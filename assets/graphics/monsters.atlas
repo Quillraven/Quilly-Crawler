@@ -1,0 +1,62 @@
+
+monsters.png
+size: 512,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+big-demon-idle
+  rotate: false
+  xy: 138, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 0
+big-demon-idle
+  rotate: false
+  xy: 172, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 1
+big-demon-idle
+  rotate: false
+  xy: 206, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 2
+big-demon-idle
+  rotate: false
+  xy: 240, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 3
+big-demon-run
+  rotate: false
+  xy: 2, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 0
+big-demon-run
+  rotate: false
+  xy: 36, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 1
+big-demon-run
+  rotate: false
+  xy: 70, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 2
+big-demon-run
+  rotate: false
+  xy: 104, 2
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 3
