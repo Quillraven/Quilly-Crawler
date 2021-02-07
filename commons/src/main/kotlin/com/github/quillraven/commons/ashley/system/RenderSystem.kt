@@ -40,11 +40,10 @@ class RenderSystem(
         }
 
         render.sprite.run {
-            setBounds(
-                transform.position.x,
-                transform.position.y,
-                transform.size.x,
-                transform.size.y
+            setScale(transform.size.x, transform.size.y)
+            setPosition(
+                transform.position.x - originX * (1f - scaleX),
+                transform.position.y - originY * (1f - scaleY)
             )
             draw(batch)
         }

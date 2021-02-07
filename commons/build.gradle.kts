@@ -1,6 +1,7 @@
 dependencies {
     api("com.badlogicgames.gdx:gdx:${project.property("gdxVersion")}")
     api("com.badlogicgames.ashley:ashley:${project.property("ashleyVersion")}")
+    api("com.badlogicgames.gdx:gdx-ai:${project.property("aiVersion")}")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${project.property("coroutines")}")
     api("io.github.libktx:ktx-app:${project.property("ktxVersion")}")
     api("io.github.libktx:ktx-ashley:${project.property("ktxVersion")}")

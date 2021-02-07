@@ -9,7 +9,10 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.ObjectMap
-import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.ashley.component.AnimationComponent
+import com.github.quillraven.commons.ashley.component.RenderComponent
+import com.github.quillraven.commons.ashley.component.animation
+import com.github.quillraven.commons.ashley.component.render
 import com.github.quillraven.commons.assets.ITextureAtlasAssets
 import kotlinx.coroutines.launch
 import ktx.ashley.allOf
@@ -42,16 +45,16 @@ class AnimationSystem(
     ).get()
 ) {
     private val animationCache =
-        ObjectMap<ITextureAtlasAssets, ObjectMap<IAnimationType, Animation<TextureRegion>>>()
+        ObjectMap<ITextureAtlasAssets, ObjectMap<String, Animation<TextureRegion>>>()
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val animation = entity.animation
 
         if (animation.dirty) {
             // animation type changed -> set new animation
-            animation.gdxAnimation = gdxAnimation(animation.type)
+            animation.gdxAnimation = gdxAnimation(animation.atlasAsset, animation.regionKey)
         } else {
-            animation.stateTime += deltaTime
+            animation.stateTime += (deltaTime * animation.animationSpeed)
         }
 
         val keyFrame = if (animation.gdxAnimation == AnimationComponent.EMPTY_ANIMATION) {
@@ -72,39 +75,39 @@ class AnimationSystem(
         }
     }
 
-    private fun gdxAnimation(animationType: IAnimationType): Animation<TextureRegion> {
-        val atlasAnimations = animationCache.getOrPut(animationType.atlasAsset) {
-            ObjectMap<IAnimationType, Animation<TextureRegion>>()
+    private fun gdxAnimation(atlasAsset: ITextureAtlasAssets, regionKey: String): Animation<TextureRegion> {
+        val atlasAnimations = animationCache.getOrPut(atlasAsset) {
+            ObjectMap<String, Animation<TextureRegion>>()
         }
 
-        return atlasAnimations.getOrPut(animationType) {
-            newGdxAnimation(animationType)
+        return atlasAnimations.getOrPut(regionKey) {
+            newGdxAnimation(atlasAsset, regionKey)
         }
     }
 
-    private fun newGdxAnimation(animationType: IAnimationType): Animation<TextureRegion> {
-        val regions = atlasRegions(animationType)
+    private fun newGdxAnimation(atlasAsset: ITextureAtlasAssets, regionKey: String): Animation<TextureRegion> {
+        val regions = atlasRegions(atlasAsset, regionKey)
 
         if (regions.isEmpty) {
-            LOG.error { "Invalid animation: (atlasAsset=${animationType.atlasAsset.descriptor.fileName}, atlasKey=${animationType.atlasKey})" }
+            LOG.error { "Invalid animation: (atlasAsset=${atlasAsset.descriptor.fileName}, atlasKey=${regionKey})" }
             return AnimationComponent.EMPTY_ANIMATION
         }
 
-        LOG.debug { "New animation: (atlasAsset=${animationType.atlasAsset.descriptor.fileName}, atlasKey=${animationType.atlasKey})" }
-        return Animation(framesPerSecond * animationType.speed, regions, animationType.playMode)
+        LOG.debug { "New animation: (atlasAsset=${atlasAsset.descriptor.fileName}, atlasKey=${regionKey})" }
+        return Animation(framesPerSecond, regions, Animation.PlayMode.LOOP)
     }
 
-    private fun atlasRegions(animationType: IAnimationType): Array<TextureAtlas.AtlasRegion> {
-        return if (!assetStorage.isLoaded(animationType.atlasAsset.descriptor)) {
-            if (assetStorage.fileResolver.resolve(animationType.atlasAsset.descriptor.fileName).exists()) {
-                LOG.error { "Atlas '${animationType.atlasAsset.descriptor.fileName}' not loaded yet! Will lazy load it now" }
-                assetStorage.loadSync(animationType.atlasAsset.descriptor).findRegions(animationType.atlasKey)
+    private fun atlasRegions(atlasAsset: ITextureAtlasAssets, regionKey: String): Array<TextureAtlas.AtlasRegion> {
+        return if (!assetStorage.isLoaded(atlasAsset.descriptor)) {
+            if (assetStorage.fileResolver.resolve(atlasAsset.descriptor.fileName).exists()) {
+                LOG.error { "Atlas '${atlasAsset.descriptor.fileName}' not loaded yet! Will lazy load it now" }
+                assetStorage.loadSync(atlasAsset.descriptor).findRegions(regionKey)
             } else {
-                LOG.error { "Invalid atlas '${animationType.atlasAsset.descriptor.fileName}'" }
+                LOG.error { "Invalid atlas '${atlasAsset.descriptor.fileName}'" }
                 gdxArrayOf()
             }
         } else {
-            assetStorage[animationType.atlasAsset.descriptor].findRegions(animationType.atlasKey)
+            assetStorage[atlasAsset.descriptor].findRegions(regionKey)
         }
     }
 
