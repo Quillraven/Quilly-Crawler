@@ -47,6 +47,6 @@ class AnimationComponent : Component, Pool.Poolable {
     }
 }
 
-val Entity.animation: AnimationComponent
+val Entity.animationCmp: AnimationComponent
     get() = this[AnimationComponent.MAPPER]
         ?: throw GdxRuntimeException("AnimationComponent for entity '$this' is null")

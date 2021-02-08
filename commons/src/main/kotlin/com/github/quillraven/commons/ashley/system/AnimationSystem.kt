@@ -11,8 +11,8 @@ import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.ObjectMap
 import com.github.quillraven.commons.ashley.component.AnimationComponent
 import com.github.quillraven.commons.ashley.component.RenderComponent
-import com.github.quillraven.commons.ashley.component.animation
-import com.github.quillraven.commons.ashley.component.render
+import com.github.quillraven.commons.ashley.component.animationCmp
+import com.github.quillraven.commons.ashley.component.renderCmp
 import com.github.quillraven.commons.assets.ITextureAtlasAssets
 import kotlinx.coroutines.launch
 import ktx.ashley.allOf
@@ -48,24 +48,24 @@ class AnimationSystem(
         ObjectMap<ITextureAtlasAssets, ObjectMap<String, Animation<TextureRegion>>>()
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        val animation = entity.animation
+        val animationCmp = entity.animationCmp
 
-        if (animation.dirty) {
+        if (animationCmp.dirty) {
             // animation type changed -> set new animation
-            animation.gdxAnimation = gdxAnimation(animation.atlasAsset, animation.regionKey)
+            animationCmp.gdxAnimation = gdxAnimation(animationCmp.atlasAsset, animationCmp.regionKey)
         } else {
-            animation.stateTime += (deltaTime * animation.animationSpeed)
+            animationCmp.stateTime += (deltaTime * animationCmp.animationSpeed)
         }
 
-        val keyFrame = if (animation.gdxAnimation == AnimationComponent.EMPTY_ANIMATION) {
+        val keyFrame = if (animationCmp.gdxAnimation == AnimationComponent.EMPTY_ANIMATION) {
             // something went wrong when trying to set animation -> check log errors
             // we will render an error texture to visualize it in game
             errorRegion()
         } else {
-            animation.gdxAnimation.getKeyFrame(animation.stateTime)
+            animationCmp.gdxAnimation.getKeyFrame(animationCmp.stateTime)
         }
 
-        entity.render.sprite.run {
+        entity.renderCmp.sprite.run {
             val flipX = isFlipX
             val flipY = isFlipY
             setRegion(keyFrame)

@@ -20,6 +20,6 @@ class RenderComponent : Component, Pool.Poolable {
     }
 }
 
-val Entity.render: RenderComponent
+val Entity.renderCmp: RenderComponent
     get() = this[RenderComponent.MAPPER]
         ?: throw GdxRuntimeException("RenderComponent for entity '$this' is null")

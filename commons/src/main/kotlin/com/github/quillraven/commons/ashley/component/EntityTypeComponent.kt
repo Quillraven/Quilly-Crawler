@@ -29,6 +29,6 @@ class EntityTypeComponent : Component, Pool.Poolable {
     }
 }
 
-val Entity.entityType: EntityTypeComponent
+val Entity.entityTypeCmp: EntityTypeComponent
     get() = this[EntityTypeComponent.MAPPER]
         ?: throw GdxRuntimeException("EntityTypeComponent for entity '$this' is null")

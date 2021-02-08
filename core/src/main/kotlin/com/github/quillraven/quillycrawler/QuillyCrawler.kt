@@ -9,8 +9,10 @@ import com.github.quillraven.quillycrawler.screen.PlayGroundScreen
 class QuillyCrawler : AbstractGame() {
     val inputServiceProvider by lazy { InputServiceProvider }
 
+    fun isDevMode() = "true" == System.getProperty("devMode", "false")
+
     override fun create() {
-        if ("true" == System.getProperty("devMode", "false")) {
+        if (isDevMode()) {
             Gdx.app.logLevel = Application.LOG_DEBUG
         }
 

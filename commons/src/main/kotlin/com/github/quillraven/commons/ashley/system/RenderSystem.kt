@@ -4,10 +4,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.github.quillraven.commons.ashley.component.RenderComponent
-import com.github.quillraven.commons.ashley.component.TransformComponent
-import com.github.quillraven.commons.ashley.component.render
-import com.github.quillraven.commons.ashley.component.transform
+import com.github.quillraven.commons.ashley.component.*
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.graphics.use
@@ -31,20 +28,30 @@ class RenderSystem(
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        val transform = entity.transform
-        val render = entity.render
+        val transformCmp = entity.transformCmp
+        val renderCmp = entity.renderCmp
+        val box2dCmp = entity[Box2DComponent.MAPPER]
 
-        if (render.sprite.texture == null) {
+        if (renderCmp.sprite.texture == null) {
             LOG.error { "Entity '$entity' does not have a texture" }
             return
         }
 
-        render.sprite.run {
-            setScale(transform.size.x, transform.size.y)
-            setPosition(
-                transform.position.x - originX * (1f - scaleX),
-                transform.position.y - originY * (1f - scaleY)
-            )
+        renderCmp.sprite.run {
+            setScale(transformCmp.size.x, transformCmp.size.y)
+
+            if (box2dCmp == null) {
+                setPosition(
+                    transformCmp.position.x - originX * (1f - scaleX),
+                    transformCmp.position.y - originY * (1f - scaleY)
+                )
+            } else {
+                setPosition(
+                    box2dCmp.renderPosition.x - originX * (1f - scaleX),
+                    box2dCmp.renderPosition.y - originY * (1f - scaleY)
+                )
+            }
+
             draw(batch)
         }
     }

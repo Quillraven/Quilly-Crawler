@@ -28,6 +28,6 @@ class TransformComponent : Component, Pool.Poolable, Comparable<TransformCompone
     }
 }
 
-val Entity.transform: TransformComponent
+val Entity.transformCmp: TransformComponent
     get() = this[TransformComponent.MAPPER]
         ?: throw GdxRuntimeException("TransformComponent for entity '$this' is null")

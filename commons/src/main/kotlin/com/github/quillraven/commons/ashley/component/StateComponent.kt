@@ -41,6 +41,6 @@ class StateComponent : Component, Pool.Poolable {
     }
 }
 
-val Entity.state: StateComponent
+val Entity.stateCmp: StateComponent
     get() = this[StateComponent.MAPPER]
         ?: throw GdxRuntimeException("StateComponent for entity '$this' is null")
