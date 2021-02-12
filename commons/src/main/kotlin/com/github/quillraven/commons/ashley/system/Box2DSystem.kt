@@ -57,8 +57,12 @@ class Box2DSystem(
             }
 
             if (!box2dCmp.impulse.isZero) {
+                // apply non-zero impulse for movement
                 body.applyLinearImpulse(box2dCmp.impulse, body.worldCenter, true)
                 box2dCmp.impulse.set(0f, 0f)
+            } else if (!body.linearVelocity.isZero) {
+                // no impulse specified -> stop body movement
+                body.setLinearVelocity(0f, 0f)
             }
         }
     }

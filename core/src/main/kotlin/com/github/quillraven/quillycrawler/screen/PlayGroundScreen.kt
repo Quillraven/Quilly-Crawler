@@ -1,9 +1,6 @@
 package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.PooledEngine
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
-import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -16,7 +13,8 @@ import com.github.quillraven.quillycrawler.EntityType
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.BigDemonState
 import com.github.quillraven.quillycrawler.ai.PlayerState
-import ktx.ashley.addComponent
+import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
+import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
 import ktx.ashley.entity
 import ktx.ashley.with
 import ktx.box2d.body
@@ -25,12 +23,15 @@ import ktx.box2d.box
 class PlayGroundScreen(
     private val game: QuillyCrawler
 ) : AbstractScreen(game) {
+    override val inputProcessor = PlayerControlSystem()
+
     private val viewport = FitViewport(16f, 9f)
     private val world = World(Vector2.Zero, true).apply {
         autoClearForces = false
     }
     private val box2DDebugRenderer = Box2DDebugRenderer()
     private val engine = PooledEngine().apply {
+        addSystem(inputProcessor)
         addSystem(EntityTypeStateAnimationSystem())
         addSystem(StateSystem())
         addSystem(MoveSystem())
@@ -42,10 +43,6 @@ class PlayGroundScreen(
         }
     }
 
-    override fun inputProcessor(): InputProcessor {
-        return game.inputServiceProvider.inputService
-    }
-
     override fun resize(width: Int, height: Int) {
         viewport.update(width, height, true)
     }
@@ -54,6 +51,7 @@ class PlayGroundScreen(
         super.show()
         engine.run {
             entity {
+                with<PlayerControlComponent>()
                 with<EntityTypeComponent> {
                     type = EntityType.WIZARD_MALE
                 }
@@ -102,24 +100,6 @@ class PlayGroundScreen(
     }
 
     override fun render(delta: Float) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
-            engine.entities.first().addComponent<MoveComponent>(engine) {
-                directionDeg = 0f
-            }
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
-            engine.entities.first().addComponent<MoveComponent>(engine) {
-                directionDeg = 180f
-            }
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.W)) {
-            engine.entities.first().addComponent<MoveComponent>(engine) {
-                directionDeg = 90f
-            }
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.S)) {
-            engine.entities.first().addComponent<MoveComponent>(engine) {
-                directionDeg = 270f
-            }
-        }
-
         engine.update(delta)
     }
 

@@ -3,12 +3,9 @@ package com.github.quillraven.quillycrawler
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.github.quillraven.commons.game.AbstractGame
-import com.github.quillraven.quillycrawler.input.InputServiceProvider
 import com.github.quillraven.quillycrawler.screen.PlayGroundScreen
 
 class QuillyCrawler : AbstractGame() {
-    val inputServiceProvider by lazy { InputServiceProvider }
-
     fun isDevMode() = "true" == System.getProperty("devMode", "false")
 
     override fun create() {

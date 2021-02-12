@@ -3,6 +3,7 @@ dependencies {
     api("com.badlogicgames.gdx:gdx-box2d:${project.property("gdxVersion")}")
     api("com.badlogicgames.ashley:ashley:${project.property("ashleyVersion")}")
     api("com.badlogicgames.gdx:gdx-ai:${project.property("aiVersion")}")
+    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:${project.property("gdxControllersVersion")}")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${project.property("coroutines")}")
     api("io.github.libktx:ktx-app:${project.property("ktxVersion")}")
     api("io.github.libktx:ktx-ashley:${project.property("ktxVersion")}")
