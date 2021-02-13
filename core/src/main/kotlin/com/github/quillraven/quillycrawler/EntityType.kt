@@ -6,5 +6,6 @@ import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 
 enum class EntityType(override val atlasAsset: ITextureAtlasAssets, override val regionKey: String) : IEntityType {
     WIZARD_MALE(TextureAtlasAssets.MONSTERS, "wizard-m"),
-    BIG_DEMON(TextureAtlasAssets.MONSTERS, "big-demon")
+    BIG_DEMON(TextureAtlasAssets.MONSTERS, "big-demon"),
+    CHEST(TextureAtlasAssets.MONSTERS, "chest")
 }

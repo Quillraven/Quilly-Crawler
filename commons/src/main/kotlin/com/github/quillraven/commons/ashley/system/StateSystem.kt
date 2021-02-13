@@ -2,11 +2,21 @@ package com.github.quillraven.commons.ashley.system
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
+import com.badlogic.gdx.ai.GdxAI
+import com.badlogic.gdx.ai.msg.MessageManager
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.ashley.component.stateCmp
 import ktx.ashley.allOf
 
-class StateSystem : IteratingSystem(allOf(StateComponent::class).get()) {
+class StateSystem(
+    private val messageManager: MessageManager
+) : IteratingSystem(allOf(StateComponent::class).get()) {
+    override fun update(deltaTime: Float) {
+        GdxAI.getTimepiece().update(deltaTime)
+        messageManager.update()
+        super.update(deltaTime)
+    }
+
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val stateCmp = entity.stateCmp
 

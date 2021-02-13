@@ -16,6 +16,7 @@ class AnimationComponent : Component, Pool.Poolable {
         private set
     var stateTime = 0f
     var animationSpeed = 1f
+    var playMode = Animation.PlayMode.LOOP
     var atlasAsset = ITextureAtlasAssets.EMPTY_TEXTURE_ATLAS_ASSET
         set(value) {
             dirty = value != field
@@ -36,6 +37,7 @@ class AnimationComponent : Component, Pool.Poolable {
     override fun reset() {
         dirty = true
         stateTime = 0f
+        playMode = Animation.PlayMode.LOOP
         animationSpeed = 1f
         atlasAsset = ITextureAtlasAssets.EMPTY_TEXTURE_ATLAS_ASSET
         regionKey = ""

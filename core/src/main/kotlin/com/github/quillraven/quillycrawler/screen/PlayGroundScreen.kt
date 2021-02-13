@@ -1,6 +1,7 @@
 package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.PooledEngine
+import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -12,18 +13,25 @@ import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.EntityType
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.BigDemonState
+import com.github.quillraven.quillycrawler.ai.ChestState
+import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ai.PlayerState
+import com.github.quillraven.quillycrawler.ashley.component.CollectableComponent
+import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
+import com.github.quillraven.quillycrawler.ashley.system.CollisionSystem
 import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
 import ktx.ashley.entity
 import ktx.ashley.with
 import ktx.box2d.body
 import ktx.box2d.box
+import ktx.box2d.circle
 
 class PlayGroundScreen(
-    private val game: QuillyCrawler
+    private val game: QuillyCrawler,
+    private val messageManager: MessageManager = MessageManager.getInstance()
 ) : AbstractScreen(game) {
-    override val inputProcessor = PlayerControlSystem()
+    override val inputProcessor = PlayerControlSystem(messageManager)
 
     private val viewport = FitViewport(16f, 9f)
     private val world = World(Vector2.Zero, true).apply {
@@ -33,9 +41,10 @@ class PlayGroundScreen(
     private val engine = PooledEngine().apply {
         addSystem(inputProcessor)
         addSystem(EntityTypeStateAnimationSystem())
-        addSystem(StateSystem())
+        addSystem(StateSystem(messageManager))
         addSystem(MoveSystem())
         addSystem(Box2DSystem(world, 1 / 60f))
+        addSystem(CollisionSystem(world))
         addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
         addSystem(RenderSystem(batch, viewport))
         if (game.isDevMode()) {
@@ -50,16 +59,21 @@ class PlayGroundScreen(
     override fun show() {
         super.show()
         engine.run {
+            playerEntity()
+
             entity {
-                with<PlayerControlComponent>()
                 with<EntityTypeComponent> {
-                    type = EntityType.WIZARD_MALE
+                    type = EntityType.CHEST
                 }
-                val transformCmp = with<TransformComponent>()
+                with<CollectableComponent>()
+                val transformCmp = with<TransformComponent> {
+                    position.set(3f, 3f, 0f)
+                }
                 with<AnimationComponent>()
                 with<RenderComponent>()
                 with<StateComponent> {
-                    state = PlayerState.IDLE
+                    state = ChestState.IDLE
+                    messageManager.addListener(stateMachine, MessageType.PLAYER_COLLECT_ENTITY.ordinal)
                 }
                 with<Box2DComponent> {
                     body = world.body(BodyDef.BodyType.DynamicBody) {
@@ -72,6 +86,8 @@ class PlayGroundScreen(
                         box(transformCmp.size.x, transformCmp.size.y) {
                             friction = 0f
                         }
+
+                        userData = this@entity.entity
                     }
                 }
             }
@@ -89,6 +105,41 @@ class PlayGroundScreen(
                 with<RenderComponent>()
                 with<StateComponent> {
                     state = BigDemonState.RUN
+                }
+            }
+        }
+    }
+
+    private fun PooledEngine.playerEntity() {
+        entity {
+            with<PlayerComponent>()
+            with<PlayerControlComponent>()
+            with<CollectingComponent>()
+            with<EntityTypeComponent> {
+                type = EntityType.WIZARD_MALE
+            }
+            val transformCmp = with<TransformComponent>()
+            with<AnimationComponent>()
+            with<RenderComponent>()
+            with<StateComponent> {
+                state = PlayerState.IDLE
+            }
+            with<Box2DComponent> {
+                body = world.body(BodyDef.BodyType.DynamicBody) {
+                    position.set(
+                        transformCmp.position.x + transformCmp.size.x * 0.5f,
+                        transformCmp.position.y + transformCmp.size.y * 0.5f
+                    )
+                    fixedRotation = true
+                    allowSleep = false
+                    box(transformCmp.size.x, transformCmp.size.y) {
+                        friction = 0f
+                    }
+                    circle(transformCmp.size.x) {
+                        isSensor = true
+                    }
+
+                    userData = this@entity.entity
                 }
             }
         }

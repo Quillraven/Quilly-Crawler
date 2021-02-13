@@ -62,6 +62,7 @@ class AnimationSystem(
             // we will render an error texture to visualize it in game
             errorRegion()
         } else {
+            animationCmp.gdxAnimation.playMode = animationCmp.playMode
             animationCmp.gdxAnimation.getKeyFrame(animationCmp.stateTime)
         }
 
