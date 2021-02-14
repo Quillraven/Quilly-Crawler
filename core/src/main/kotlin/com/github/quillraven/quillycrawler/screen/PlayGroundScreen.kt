@@ -76,7 +76,7 @@ class PlayGroundScreen(
                     messageManager.addListener(stateMachine, MessageType.PLAYER_COLLECT_ENTITY.ordinal)
                 }
                 with<Box2DComponent> {
-                    body = world.body(BodyDef.BodyType.DynamicBody) {
+                    body = world.body(BodyDef.BodyType.StaticBody) {
                         position.set(
                             transformCmp.position.x + transformCmp.size.x * 0.5f,
                             transformCmp.position.y + transformCmp.size.y * 0.5f
@@ -132,7 +132,12 @@ class PlayGroundScreen(
                     )
                     fixedRotation = true
                     allowSleep = false
-                    box(transformCmp.size.x, transformCmp.size.y) {
+                    val boundingBoxHeight = transformCmp.size.y * 0.2f
+                    box(
+                        transformCmp.size.x,
+                        boundingBoxHeight,
+                        Vector2(0f, -transformCmp.size.y * 0.5f + boundingBoxHeight * 0.5f)
+                    ) {
                         friction = 0f
                     }
                     circle(transformCmp.size.x) {
