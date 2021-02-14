@@ -51,18 +51,20 @@ class Box2DSystem(
             )
 
             // calculate impulse to apply
-            entity[MoveComponent.MAPPER]?.let { moveCmp ->
+            val moveCmp = entity[MoveComponent.MAPPER]
+            if (moveCmp != null) {
                 box2dCmp.impulse.x = body.mass * (moveCmp.speed * cosDeg(moveCmp.directionDeg) - body.linearVelocity.x)
                 box2dCmp.impulse.y = body.mass * (moveCmp.speed * sinDeg(moveCmp.directionDeg) - body.linearVelocity.y)
+            } else if (!body.linearVelocity.isZero) {
+                // no move component but still moving -> stop it
+                box2dCmp.impulse.x = body.mass * (0f - body.linearVelocity.x)
+                box2dCmp.impulse.y = body.mass * (0f - body.linearVelocity.y)
             }
 
             if (!box2dCmp.impulse.isZero) {
                 // apply non-zero impulse for movement
                 body.applyLinearImpulse(box2dCmp.impulse, body.worldCenter, true)
                 box2dCmp.impulse.set(0f, 0f)
-            } else if (!body.linearVelocity.isZero) {
-                // no impulse specified -> stop body movement
-                body.setLinearVelocity(0f, 0f)
             }
         }
     }
