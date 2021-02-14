@@ -20,7 +20,6 @@ abstract class AbstractGame : KtxGame<AbstractScreen>() {
 
     override fun dispose() {
         super.dispose()
-        assetStorage.dispose()
 
         if (Gdx.app.logLevel == Application.LOG_DEBUG) {
             if (batch is SpriteBatch) {
@@ -32,6 +31,9 @@ abstract class AbstractGame : KtxGame<AbstractScreen>() {
             }
         }
         batch.dispose()
+
+        LOG.debug { assetStorage.takeSnapshot().prettyPrint() }
+        assetStorage.dispose()
     }
 
     companion object {
