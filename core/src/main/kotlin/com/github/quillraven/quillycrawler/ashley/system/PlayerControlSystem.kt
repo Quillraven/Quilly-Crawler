@@ -2,6 +2,8 @@ package com.github.quillraven.quillycrawler.ashley.system
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.controllers.Controller
@@ -28,10 +30,71 @@ class PlayerControlSystem(
     private var actionPressed = false
 
     override fun keyDown(keycode: Int): Boolean {
+        when (keycode) {
+            Input.Keys.D -> {
+                updateMovementValues(1f, valueLeftY)
+                return true
+            }
+            Input.Keys.A -> {
+                updateMovementValues(-1f, valueLeftY)
+                return true
+            }
+            Input.Keys.W -> {
+                updateMovementValues(valueLeftX, -1f)
+                return true
+            }
+            Input.Keys.S -> {
+                updateMovementValues(valueLeftX, 1f)
+                return true
+            }
+            Input.Keys.SPACE -> {
+                actionPressed = true
+                return true
+            }
+        }
         return false
     }
 
     override fun keyUp(keycode: Int): Boolean {
+        when (keycode) {
+            Input.Keys.D -> {
+                if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    updateMovementValues(-1f, valueLeftY)
+                } else {
+                    updateMovementValues(0f, valueLeftY)
+                }
+                return true
+            }
+            Input.Keys.A -> {
+                if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    updateMovementValues(1f, valueLeftY)
+                } else {
+                    updateMovementValues(0f, valueLeftY)
+                }
+                return true
+            }
+            Input.Keys.W -> {
+                if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    updateMovementValues(valueLeftX, 1f)
+                } else {
+                    updateMovementValues(valueLeftX, 0f)
+                }
+                return true
+            }
+            Input.Keys.S -> {
+                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                    updateMovementValues(valueLeftX, -1f)
+                } else {
+                    updateMovementValues(valueLeftX, 0f)
+                }
+
+                return true
+            }
+            Input.Keys.SPACE -> {
+                actionPressed = false
+                return true
+            }
+        }
         return false
     }
 
@@ -78,20 +141,23 @@ class PlayerControlSystem(
     override fun axisMoved(controller: Controller?, axisCode: Int, value: Float): Boolean {
         when (axisCode) {
             XboxInputProcessor.AXIS_X_LEFT -> {
-                valueLeftX = value
-                stopMovement = abs(valueLeftX) <= 0.1f && abs(valueLeftY) <= 0.1f
-                moveDirectionDeg = atan2(-valueLeftY, valueLeftX) * 180f / PI.toFloat()
+                updateMovementValues(value, valueLeftY)
                 return true
             }
             XboxInputProcessor.AXIS_Y_LEFT -> {
-                valueLeftY = value
-                stopMovement = abs(valueLeftX) <= 0.1f && abs(valueLeftY) <= 0.1f
-                moveDirectionDeg = atan2(-valueLeftY, valueLeftX) * 180f / PI.toFloat()
+                updateMovementValues(valueLeftX, value)
                 return true
             }
         }
 
         return false
+    }
+
+    private fun updateMovementValues(newX: Float, newY: Float) {
+        valueLeftX = newX
+        valueLeftY = newY
+        stopMovement = abs(valueLeftX) <= AXIS_DEAD_ZONE && abs(valueLeftY) <= AXIS_DEAD_ZONE
+        moveDirectionDeg = atan2(-valueLeftY, valueLeftX) * 180f / PI.toFloat()
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
@@ -104,7 +170,7 @@ class PlayerControlSystem(
         if (moveCmp == null && !stopMovement) {
             entity.add(engine.createComponent(MoveComponent::class.java).apply {
                 directionDeg = moveDirectionDeg
-                speed = 2.5f
+                maxSpeed = 2.5f
             })
         } else if (moveCmp != null) {
             if (stopMovement) {
@@ -128,5 +194,9 @@ class PlayerControlSystem(
                 }
             }
         }
+    }
+
+    companion object {
+        private const val AXIS_DEAD_ZONE = 0.25f
     }
 }
