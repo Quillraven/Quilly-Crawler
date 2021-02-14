@@ -18,6 +18,6 @@ class QuillyCrawler : AbstractGame() {
     }
 
     companion object {
-        const val UNIT_SCALE = 1 / 16f
+        const val UNIT_SCALE = 1 / 16f // 16 pixels is one in game world unit
     }
 }
