@@ -1,7 +1,7 @@
 package com.github.quillraven.quillycrawler.ai
 
-import com.github.quillraven.commons.ashley.component.IState
+import com.github.quillraven.commons.ashley.component.EntityState
 
-enum class PlayerState : IState {
+enum class PlayerState : EntityState {
     IDLE
 }

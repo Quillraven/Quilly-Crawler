@@ -39,7 +39,7 @@ class PlayGroundScreen(
     private val engine = PooledEngine().apply {
         addSystem(PlayerControlSystem(messageManager))
         addSystem(EntityTypeStateAnimationSystem())
-        addSystem(StateSystem(messageManager))
+        addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
         addSystem(MoveSystem())
         addSystem(Box2DSystem(world, 1 / 60f))
         addSystem(CollisionSystem(world))
@@ -71,7 +71,6 @@ class PlayGroundScreen(
                 with<RenderComponent>()
                 with<StateComponent> {
                     state = ChestState.IDLE
-                    messageManager.addListener(stateMachine, MessageType.PLAYER_COLLECT_ENTITY.ordinal)
                 }
                 with<Box2DComponent> {
                     body = world.body(BodyDef.BodyType.StaticBody) {

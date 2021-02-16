@@ -11,14 +11,14 @@ import ktx.log.logger
 
 class EntityTypeStateAnimationSystem :
     IteratingSystem(allOf(EntityTypeComponent::class, StateComponent::class, AnimationComponent::class).get()) {
-    private val regionStringCache = ObjectMap<IEntityType, ObjectMap<IState, String>>()
+    private val regionStringCache = ObjectMap<IEntityType, ObjectMap<EntityState, String>>()
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         val entityTypeCmp = entity.entityTypeCmp.type
         val stateCmp = entity.stateCmp
         val animationCmp = entity.animationCmp
 
-        if (animationCmp.atlasFilePath == entityTypeCmp.atlasFilePath && stateCmp.state == stateCmp.stateMachine.currentState) {
+        if (animationCmp.atlasFilePath == entityTypeCmp.atlasFilePath && stateCmp.state == EntityState.EMPTY_STATE) {
             // animation is already up to date -> do nothing
             return
         }
