@@ -53,6 +53,9 @@ class Box2DComponent : Component, Pool.Poolable {
     }
 }
 
+/**
+ * Returns a [Box2DComponent] or throws a [GdxRuntimeException] if it doesn't exist.
+ */
 val Entity.box2dCmp: Box2DComponent
     get() = this[Box2DComponent.MAPPER]
         ?: throw GdxRuntimeException("Box2DComponent for entity '$this' is null")

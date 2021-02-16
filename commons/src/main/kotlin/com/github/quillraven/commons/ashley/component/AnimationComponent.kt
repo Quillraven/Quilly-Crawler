@@ -63,6 +63,9 @@ class AnimationComponent : Component, Pool.Poolable {
     }
 }
 
+/**
+ * Returns an [AnimationComponent] or throws a [GdxRuntimeException] if it doesn't exist.
+ */
 val Entity.animationCmp: AnimationComponent
     get() = this[AnimationComponent.MAPPER]
         ?: throw GdxRuntimeException("AnimationComponent for entity '$this' is null")
