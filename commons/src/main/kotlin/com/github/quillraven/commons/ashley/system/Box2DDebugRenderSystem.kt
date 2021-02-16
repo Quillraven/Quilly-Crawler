@@ -5,6 +5,10 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.Viewport
 
+/**
+ * System for debug rendering of a [world]. It applies the [viewport] before calling [Box2DDebugRenderer.render].
+ * Make sure to call [Box2DDebugRenderer.dispose] once you don't need the renderer anymore.
+ */
 class Box2DDebugRenderSystem(
     private val world: World,
     private val viewport: Viewport,

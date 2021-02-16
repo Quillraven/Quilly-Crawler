@@ -3,22 +3,45 @@ package com.github.quillraven.commons.ashley.system
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.MathUtils.cosDeg
-import com.badlogic.gdx.math.MathUtils.sinDeg
+import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.World
-import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.ashley.component.Box2DComponent
+import com.github.quillraven.commons.ashley.component.TransformComponent
+import com.github.quillraven.commons.ashley.component.box2dCmp
+import com.github.quillraven.commons.ashley.component.transformCmp
 import ktx.ashley.allOf
-import ktx.ashley.get
 import ktx.log.error
 import ktx.log.logger
 import kotlin.math.min
 
+/**
+ * System to update the [world] using a fixed timestep implementation. The rate of the update calls is defined
+ * by [physicTimeStep].
+ * To avoid the spiral of death a fixed maximum time of 1/30 seconds between two frames is used.
+ *
+ * Make sure to set the [world's][World] autoClearForces to false. Otherwise, the system will automatically set it
+ * and log an error. Forces get cleared after all [World.step] calls are done.
+ *
+ * Applies the [Box2DComponent.impulse] to a [Body] before a call to [World.step].
+ * The impulse gets set to zero afterwards.
+ *
+ * The system also updates the [Box2DComponent.renderPosition] by using an interpolation between the position of a
+ * [Body] before [World.step] and after. Use this position for a smoother render experience.
+ * In case of a box body the position represents the bottom left corner. It is calculated by using the [body's][Body]
+ * position, which is usually the center, and the [TransformComponent.size].
+ *
+ * [TransformComponent.position] is linked to the [Body.position]. It also represents the bottom left corner
+ * like the [Box2DComponent.renderPosition].
+ */
 class Box2DSystem(
     private val world: World,
     private val physicTimeStep: Float
 ) : IteratingSystem(allOf(Box2DComponent::class, TransformComponent::class).get()) {
     private var accumulator = 0f
 
+    /**
+     * Updates the [world] using a fixed timestep of [physicTimeStep]
+     */
     override fun update(deltaTime: Float) {
         if (world.autoClearForces) {
             LOG.error { "AutoClearForces must be set to false to guarantee a correct physic step behavior." }
@@ -33,9 +56,13 @@ class Box2DSystem(
         }
         world.clearForces()
 
-        updateInterpolatedPosition(accumulator / physicTimeStep)
+        updatePositionAndRenderPosition(accumulator / physicTimeStep)
     }
 
+    /**
+     * Applies an impulse once to all entities and updates their [TransformComponent.position] to the position
+     * before calling [World.step].
+     */
     private fun updatePrevPositionAndApplyForces() {
         entities.forEach { entity ->
             val transformCmp = entity.transformCmp
@@ -50,26 +77,18 @@ class Box2DSystem(
                 transformCmp.position.z
             )
 
-            // calculate impulse to apply
-            val moveCmp = entity[MoveComponent.MAPPER]
-            if (moveCmp != null) {
-                box2dCmp.impulse.x = body.mass * (moveCmp.speed * cosDeg(moveCmp.directionDeg) - body.linearVelocity.x)
-                box2dCmp.impulse.y = body.mass * (moveCmp.speed * sinDeg(moveCmp.directionDeg) - body.linearVelocity.y)
-            } else if (!body.linearVelocity.isZero) {
-                // no move component but still moving -> stop it
-                box2dCmp.impulse.x = body.mass * (0f - body.linearVelocity.x)
-                box2dCmp.impulse.y = body.mass * (0f - body.linearVelocity.y)
-            }
-
             if (!box2dCmp.impulse.isZero) {
-                // apply non-zero impulse for movement
+                // apply non-zero impulse once before a call to world.step
                 body.applyLinearImpulse(box2dCmp.impulse, body.worldCenter, true)
                 box2dCmp.impulse.set(0f, 0f)
             }
         }
     }
 
-    private fun updateInterpolatedPosition(alpha: Float) {
+    /**
+     * Updates the [TransformComponent.position] and [Box2DComponent.renderPosition] of all entities.
+     */
+    private fun updatePositionAndRenderPosition(alpha: Float) {
         entities.forEach { entity ->
             val transformCmp = entity.transformCmp
             val halfW = transformCmp.size.x * 0.5f
