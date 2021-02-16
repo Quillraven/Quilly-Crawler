@@ -31,15 +31,13 @@ class PlayGroundScreen(
     private val game: QuillyCrawler,
     private val messageManager: MessageManager = MessageManager.getInstance()
 ) : AbstractScreen(game) {
-    override val inputProcessor = PlayerControlSystem(messageManager)
-
     private val viewport = FitViewport(16f, 9f)
     private val world = World(Vector2.Zero, true).apply {
         autoClearForces = false
     }
     private val box2DDebugRenderer = Box2DDebugRenderer()
     private val engine = PooledEngine().apply {
-        addSystem(inputProcessor)
+        addSystem(PlayerControlSystem(messageManager))
         addSystem(EntityTypeStateAnimationSystem())
         addSystem(StateSystem(messageManager))
         addSystem(MoveSystem())

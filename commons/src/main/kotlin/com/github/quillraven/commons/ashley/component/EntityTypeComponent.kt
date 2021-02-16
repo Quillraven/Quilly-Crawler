@@ -4,12 +4,12 @@ import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
-import com.github.quillraven.commons.assets.ITextureAtlasAssets
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 
+// TODO replace with entity cfg DSL?
 interface IEntityType {
-    val atlasAsset: ITextureAtlasAssets
+    val atlasFilePath: String
     val regionKey: String
 }
 
@@ -23,7 +23,7 @@ class EntityTypeComponent : Component, Pool.Poolable {
     companion object {
         val MAPPER = mapperFor<EntityTypeComponent>()
         val EMPTY_ENTITY_TYPE = object : IEntityType {
-            override val atlasAsset = ITextureAtlasAssets.EMPTY_TEXTURE_ATLAS_ASSET
+            override val atlasFilePath = ""
             override val regionKey = ""
         }
     }

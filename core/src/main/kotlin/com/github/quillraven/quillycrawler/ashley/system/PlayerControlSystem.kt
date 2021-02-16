@@ -1,5 +1,6 @@
 package com.github.quillraven.quillycrawler.ashley.system
 
+import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.Gdx
@@ -7,6 +8,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.controllers.Controller
+import com.github.quillraven.commons.ashley.component.Box2DComponent
 import com.github.quillraven.commons.ashley.component.MoveComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.input.XboxInputProcessor
@@ -28,6 +30,29 @@ class PlayerControlSystem(
     private var stopMovement = true
     private var moveDirectionDeg = 0f
     private var actionPressed = false
+
+    override fun addedToEngine(engine: Engine?) {
+        super.addedToEngine(engine)
+        Gdx.input.inputProcessor = this
+        addXboxControllerListener()
+    }
+
+    override fun removedFromEngine(engine: Engine?) {
+        super.removedFromEngine(engine)
+        Gdx.input.inputProcessor = null
+        removeXboxControllerListener()
+    }
+
+    override fun setProcessing(processing: Boolean) {
+        super.setProcessing(processing)
+        if (processing) {
+            Gdx.input.inputProcessor = this
+            addXboxControllerListener()
+        } else {
+            Gdx.input.inputProcessor = null
+            removeXboxControllerListener()
+        }
+    }
 
     override fun keyDown(keycode: Int): Boolean {
         when (keycode) {
@@ -175,6 +200,7 @@ class PlayerControlSystem(
         } else if (moveCmp != null) {
             if (stopMovement) {
                 entity.remove(MoveComponent::class.java)
+                entity[Box2DComponent.MAPPER]?.stopMovementImmediately()
             } else {
                 moveCmp.directionDeg = moveDirectionDeg
             }

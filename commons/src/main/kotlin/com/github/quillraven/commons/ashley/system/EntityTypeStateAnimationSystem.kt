@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.utils.ObjectMap
 import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.collections.getOrPut
 import ktx.ashley.allOf
 import ktx.log.debug
 import ktx.log.logger
@@ -17,13 +18,13 @@ class EntityTypeStateAnimationSystem :
         val stateCmp = entity.stateCmp
         val animationCmp = entity.animationCmp
 
-        if (animationCmp.atlasAsset == entityTypeCmp.atlasAsset && stateCmp.state == stateCmp.stateMachine.currentState) {
+        if (animationCmp.atlasFilePath == entityTypeCmp.atlasFilePath && stateCmp.state == stateCmp.stateMachine.currentState) {
             // animation is already up to date -> do nothing
             return
         }
 
         animationCmp.run {
-            atlasAsset = entityTypeCmp.atlasAsset
+            atlasFilePath = entityTypeCmp.atlasFilePath
             regionKey = regionStringCache
                 .getOrPut(entityTypeCmp) { ObjectMap() }
                 .getOrPut(stateCmp.state) {
