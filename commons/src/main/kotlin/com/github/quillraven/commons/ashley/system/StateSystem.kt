@@ -72,7 +72,7 @@ class StateSystem(
     }
 
     /**
-     * Updates the [time piece][GdxAI.getTimepiece], [messageManager] and all entites.
+     * Updates the [time piece][GdxAI.getTimepiece], [messageManager] and all entities.
      */
     override fun update(deltaTime: Float) {
         GdxAI.getTimepiece().update(deltaTime)
