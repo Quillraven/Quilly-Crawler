@@ -28,7 +28,7 @@ class EntityTypeStateAnimationSystem :
             regionKey = regionStringCache
                 .getOrPut(entityTypeCmp) { ObjectMap() }
                 .getOrPut(stateCmp.state) {
-                    val result = "${entityTypeCmp.regionKey}-${stateCmp.state.toString().toLowerCase()}"
+                    val result = "${entityTypeCmp.regionKey}/${stateCmp.state.toString().toLowerCase()}"
                     LOG.debug { "Caching animation string '$result'" }
                     result
                 }

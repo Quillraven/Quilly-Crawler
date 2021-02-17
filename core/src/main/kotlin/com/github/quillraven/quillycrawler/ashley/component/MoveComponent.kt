@@ -13,14 +13,16 @@ class MoveComponent : Component, Pool.Poolable {
     var maxSpeed = 1f
     var alpha = 0f
     var accInterpolation: Interpolation = Interpolation.exp10Out
-    var directionDeg = 0f
+    var cosDeg = 0f
+    var sinDeg = 0f
 
     override fun reset() {
         speed = 0f
         maxSpeed = 1f
         alpha = 0f
         accInterpolation = Interpolation.exp10Out
-        directionDeg = 0f
+        cosDeg = 0f
+        sinDeg = 0f
     }
 
     companion object {

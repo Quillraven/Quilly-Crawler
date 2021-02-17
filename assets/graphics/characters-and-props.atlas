@@ -1,118 +1,118 @@
 
-monsters.png
+characters-and-props.png
 size: 128,128
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-big-demon-idle
-  rotate: false
-  xy: 36, 50
-  size: 32, 36
-  orig: 32, 36
-  offset: 0, 0
-  index: 0
-big-demon-idle
-  rotate: false
-  xy: 70, 88
-  size: 32, 36
-  orig: 32, 36
-  offset: 0, 0
-  index: 1
-big-demon-idle
-  rotate: false
-  xy: 36, 12
-  size: 32, 36
-  orig: 32, 36
-  offset: 0, 0
-  index: 2
-big-demon-idle
-  rotate: false
-  xy: 70, 50
-  size: 32, 36
-  orig: 32, 36
-  offset: 0, 0
-  index: 3
-big-demon-run
-  rotate: false
-  xy: 2, 88
-  size: 32, 36
-  orig: 32, 36
-  offset: 0, 0
-  index: 0
-big-demon-run
+big-demon/idle
   rotate: false
   xy: 2, 50
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
-  index: 1
-big-demon-run
+  index: 0
+big-demon/idle
   rotate: false
   xy: 36, 88
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
+  index: 1
+big-demon/idle
+  rotate: false
+  xy: 36, 50
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 3
+big-demon/idle
+  rotate: false
+  xy: 70, 88
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
   index: 2
-big-demon-run
+big-demon/run
+  rotate: false
+  xy: 2, 88
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 1
+big-demon/run
   rotate: false
   xy: 2, 12
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 3
-chest-idle
+big-demon/run
   rotate: false
-  xy: 106, 30
+  xy: 36, 12
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 2
+big-demon/run
+  rotate: false
+  xy: 70, 50
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 0
+chest/idle
+  rotate: false
+  xy: 106, 48
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
-chest-open
+chest/open
   rotate: false
   xy: 70, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
-chest-open
+chest/open
   rotate: false
   xy: 88, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
-chest-open
+chest/open
   rotate: false
-  xy: 106, 48
+  xy: 106, 30
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
-wizard-m-idle
+wizard-m/idle
   rotate: false
   xy: 104, 96
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 0
-wizard-m-idle
+wizard-m/idle
   rotate: false
   xy: 70, 20
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
-  index: 2
-wizard-m-idle
+  index: 1
+wizard-m/idle
   rotate: false
   xy: 104, 66
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
-  index: 3
-wizard-m-idle
+  index: 2
+wizard-m/idle
   rotate: false
   xy: 88, 20
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
-  index: 1
+  index: 3

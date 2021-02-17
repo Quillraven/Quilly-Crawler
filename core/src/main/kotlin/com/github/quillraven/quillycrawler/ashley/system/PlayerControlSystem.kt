@@ -8,6 +8,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.Box2DComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.input.XboxInputProcessor
@@ -194,7 +195,8 @@ class PlayerControlSystem(
         val moveCmp = entity[MoveComponent.MAPPER]
         if (moveCmp == null && !stopMovement) {
             entity.add(engine.createComponent(MoveComponent::class.java).apply {
-                directionDeg = moveDirectionDeg
+                cosDeg = MathUtils.cosDeg(moveDirectionDeg)
+                sinDeg = MathUtils.sinDeg(moveDirectionDeg)
                 maxSpeed = 2.5f
             })
         } else if (moveCmp != null) {
@@ -202,7 +204,8 @@ class PlayerControlSystem(
                 entity.remove(MoveComponent::class.java)
                 entity[Box2DComponent.MAPPER]?.stopMovementImmediately()
             } else {
-                moveCmp.directionDeg = moveDirectionDeg
+                moveCmp.cosDeg = MathUtils.cosDeg(moveDirectionDeg)
+                moveCmp.sinDeg = MathUtils.sinDeg(moveDirectionDeg)
             }
         }
     }
