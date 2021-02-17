@@ -9,11 +9,11 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.controllers.Controller
 import com.github.quillraven.commons.ashley.component.Box2DComponent
-import com.github.quillraven.commons.ashley.component.MoveComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
+import com.github.quillraven.quillycrawler.ashley.component.MoveComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import ktx.ashley.allOf
 import ktx.ashley.get

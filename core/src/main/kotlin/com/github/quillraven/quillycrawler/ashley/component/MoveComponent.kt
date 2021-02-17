@@ -1,4 +1,4 @@
-package com.github.quillraven.commons.ashley.component
+package com.github.quillraven.quillycrawler.ashley.component
 
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity

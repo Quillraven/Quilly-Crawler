@@ -20,6 +20,7 @@ import com.github.quillraven.quillycrawler.ashley.component.CollectableComponent
 import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import com.github.quillraven.quillycrawler.ashley.system.CollisionSystem
+import com.github.quillraven.quillycrawler.ashley.system.MoveSystem
 import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
 import ktx.ashley.entity
 import ktx.ashley.with

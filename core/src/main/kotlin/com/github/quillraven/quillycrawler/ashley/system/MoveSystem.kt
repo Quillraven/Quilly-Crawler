@@ -1,11 +1,11 @@
-package com.github.quillraven.commons.ashley.system
+package com.github.quillraven.quillycrawler.ashley.system
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.Box2DComponent
-import com.github.quillraven.commons.ashley.component.MoveComponent
-import com.github.quillraven.commons.ashley.component.moveCmp
+import com.github.quillraven.quillycrawler.ashley.component.MoveComponent
+import com.github.quillraven.quillycrawler.ashley.component.moveCmp
 import ktx.ashley.allOf
 import ktx.ashley.get
 import kotlin.math.max
