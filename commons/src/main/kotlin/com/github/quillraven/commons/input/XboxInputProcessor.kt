@@ -9,6 +9,9 @@ interface XboxInputProcessor : ControllerListener {
 
     override fun disconnected(controller: Controller?) = Unit
 
+    /**
+     * Adds this instance as a [ControllerListener] to the first X360 Controller that is found.
+     */
     fun addXboxControllerListener() {
         Controllers.getControllers()
             .firstOrNull { CONTROLLER_NAME == it.name }
@@ -20,6 +23,9 @@ interface XboxInputProcessor : ControllerListener {
             }
     }
 
+    /**
+     * Removes this instance as a [ControllerListener] from the first X360 Controler that is found.
+     */
     fun removeXboxControllerListener() {
         Controllers.getControllers()
             .firstOrNull { CONTROLLER_NAME == it.name }
