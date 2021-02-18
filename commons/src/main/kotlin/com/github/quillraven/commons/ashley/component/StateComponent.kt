@@ -44,6 +44,8 @@ class StateComponent : Component, Pool.Poolable {
     var state = EntityState.EMPTY_STATE
     var stateTime = 0f
         internal set
+    // Keep stateMachine internal to avoid calling changeState at any time during a frame.
+    // That way we can guarantee that AI is always processed within the StateSystem.
     internal val stateMachine = DefaultStateMachine<Entity, State<Entity>>()
 
     override fun reset() {
