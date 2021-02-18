@@ -22,4 +22,5 @@ TBD
 
 ### Credits
 - Twitch chat for supporting with some questions during development
+- czyzby for his quick support and adjustments in [LibKTX](https://github.com/libktx/ktx)
 - 0x72: [16x16 Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii)
