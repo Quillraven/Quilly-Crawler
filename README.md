@@ -1,5 +1,7 @@
 # Quilly Crawler
 
+![Master](https://github.com/Quillraven/QuillyCrawler/workflows/Build/badge.svg?branch=master&event=push)
+
 [![Kotlin](https://img.shields.io/badge/kotlin-1.4.30-red.svg)](http://kotlinlang.org/)
 [![LibGDX](https://img.shields.io/badge/libgdx-1.9.14-green.svg)](https://libgdx.badlogicgames.com/)
 [![LibKTX](https://img.shields.io/badge/libktx-1.9.14--SNAPSHOT-blue.svg)](https://libktx.github.io/)
