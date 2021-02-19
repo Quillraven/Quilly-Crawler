@@ -1,10 +1,9 @@
 # Quilly Crawler
 
-![Master](https://github.com/Quillraven/QuillyCrawler/workflows/Build/badge.svg?branch=master&event=push)
-
-[![Kotlin](https://img.shields.io/badge/kotlin-1.4.30-red.svg)](http://kotlinlang.org/)
-[![LibGDX](https://img.shields.io/badge/libgdx-1.9.14-green.svg)](https://libgdx.badlogicgames.com/)
-[![LibKTX](https://img.shields.io/badge/libktx-1.9.14--SNAPSHOT-blue.svg)](https://libktx.github.io/)
+[![Build Master](https://img.shields.io/github/workflow/status/quillraven/quilly-crawler/Build/master?event=push&label=Build%20master)](https://github.com/Quillraven/Quilly-Crawler/actions)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.4.30-red.svg)](http://kotlinlang.org/)
+[![LibGDX](https://img.shields.io/badge/LibGDX-1.9.14-green.svg)](https://github.com/libgdx/libgdx)
+[![LibKTX](https://img.shields.io/badge/LibKTX-1.9.14--Snapshot-blue.svg)](https://github.com/libktx/ktx)
 
 **Quilly Crawler** will become a small dungeon crawler game with a round based fighting system
 using [Kotlin](https://kotlinlang.org/) and [LibGDX](https://github.com/libgdx/libgdx).
