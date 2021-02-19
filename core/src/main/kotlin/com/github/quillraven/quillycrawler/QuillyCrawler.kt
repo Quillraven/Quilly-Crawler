@@ -12,7 +12,7 @@ class QuillyCrawler : AbstractGame() {
         if (isDevMode()) {
             Gdx.app.logLevel = Application.LOG_DEBUG
         }
-a
+
         addScreen(PlayGroundScreen(this))
         setScreen<PlayGroundScreen>()
     }
