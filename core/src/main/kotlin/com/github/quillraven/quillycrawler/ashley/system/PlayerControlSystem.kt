@@ -11,6 +11,7 @@ import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.Box2DComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
+import com.github.quillraven.commons.ashley.component.configCmp
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
@@ -197,7 +198,7 @@ class PlayerControlSystem(
             entity.add(engine.createComponent(MoveComponent::class.java).apply {
                 cosDeg = MathUtils.cosDeg(moveDirectionDeg)
                 sinDeg = MathUtils.sinDeg(moveDirectionDeg)
-                maxSpeed = 2.5f
+                maxSpeed = entity.configCmp.config.moveSpeed
             })
         } else if (moveCmp != null) {
             if (stopMovement) {

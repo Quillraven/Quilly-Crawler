@@ -3,6 +3,7 @@ package com.github.quillraven.commons.ashley.system
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.utils.ObjectMap
+import com.github.quillraven.commons.ashley.AbstractEntityConfiguration
 import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.collections.getOrPut
 import ktx.ashley.allOf
@@ -10,25 +11,31 @@ import ktx.log.debug
 import ktx.log.logger
 
 class EntityTypeStateAnimationSystem :
-    IteratingSystem(allOf(EntityTypeComponent::class, StateComponent::class, AnimationComponent::class).get()) {
-    private val regionStringCache = ObjectMap<IEntityType, ObjectMap<EntityState, String>>()
+    IteratingSystem(
+        allOf(
+            EntityConfigurationComponent::class,
+            StateComponent::class,
+            AnimationComponent::class
+        ).get()
+    ) {
+    private val regionStringCache = ObjectMap<AbstractEntityConfiguration, ObjectMap<EntityState, String>>()
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        val entityTypeCmp = entity.entityTypeCmp.type
+        val configCmp = entity.configCmp
         val stateCmp = entity.stateCmp
         val animationCmp = entity.animationCmp
 
-        if (animationCmp.atlasFilePath == entityTypeCmp.atlasFilePath && stateCmp.state == EntityState.EMPTY_STATE) {
-            // animation is already up to date -> do nothing
+        if (stateCmp.state == EntityState.EMPTY_STATE) {
+            // state is not changing -> nothing to do
             return
         }
 
         animationCmp.run {
-            atlasFilePath = entityTypeCmp.atlasFilePath
+            atlasFilePath = configCmp.config.atlasFilePath
             regionKey = regionStringCache
-                .getOrPut(entityTypeCmp) { ObjectMap() }
+                .getOrPut(configCmp.config) { ObjectMap() }
                 .getOrPut(stateCmp.state) {
-                    val result = "${entityTypeCmp.regionKey}/${stateCmp.state.toString().toLowerCase()}"
+                    val result = "${configCmp.config.regionKey}/${stateCmp.state.toString().toLowerCase()}"
                     LOG.debug { "Caching animation string '$result'" }
                     result
                 }
