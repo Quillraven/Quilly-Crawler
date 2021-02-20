@@ -15,6 +15,7 @@ class MoveComponent : Component, Pool.Poolable {
     var accInterpolation: Interpolation = Interpolation.exp10Out
     var cosDeg = 0f
     var sinDeg = 0f
+    var root = false
 
     override fun reset() {
         speed = 0f
@@ -23,6 +24,7 @@ class MoveComponent : Component, Pool.Poolable {
         accInterpolation = Interpolation.exp10Out
         cosDeg = 0f
         sinDeg = 0f
+        root = false
     }
 
     companion object {
