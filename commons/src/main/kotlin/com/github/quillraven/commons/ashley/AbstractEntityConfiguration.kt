@@ -12,4 +12,15 @@ abstract class AbstractEntityConfiguration(
     var initialState: EntityState = EntityState.EMPTY_STATE,
     var bodyType: BodyDef.BodyType? = null,
     var boundingBoxHeightPercentage: Float = 1f,
-)
+) {
+    override fun toString(): String {
+        return "AbstractEntityConfiguration(" +
+                "size=$size, " +
+                "moveSpeed=$moveSpeed, " +
+                "atlasFilePath='$atlasFilePath', " +
+                "regionKey='$regionKey', " +
+                "initialState=$initialState, " +
+                "bodyType=$bodyType, " +
+                "boundingBoxHeightPercentage=$boundingBoxHeightPercentage)"
+    }
+}
