@@ -12,17 +12,20 @@ import kotlin.math.min
 
 class MoveSystem : IteratingSystem(allOf(MoveComponent::class).get()) {
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        val moveCmp = entity.moveCmp
+        with(entity.moveCmp) {
+            if (root) {
+                entity[Box2DComponent.MAPPER]?.stopMovementImmediately()
+            } else {
+                alpha = max(0f, min(1f, alpha + deltaTime))
+                speed = accInterpolation.apply(0f, maxSpeed, alpha)
 
-        moveCmp.alpha = max(0f, min(1f, moveCmp.alpha + deltaTime))
-        moveCmp.speed = moveCmp.accInterpolation.apply(0f, moveCmp.maxSpeed, moveCmp.alpha)
-
-        // calculate impulse to apply
-        val box2dCmp = entity[Box2DComponent.MAPPER]
-        if (box2dCmp != null) {
-            with(box2dCmp.body) {
-                box2dCmp.impulse.x = mass * (moveCmp.speed * moveCmp.cosDeg - linearVelocity.x)
-                box2dCmp.impulse.y = mass * (moveCmp.speed * moveCmp.sinDeg - linearVelocity.y)
+                // calculate impulse to apply
+                entity[Box2DComponent.MAPPER]?.let { box2dCmp ->
+                    with(box2dCmp.body) {
+                        box2dCmp.impulse.x = mass * (speed * cosDeg - linearVelocity.x)
+                        box2dCmp.impulse.y = mass * (speed * sinDeg - linearVelocity.y)
+                    }
+                }
             }
         }
     }

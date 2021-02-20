@@ -8,10 +8,15 @@ import com.badlogic.gdx.ai.GdxAI
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine
 import com.badlogic.gdx.ai.fsm.StateMachine
 import com.badlogic.gdx.ai.msg.MessageManager
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.utils.ObjectMap
+import com.github.quillraven.commons.ashley.component.AnimationComponent
 import com.github.quillraven.commons.ashley.component.EntityState
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.ashley.component.stateCmp
+import com.github.quillraven.commons.collections.getOrPut
 import ktx.ashley.allOf
+import ktx.ashley.get
 
 /**
  * System to set and update an [entity's][Entity] [EntityState]. It also updates
@@ -25,11 +30,19 @@ import ktx.ashley.allOf
  * will update the [StateComponent.stateMachine] and [StateComponent.stateTime].
  * Otherwise, it will call the state machine's [changeState][StateMachine.changeState] function
  * and reset the [StateComponent.stateTime] to 0.
+ *
+ * Additionally, if an entity has an [AnimationComponent] then this system is setting its [AnimationComponent.stateKey].
+ * In order for that to work you need to stick to a certain naming convention. The **regionKey** of the
+ * [TextureAtlas] must be "regionKey/%state%" where %state% is the lowercase name of the [EntityState].
+ * E.g. if your regionKey is "wizard" and your state is called "IDLE" then the region in the atlas
+ * must be called "wizard/idle".
  */
 class StateSystem(
     private val messageManager: MessageManager,
     private val messageTypes: Set<Int> = setOf()
 ) : IteratingSystem(allOf(StateComponent::class).get()), EntityListener {
+    private val stateAnimationStringCache = ObjectMap<EntityState, String>()
+
     /**
      * Adds the system as an [EntityListener] for the [family]
      */
@@ -91,6 +104,9 @@ class StateSystem(
                     // switch to new state
                     stateTime = 0f
                     stateMachine.changeState(state)
+                    entity[AnimationComponent.MAPPER]?.let {
+                        it.stateKey = stateAnimationStringCache.getOrPut(state) { state.toString().toLowerCase() }
+                    }
                     state = EntityState.EMPTY_STATE
                 }
                 else -> {

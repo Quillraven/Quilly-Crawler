@@ -24,7 +24,7 @@ interface XboxInputProcessor : ControllerListener {
     }
 
     /**
-     * Removes this instance as a [ControllerListener] from the first X360 Controler that is found.
+     * Removes this instance as a [ControllerListener] from the first X360 Controller that is found.
      */
     fun removeXboxControllerListener() {
         Controllers.getControllers()

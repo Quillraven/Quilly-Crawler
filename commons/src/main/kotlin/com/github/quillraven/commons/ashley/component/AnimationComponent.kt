@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
 import com.github.quillraven.commons.ashley.system.AnimationSystem
+import com.github.quillraven.commons.ashley.system.StateSystem
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.collections.gdxArrayOf
@@ -16,6 +17,9 @@ import ktx.collections.gdxArrayOf
  *
  * Use [atlasFilePath] and [regionKey] to define which [regions][TextureRegion] to use for the animation.
  * Whenever you change the value of one of those fields then the [AnimationSystem] will set the new animation.
+ *
+ * Use [stateKey] if you want to link an [EntityState] to an animation. Have a look at the [AnimationSystem]
+ * and [StateSystem] as an example.
  *
  * Use [playMode] and [animationSpeed] to define how and how fast the animation is played.
  *
@@ -36,6 +40,11 @@ class AnimationComponent : Component, Pool.Poolable {
             dirty = value != field
             field = value
         }
+    var stateKey = ""
+        set(value) {
+            dirty = value != field
+            field = value
+        }
     var playMode = Animation.PlayMode.LOOP
     var animationSpeed = 1f
     var stateTime = 0f
@@ -51,6 +60,7 @@ class AnimationComponent : Component, Pool.Poolable {
     override fun reset() {
         atlasFilePath = ""
         regionKey = ""
+        stateKey = ""
         playMode = Animation.PlayMode.LOOP
         animationSpeed = 1f
         stateTime = 0f

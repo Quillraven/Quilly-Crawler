@@ -9,13 +9,12 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.math.MathUtils
-import com.github.quillraven.commons.ashley.component.Box2DComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
-import com.github.quillraven.quillycrawler.ashley.component.MoveComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
+import com.github.quillraven.quillycrawler.ashley.component.moveCmp
 import ktx.ashley.allOf
 import ktx.ashley.get
 import kotlin.math.PI
@@ -192,20 +191,11 @@ class PlayerControlSystem(
     }
 
     private fun updateMovement(entity: Entity) {
-        val moveCmp = entity[MoveComponent.MAPPER]
-        if (moveCmp == null && !stopMovement) {
-            entity.add(engine.createComponent(MoveComponent::class.java).apply {
+        with(entity.moveCmp) {
+            root = stopMovement
+            if (!root) {
                 cosDeg = MathUtils.cosDeg(moveDirectionDeg)
                 sinDeg = MathUtils.sinDeg(moveDirectionDeg)
-                maxSpeed = 2.5f
-            })
-        } else if (moveCmp != null) {
-            if (stopMovement) {
-                entity.remove(MoveComponent::class.java)
-                entity[Box2DComponent.MAPPER]?.stopMovementImmediately()
-            } else {
-                moveCmp.cosDeg = MathUtils.cosDeg(moveDirectionDeg)
-                moveCmp.sinDeg = MathUtils.sinDeg(moveDirectionDeg)
             }
         }
     }
