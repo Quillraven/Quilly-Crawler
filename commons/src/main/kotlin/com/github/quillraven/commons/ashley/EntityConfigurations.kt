@@ -3,7 +3,6 @@ package com.github.quillraven.commons.ashley
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.ObjectMap
@@ -22,6 +21,18 @@ import kotlin.contracts.contract
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
+/**
+ * Class to create and cache [entity configurations][AbstractEntityConfiguration] of type [ConfigType].
+ * It provides a DSL to support a type-safe creation of configuration objects.
+ *
+ * Use [config] to create, configure and add a configuration to the cache. The config id must be unique.
+ * Otherwise a [GdxRuntimeException] is thrown.
+ *
+ * Use [get] to retrieve an already stored configuration. If the configuration is not existing then a
+ * [GdxRuntimeException] is thrown.
+ *
+ * Use [newEntity] to create and add a new [Entity] to an [Engine] by using an already existing configuration.
+ */
 class EntityConfigurations<ConfigType : AbstractEntityConfiguration>
 @PublishedApi
 internal constructor(
@@ -31,6 +42,10 @@ internal constructor(
     @PublishedApi
     internal val configurations = ObjectMap<String, ConfigType>()
 
+    /**
+     * Creates and stores a new configuration with the given [id].
+     * Throws a [GdxRuntimeException] if the [id] is already existing.
+     */
     inline fun config(id: String, block: ConfigType.() -> Unit) {
         contract {
             callsInPlace(block, InvocationKind.AT_MOST_ONCE)
@@ -45,10 +60,29 @@ internal constructor(
         LOG.debug { "Adding configuration '$id': $newCfg" }
     }
 
+    /**
+     * Returns the configuration of the given [id]. [config] must be called prior to a [get] call.
+     * If the configuration does not exist then a [GdxRuntimeException] is thrown.
+     */
     operator fun get(id: String): ConfigType {
         return configurations[id] ?: throw GdxRuntimeException("There is no configuration for id '$id'")
     }
 
+    /**
+     * Creates and adds a new [Entity] to the [engine] using the configuration of [cfgId].
+     * Sets the [TransformComponent.position] to [x] and [y].
+     *
+     * In case a box2d configuration is specified then a body is created for the [world].
+     *
+     * Configures following components:
+     * - [TransformComponent]
+     * - [AnimationComponent]
+     * - [RenderComponent]
+     * - [Box2DComponent]
+     * - [StateComponent]
+     *
+     * Use [configure] to add custom configuration to the created entity.
+     */
     fun newEntity(
         engine: Engine,
         x: Float,
@@ -57,14 +91,21 @@ internal constructor(
         world: World? = null,
         configure: EngineEntity.(ConfigType) -> Unit = {}
     ): Entity {
+        contract {
+            callsInPlace(configure, InvocationKind.EXACTLY_ONCE)
+        }
+
+        LOG.debug { "Creating new entity with configuration '$cfgId'" }
         val entityCfg = configurations[cfgId]
 
         return engine.entity {
+            // transform
             val transformCmp = with<TransformComponent> {
                 position.set(x, y, position.z)
                 size.set(entityCfg.size)
             }
 
+            // animation and render
             if (entityCfg.atlasFilePath.isNotBlank()) {
                 with<AnimationComponent> {
                     atlasFilePath = entityCfg.atlasFilePath
@@ -73,9 +114,11 @@ internal constructor(
                 with<RenderComponent>()
             }
 
-            if (world != null && entityCfg.bodyType != null) {
+            // box2d
+            val bodyType = entityCfg.bodyType
+            if (world != null && bodyType != null) {
                 with<Box2DComponent> {
-                    body = world.body(BodyDef.BodyType.DynamicBody) {
+                    body = world.body(bodyType) {
                         position.set(
                             transformCmp.position.x + transformCmp.size.x * 0.5f,
                             transformCmp.position.y + transformCmp.size.y * 0.5f
@@ -96,6 +139,7 @@ internal constructor(
                 }
             }
 
+            // state
             if (entityCfg.initialState != EntityState.EMPTY_STATE) {
                 with<StateComponent> {
                     state = entityCfg.initialState
