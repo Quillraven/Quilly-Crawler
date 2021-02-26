@@ -14,9 +14,9 @@ import com.github.quillraven.commons.ashley.component.AnimationComponent
 import com.github.quillraven.commons.ashley.component.EntityState
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.ashley.component.stateCmp
-import com.github.quillraven.commons.collections.getOrPut
 import ktx.ashley.allOf
 import ktx.ashley.get
+import ktx.collections.getOrPut
 
 /**
  * System to set and update an [entity's][Entity] [EntityState]. It also updates

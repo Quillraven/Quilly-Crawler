@@ -13,12 +13,12 @@ import com.github.quillraven.commons.ashley.component.AnimationComponent
 import com.github.quillraven.commons.ashley.component.RenderComponent
 import com.github.quillraven.commons.ashley.component.animationCmp
 import com.github.quillraven.commons.ashley.component.renderCmp
-import com.github.quillraven.commons.collections.getOrPut
 import kotlinx.coroutines.launch
 import ktx.ashley.allOf
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
 import ktx.collections.gdxArrayOf
+import ktx.collections.getOrPut
 import ktx.log.debug
 import ktx.log.error
 import ktx.log.info
