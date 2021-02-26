@@ -10,6 +10,10 @@ import com.badlogic.gdx.utils.Pool
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 
+const val Z_BACKGROUND = -1
+const val Z_DEFAULT = 0
+const val Z_FOREGROUND = 1
+
 /**
  * Component to store transformation related data.
  *
@@ -27,7 +31,7 @@ class TransformComponent : Component, Pool.Poolable, Comparable<TransformCompone
     val size = Vector2(1f, 1f)
 
     override fun reset() {
-        position.set(0f, 0f, 0f)
+        position.set(0f, 0f, Z_DEFAULT.toFloat())
         size.set(1f, 1f)
     }
 

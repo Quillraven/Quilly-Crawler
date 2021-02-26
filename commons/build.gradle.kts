@@ -13,4 +13,5 @@ dependencies {
     api("io.github.libktx:ktx-collections:${project.property("ktxVersion")}")
     api("io.github.libktx:ktx-graphics:${project.property("ktxVersion")}")
     api("io.github.libktx:ktx-log:${project.property("ktxVersion")}")
+    api("io.github.libktx:ktx-tiled:${project.property("ktxVersion")}")
 }

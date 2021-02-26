@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-up" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+ <tileset firstgid="1" source="tileset1.tsx"/>
+ <layer id="1" name="background" width="20" height="20">
+  <properties>
+   <property name="z" type="int" value="0"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzjYmBg4BrFo3gUj+JRPIpJxAD8UA+h
+  </data>
+ </layer>
+ <layer id="2" name="foreground" width="20" height="20">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUkANkgNiGRD0eOLACEGsDMR8Qc+JRh46ZgNgUiD2RMIhvAcRiQGwFZUujqfHEIqZPol9GwSgAAGbICaY=
+  </data>
+ </layer>
+</map>

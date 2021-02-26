@@ -2,10 +2,12 @@ package com.github.quillraven.commons.ashley.system
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.SortedIteratingSystem
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.map.MapService
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.graphics.use
@@ -26,6 +28,8 @@ import ktx.log.logger
 class RenderSystem(
     private val batch: Batch,
     private val viewport: Viewport,
+    private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
+    private val mapService: MapService? = null
 ) : SortedIteratingSystem(
     allOf(TransformComponent::class, RenderComponent::class).get(),
     compareBy { it[TransformComponent.MAPPER] }
@@ -37,8 +41,12 @@ class RenderSystem(
         forceSort()
 
         viewport.apply()
-        batch.use(viewport.camera) {
+        // TODO introduce empty DefaultMapService to get rid of multiple null checks (?.)
+        mapService?.setViewBounds(camera)
+        batch.use(camera) {
+            mapService?.renderBackground()
             super.update(deltaTime)
+            mapService?.renderForeground()
         }
     }
 

@@ -1,16 +1,21 @@
 package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.PooledEngine
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.github.quillraven.commons.ashley.component.CameraLockComponent
 import com.github.quillraven.commons.ashley.component.PlayerComponent
 import com.github.quillraven.commons.ashley.component.box2dCmp
 import com.github.quillraven.commons.ashley.component.transformCmp
 import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
+import com.github.quillraven.commons.map.MapService
+import com.github.quillraven.commons.map.TiledMapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.EntityType
@@ -33,14 +38,16 @@ class PlayGroundScreen(
         autoClearForces = false
     }
     private val box2DDebugRenderer = Box2DDebugRenderer()
+    private val mapService: MapService = TiledMapService(assetStorage, batch, QuillyCrawler.UNIT_SCALE)
     private val engine = PooledEngine().apply {
         addSystem(PlayerControlSystem(messageManager))
         addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
         addSystem(MoveSystem())
         addSystem(Box2DSystem(world, 1 / 60f))
+        addSystem(CameraLockSystem(viewport.camera))
         addSystem(CollisionSystem(world))
         addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
-        addSystem(RenderSystem(batch, viewport))
+        addSystem(RenderSystem(batch, viewport, mapService = mapService))
         if (game.isDevMode()) {
             addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
         }
@@ -63,6 +70,7 @@ class PlayGroundScreen(
                 with<MoveComponent> {
                     maxSpeed = cfg.moveSpeed
                 }
+                with<CameraLockComponent>()
             }
 
             game.entityConfigurations.newEntity(engine, 3f, 3f, EntityType.CHEST.name, world) {
@@ -79,6 +87,13 @@ class PlayGroundScreen(
     }
 
     override fun render(delta: Float) {
+        //TODO remove debug stuff
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+            mapService.setMap(engine, "maps/test1.tmx")
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+            mapService.setMap(engine, "maps/test2.tmx")
+        }
+
         engine.update(delta)
     }
 
