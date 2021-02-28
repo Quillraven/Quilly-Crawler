@@ -8,26 +8,15 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
-import com.github.quillraven.commons.ashley.component.CameraLockComponent
-import com.github.quillraven.commons.ashley.component.PlayerComponent
-import com.github.quillraven.commons.ashley.component.box2dCmp
-import com.github.quillraven.commons.ashley.component.transformCmp
 import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
-import com.github.quillraven.quillycrawler.ashley.EntityType
-import com.github.quillraven.quillycrawler.ashley.component.CollectableComponent
-import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
-import com.github.quillraven.quillycrawler.ashley.component.MoveComponent
-import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import com.github.quillraven.quillycrawler.ashley.system.CollisionSystem
 import com.github.quillraven.quillycrawler.ashley.system.MoveSystem
 import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
-import ktx.ashley.with
-import ktx.box2d.circle
 
 class PlayGroundScreen(
     private val game: QuillyCrawler,
@@ -38,20 +27,9 @@ class PlayGroundScreen(
         autoClearForces = false
     }
     private val box2DDebugRenderer = Box2DDebugRenderer()
-    private val mapService: MapService = TiledMapService(assetStorage, batch, QuillyCrawler.UNIT_SCALE)
-    private val engine = PooledEngine().apply {
-        addSystem(PlayerControlSystem(messageManager))
-        addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
-        addSystem(MoveSystem())
-        addSystem(Box2DSystem(world, 1 / 60f))
-        addSystem(CameraLockSystem(viewport.camera))
-        addSystem(CollisionSystem(world))
-        addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
-        addSystem(RenderSystem(batch, viewport, mapService = mapService))
-        if (game.isDevMode()) {
-            addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
-        }
-    }
+    private val engine = PooledEngine()
+    private val mapService: MapService =
+        TiledMapService(game.entityConfigurations, engine, assetStorage, batch, QuillyCrawler.UNIT_SCALE, world)
 
     override fun resize(width: Int, height: Int) {
         viewport.update(width, height, true)
@@ -59,26 +37,24 @@ class PlayGroundScreen(
 
     override fun show() {
         super.show()
-        engine.run {
-            game.entityConfigurations.newEntity(engine, 0f, 0f, EntityType.PLAYER.name, world) { cfg ->
-                with<PlayerComponent>()
-                with<PlayerControlComponent>()
-                with<CollectingComponent>()
-                this.entity.box2dCmp.body.circle(this.entity.transformCmp.size.x) {
-                    isSensor = true
-                }
-                with<MoveComponent> {
-                    maxSpeed = cfg.moveSpeed
-                }
-                with<CameraLockComponent>()
-            }
 
-            game.entityConfigurations.newEntity(engine, 3f, 3f, EntityType.CHEST.name, world) {
-                with<CollectableComponent>()
+        if (engine.systems.size() <= 0) {
+            engine.run {
+                addSystem(PlayerControlSystem(messageManager))
+                addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
+                addSystem(MoveSystem())
+                addSystem(Box2DSystem(world, 1 / 60f))
+                addSystem(CameraLockSystem(viewport.camera))
+                addSystem(CollisionSystem(world))
+                addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
+                addSystem(RenderSystem(batch, viewport, mapService = mapService))
+                if (game.isDevMode()) {
+                    addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
+                }
             }
-
-            game.entityConfigurations.newEntity(engine, 1f, 0f, EntityType.BIG_DEMON.name, world)
         }
+
+        mapService.setMap(engine, "maps/tutorial.tmx")
     }
 
     override fun hide() {

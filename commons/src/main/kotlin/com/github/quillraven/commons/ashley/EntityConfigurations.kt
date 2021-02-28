@@ -18,8 +18,6 @@ import ktx.log.debug
 import ktx.log.logger
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 
 /**
  * Class to create and cache [entity configurations][AbstractEntityConfiguration] of type [ConfigType].
@@ -33,14 +31,17 @@ import kotlin.reflect.full.createInstance
  *
  * Use [newEntity] to create and add a new [Entity] to an [Engine] by using an already existing configuration.
  */
-class EntityConfigurations<ConfigType : AbstractEntityConfiguration>
-@PublishedApi
-internal constructor(
+open class EntityConfigurations<ConfigType : AbstractEntityConfiguration>(
     @PublishedApi
-    internal val type: KClass<ConfigType>
+    internal val factory: () -> ConfigType,
+    block: EntityConfigurations<ConfigType>.() -> Unit = {}
 ) {
     @PublishedApi
     internal val configurations = ObjectMap<String, ConfigType>()
+
+    init {
+        this.apply(block)
+    }
 
     /**
      * Creates and stores a new configuration with the given [id].
@@ -55,7 +56,7 @@ internal constructor(
             throw GdxRuntimeException("Configuration of id '$id' already exists. Configurations must be unique!")
         }
 
-        val newCfg = type.createInstance().apply(block)
+        val newCfg = factory().apply(block)
         configurations[id] = newCfg
         LOG.debug { "Adding configuration '$id': $newCfg" }
     }
@@ -83,7 +84,7 @@ internal constructor(
      *
      * Use [configure] to add custom configuration to the created entity.
      */
-    fun newEntity(
+    open fun newEntity(
         engine: Engine,
         x: Float,
         y: Float,
@@ -91,10 +92,6 @@ internal constructor(
         world: World? = null,
         configure: EngineEntity.(ConfigType) -> Unit = {}
     ): Entity {
-        contract {
-            callsInPlace(configure, InvocationKind.EXACTLY_ONCE)
-        }
-
         LOG.debug { "Creating new entity with configuration '$cfgId'" }
         val entityCfg = configurations[cfgId]
 
@@ -152,8 +149,5 @@ internal constructor(
 
     companion object {
         val LOG = logger<EntityConfigurations<AbstractEntityConfiguration>>()
-
-        inline operator fun <reified ConfigType : AbstractEntityConfiguration> invoke(block: EntityConfigurations<ConfigType>.() -> Unit) =
-            EntityConfigurations(ConfigType::class).apply(block)
     }
 }

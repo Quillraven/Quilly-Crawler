@@ -8,20 +8,35 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.maps.MapLayer
 import com.badlogic.gdx.maps.MapLayers
 import com.badlogic.gdx.maps.MapObject
+import com.badlogic.gdx.maps.MapObjects
+import com.badlogic.gdx.maps.objects.*
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
+import com.badlogic.gdx.math.Polygon
+import com.badlogic.gdx.math.Polyline
+import com.badlogic.gdx.physics.box2d.BodyDef
+import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.GdxRuntimeException
+import com.github.quillraven.commons.ashley.AbstractEntityConfiguration
+import com.github.quillraven.commons.ashley.EntityConfigurations
+import com.github.quillraven.commons.ashley.component.Box2DComponent
 import com.github.quillraven.commons.ashley.component.Z_BACKGROUND
 import com.github.quillraven.commons.ashley.component.Z_DEFAULT
 import kotlinx.coroutines.launch
+import ktx.ashley.entity
+import ktx.ashley.with
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
+import ktx.box2d.*
 import ktx.collections.GdxArray
 import ktx.collections.gdxArrayOf
 import ktx.log.debug
 import ktx.tiled.property
+import ktx.tiled.shape
+import ktx.tiled.x
+import ktx.tiled.y
 import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 
@@ -34,10 +49,21 @@ inline operator fun <reified T : MapLayer> MapLayers.invoke(fill: GdxArray<T>? =
     }
 }
 
+inline fun <reified T : MapLayer> TiledMap.forEachLayer(lambda: (T) -> Unit) {
+    this.layers.forEach {
+        if (it::class == T::class) {
+            lambda(it as T)
+        }
+    }
+}
+
 class TiledMapService(
+    private val entityConfigurations: EntityConfigurations<out AbstractEntityConfiguration>,
+    private val engine: Engine,
     assetStorage: AssetStorage,
     batch: Batch,
-    unitScale: Float,
+    private val unitScale: Float,
+    private val world: World? = null,
     override val mapRenderer: OrthogonalTiledMapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
 ) : MapService(assetStorage) {
     private var currentMapFilePath = ""
@@ -75,6 +101,7 @@ class TiledMapService(
             }
 
             parseRenderLayers()
+            parseObjectLayers()
 
             currentMapFilePath = mapFilePath
             mapRenderer.map = currentMap
@@ -91,6 +118,72 @@ class TiledMapService(
             } else {
                 foregroundLayers.add(layer)
             }
+        }
+    }
+
+    private fun parseObjectLayers() {
+        currentMap.forEachLayer<MapLayer> { layer ->
+            if (layer.property("collisionLayer", false)) {
+                createCollisionBody(layer.objects)
+            } else {
+                createEntities(layer.objects)
+            }
+        }
+    }
+
+    private fun createEntities(objects: MapObjects) {
+        objects.forEach { mapObject ->
+            entityConfigurations.newEntity(
+                engine,
+                mapObject.x * unitScale,
+                mapObject.y * unitScale,
+                mapObject.property("id"),
+                world
+            )
+        }
+    }
+
+    private fun createCollisionBody(objects: MapObjects) {
+        // TODO provide LibKTX isEmpty extension
+        if (world != null && objects.count > 0) {
+            engine.entity {
+                with<Box2DComponent> {
+                    body = world.body(BodyDef.BodyType.StaticBody) {
+                        fixedRotation = true
+
+                        objects.forEach { mapObject ->
+                            val shape = mapObject.shape
+                            when (shape) {
+                                is Polyline -> {
+                                    val x = shape.x
+                                    val y = shape.y
+                                    // transformed vertices also adds the position to each
+                                    // vertex. Therefore, we need to set position first to ZERO
+                                    // and then restore it afterwards
+                                    shape.setPosition(x * unitScale, y * unitScale)
+                                    shape.setScale(unitScale, unitScale)
+                                    chain(shape.transformedVertices)
+                                    shape.setPosition(x, y)
+                                }
+                                is Polygon -> {
+                                    val x = shape.x
+                                    val y = shape.y
+                                    // transformed vertices also adds the position to each
+                                    // vertex. Therefore, we need to set position first to ZERO
+                                    // and then restore it afterwards
+                                    shape.setPosition(x * unitScale, y * unitScale)
+                                    shape.setScale(unitScale, unitScale)
+                                    loop(shape.transformedVertices)
+                                    shape.setPosition(x, y)
+                                }
+                            }
+                        }
+
+                        userData = this@entity.entity
+                    }
+                }
+            }
+
         }
     }
 

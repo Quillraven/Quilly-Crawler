@@ -5,6 +5,7 @@ import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.map.MapService
@@ -43,6 +44,9 @@ class RenderSystem(
         viewport.apply()
         // TODO introduce empty DefaultMapService to get rid of multiple null checks (?.)
         mapService?.setViewBounds(camera)
+        // TODO add to mapService
+        AnimatedTiledMapTile.updateAnimationBaseTime()
+
         batch.use(camera) {
             mapService?.renderBackground()
             super.update(deltaTime)
