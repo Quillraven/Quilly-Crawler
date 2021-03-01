@@ -20,31 +20,34 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 /**
- * Class to create and cache [entity configurations][AbstractEntityConfiguration] of type [ConfigType].
+ * Class to create [entities][Entity] and create and cache
+ * [entity configurations][AbstractEntityConfiguration] of type [ConfigType].
  * It provides a DSL to support a type-safe creation of configuration objects.
  *
- * Use [config] to create, configure and add a configuration to the cache. The config id must be unique.
- * Otherwise a [GdxRuntimeException] is thrown.
+ * Use [configurations] and [config] to create, configure and add configurations to the cache.
+ * The config id must be unique. Otherwise a [GdxRuntimeException] is thrown.
  *
  * Use [get] to retrieve an already stored configuration. If the configuration is not existing then a
  * [GdxRuntimeException] is thrown.
  *
- * Use [newEntity] to create and add a new [Entity] to an [Engine] by using an already existing configuration.
+ * Use [newEntity] to create and add a new [Entity] to the [engine] by using an already existing configuration.
+ * If a [world] is specified then a [Box2DComponent] is initialized if needed.
+ *
+ * Use [configFactory] to define how a new instance of type [ConfigType] should be created within [config].
+ *
+ * Override [configureEntity] to add your own specific configurations after an entity was created.
  */
-open class EntityConfigurations<ConfigType : AbstractEntityConfiguration>(
+abstract class AbstractEntityFactory<ConfigType : AbstractEntityConfiguration>(
+    val engine: Engine,
     @PublishedApi
-    internal val factory: () -> ConfigType,
-    block: EntityConfigurations<ConfigType>.() -> Unit = {}
+    internal val configFactory: () -> ConfigType,
+    val world: World? = null
 ) {
     @PublishedApi
-    internal val configurations = ObjectMap<String, ConfigType>()
-
-    init {
-        this.apply(block)
-    }
+    internal val configCache = ObjectMap<String, ConfigType>()
 
     /**
-     * Creates and stores a new configuration with the given [id].
+     * Creates and stores a new configuration with the given [id] using the [configFactory] function.
      * Throws a [GdxRuntimeException] if the [id] is already existing.
      */
     inline fun config(id: String, block: ConfigType.() -> Unit) {
@@ -52,12 +55,12 @@ open class EntityConfigurations<ConfigType : AbstractEntityConfiguration>(
             callsInPlace(block, InvocationKind.AT_MOST_ONCE)
         }
 
-        if (id in configurations) {
+        if (id in configCache) {
             throw GdxRuntimeException("Configuration of id '$id' already exists. Configurations must be unique!")
         }
 
-        val newCfg = factory().apply(block)
-        configurations[id] = newCfg
+        val newCfg = configFactory().apply(block)
+        configCache[id] = newCfg
         LOG.debug { "Adding configuration '$id': $newCfg" }
     }
 
@@ -66,7 +69,7 @@ open class EntityConfigurations<ConfigType : AbstractEntityConfiguration>(
      * If the configuration does not exist then a [GdxRuntimeException] is thrown.
      */
     operator fun get(id: String): ConfigType {
-        return configurations[id] ?: throw GdxRuntimeException("There is no configuration for id '$id'")
+        return configCache[id] ?: throw GdxRuntimeException("There is no configuration for id '$id'")
     }
 
     /**
@@ -82,18 +85,15 @@ open class EntityConfigurations<ConfigType : AbstractEntityConfiguration>(
      * - [Box2DComponent]
      * - [StateComponent]
      *
-     * Use [configure] to add custom configuration to the created entity.
+     * Use [configureEntity] to add custom configuration to the created entity.
      */
-    open fun newEntity(
-        engine: Engine,
+    fun newEntity(
         x: Float,
         y: Float,
-        cfgId: String,
-        world: World? = null,
-        configure: EngineEntity.(ConfigType) -> Unit = {}
+        cfgId: String
     ): Entity {
         LOG.debug { "Creating new entity with configuration '$cfgId'" }
-        val entityCfg = configurations[cfgId]
+        val entityCfg = configCache[cfgId]
 
         return engine.entity {
             // transform
@@ -143,11 +143,31 @@ open class EntityConfigurations<ConfigType : AbstractEntityConfiguration>(
                 }
             }
 
-            apply { configure(entityCfg) }
+            configureEntity(this, entityCfg)
         }
     }
 
+    /**
+     * This function is called at the end of [newEntity]. Use it to add custom configuration for your
+     * created entities.
+     *
+     * It receives the created [engineEntity] and the [configuration] used for the creation process.
+     */
+    abstract fun configureEntity(engineEntity: EngineEntity, configuration: ConfigType)
+
     companion object {
-        val LOG = logger<EntityConfigurations<AbstractEntityConfiguration>>()
+        val LOG = logger<AbstractEntityFactory<AbstractEntityConfiguration>>()
     }
+}
+
+/**
+ * Calls the specified function [block] on an [AbstractEntityFactory]. Use [AbstractEntityFactory.config] within
+ * [block] to easily setup the configurations for your entities.
+ */
+fun <T : AbstractEntityFactory<out AbstractEntityConfiguration>> T.configurations(block: T.() -> Unit): T {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+
+    return this.apply(block)
 }

@@ -1,15 +1,15 @@
 package com.github.quillraven.quillycrawler.ashley
 
 import com.badlogic.ashley.core.Engine
-import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import com.github.quillraven.commons.ashley.AbstractEntityConfiguration
-import com.github.quillraven.commons.ashley.EntityConfigurations
+import com.github.quillraven.commons.ashley.AbstractEntityFactory
 import com.github.quillraven.commons.ashley.component.CameraLockComponent
 import com.github.quillraven.commons.ashley.component.PlayerComponent
 import com.github.quillraven.commons.ashley.component.box2dCmp
 import com.github.quillraven.commons.ashley.component.transformCmp
+import com.github.quillraven.commons.ashley.configurations
 import com.github.quillraven.quillycrawler.ai.BigDemonState
 import com.github.quillraven.quillycrawler.ai.ChestState
 import com.github.quillraven.quillycrawler.ai.PlayerState
@@ -33,20 +33,13 @@ class EntityConfiguration(
     var actionable: Boolean = false
 ) : AbstractEntityConfiguration()
 
-class CustomEntityConfigurations(block: EntityConfigurations<EntityConfiguration>.() -> Unit = {}) :
-    EntityConfigurations<EntityConfiguration>({ EntityConfiguration() }, block) {
-    override fun newEntity(
-        engine: Engine,
-        x: Float,
-        y: Float,
-        cfgId: String,
-        world: World?,
-        configure: EngineEntity.(EntityConfiguration) -> Unit
-    ): Entity {
-        return super.newEntity(engine, x, y, cfgId, world) { entityCfg ->
-            apply { configure(entityCfg) }
-
-            if (entityCfg.playerControlled) {
+class EntityFactory(
+    engine: Engine,
+    world: World
+) : AbstractEntityFactory<EntityConfiguration>(engine, { EntityConfiguration() }, world) {
+    override fun configureEntity(engineEntity: EngineEntity, configuration: EntityConfiguration) {
+        engineEntity.run {
+            if (configuration.playerControlled) {
                 with<PlayerComponent>()
                 with<PlayerControlComponent>()
                 with<CollectingComponent>()
@@ -54,20 +47,20 @@ class CustomEntityConfigurations(block: EntityConfigurations<EntityConfiguration
                     isSensor = true
                 }
                 with<MoveComponent> {
-                    maxSpeed = entityCfg.moveSpeed
+                    maxSpeed = configuration.moveSpeed
                 }
                 with<CameraLockComponent>()
             }
 
-            if (entityCfg.actionable) {
+            if (configuration.actionable) {
                 with<CollectableComponent>()
             }
         }
     }
 }
 
-fun loadEntityConfigurations(): CustomEntityConfigurations =
-    CustomEntityConfigurations {
+fun newEntityFactory(engine: Engine, world: World): EntityFactory =
+    EntityFactory(engine, world).configurations {
         config(EntityType.PLAYER.name) {
             playerControlled = true
             atlasFilePath = TextureAtlasAssets.CHARACTERS_AND_PROPS.descriptor.fileName

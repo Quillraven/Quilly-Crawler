@@ -17,10 +17,9 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Polyline
 import com.badlogic.gdx.physics.box2d.BodyDef
-import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.AbstractEntityConfiguration
-import com.github.quillraven.commons.ashley.EntityConfigurations
+import com.github.quillraven.commons.ashley.AbstractEntityFactory
 import com.github.quillraven.commons.ashley.component.Box2DComponent
 import com.github.quillraven.commons.ashley.component.Z_BACKGROUND
 import com.github.quillraven.commons.ashley.component.Z_DEFAULT
@@ -58,12 +57,10 @@ inline fun <reified T : MapLayer> TiledMap.forEachLayer(lambda: (T) -> Unit) {
 }
 
 class TiledMapService(
-    private val entityConfigurations: EntityConfigurations<out AbstractEntityConfiguration>,
-    private val engine: Engine,
+    private val entityFactory: AbstractEntityFactory<out AbstractEntityConfiguration>,
     assetStorage: AssetStorage,
     batch: Batch,
     private val unitScale: Float,
-    private val world: World? = null,
     override val mapRenderer: OrthogonalTiledMapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
 ) : MapService(assetStorage) {
     private var currentMapFilePath = ""
@@ -133,22 +130,20 @@ class TiledMapService(
 
     private fun createEntities(objects: MapObjects) {
         objects.forEach { mapObject ->
-            entityConfigurations.newEntity(
-                engine,
+            entityFactory.newEntity(
                 mapObject.x * unitScale,
                 mapObject.y * unitScale,
-                mapObject.property("id"),
-                world
+                mapObject.property("id")
             )
         }
     }
 
     private fun createCollisionBody(objects: MapObjects) {
         // TODO provide LibKTX isEmpty extension
-        if (world != null && objects.count > 0) {
-            engine.entity {
+        if (entityFactory.world != null && objects.count > 0) {
+            entityFactory.engine.entity {
                 with<Box2DComponent> {
-                    body = world.body(BodyDef.BodyType.StaticBody) {
+                    body = entityFactory.world.body(BodyDef.BodyType.StaticBody) {
                         fixedRotation = true
 
                         objects.forEach { mapObject ->

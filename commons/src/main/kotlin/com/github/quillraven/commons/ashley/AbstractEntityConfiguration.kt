@@ -7,7 +7,7 @@ import com.github.quillraven.commons.ashley.component.*
 
 /**
  * Abstract entity configuration to configure the values of an entity. It is used by
- * [EntityConfigurations] to create an [Entity] out of it.
+ * [AbstractEntityFactory] to create an [Entity] out of it.
  *
  * Use [size] to configure the [TransformComponent.size].
  *

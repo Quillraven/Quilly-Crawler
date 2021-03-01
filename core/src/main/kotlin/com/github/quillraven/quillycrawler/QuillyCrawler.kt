@@ -2,17 +2,10 @@ package com.github.quillraven.quillycrawler
 
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
-import com.github.quillraven.commons.ashley.EntityConfigurations
 import com.github.quillraven.commons.game.AbstractGame
-import com.github.quillraven.quillycrawler.ashley.EntityConfiguration
-import com.github.quillraven.quillycrawler.ashley.loadEntityConfigurations
 import com.github.quillraven.quillycrawler.screen.PlayGroundScreen
 
 class QuillyCrawler : AbstractGame() {
-    val entityConfigurations: EntityConfigurations<EntityConfiguration> by lazy {
-        loadEntityConfigurations()
-    }
-
     fun isDevMode() = "true" == System.getProperty("devMode", "false")
 
     override fun create() {
