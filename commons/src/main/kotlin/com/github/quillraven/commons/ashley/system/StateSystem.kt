@@ -10,11 +10,9 @@ import com.badlogic.gdx.ai.fsm.StateMachine
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.ObjectMap
-import com.github.quillraven.commons.ashley.component.AnimationComponent
-import com.github.quillraven.commons.ashley.component.EntityState
-import com.github.quillraven.commons.ashley.component.StateComponent
-import com.github.quillraven.commons.ashley.component.stateCmp
+import com.github.quillraven.commons.ashley.component.*
 import ktx.ashley.allOf
+import ktx.ashley.exclude
 import ktx.ashley.get
 import ktx.collections.getOrPut
 
@@ -40,7 +38,7 @@ import ktx.collections.getOrPut
 class StateSystem(
     private val messageManager: MessageManager,
     private val messageTypes: Set<Int> = setOf()
-) : IteratingSystem(allOf(StateComponent::class).get()), EntityListener {
+) : IteratingSystem(allOf(StateComponent::class).exclude(RemoveComponent::class).get()), EntityListener {
     private val stateAnimationStringCache = ObjectMap<EntityState, String>()
 
     /**

@@ -5,11 +5,11 @@ import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
-import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.map.MapService
 import ktx.ashley.allOf
+import ktx.ashley.exclude
 import ktx.ashley.get
 import ktx.graphics.use
 import ktx.log.error
@@ -32,7 +32,7 @@ class RenderSystem(
     private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
     private val mapService: MapService? = null
 ) : SortedIteratingSystem(
-    allOf(TransformComponent::class, RenderComponent::class).get(),
+    allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
     compareBy { it[TransformComponent.MAPPER] }
 ) {
     /**
@@ -42,10 +42,7 @@ class RenderSystem(
         forceSort()
 
         viewport.apply()
-        // TODO introduce empty DefaultMapService to get rid of multiple null checks (?.)
         mapService?.setViewBounds(camera)
-        // TODO add to mapService
-        AnimatedTiledMapTile.updateAnimationBaseTime()
 
         batch.use(camera) {
             mapService?.renderBackground()

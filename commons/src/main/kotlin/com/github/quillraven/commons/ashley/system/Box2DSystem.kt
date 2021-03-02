@@ -5,11 +5,9 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.World
-import com.github.quillraven.commons.ashley.component.Box2DComponent
-import com.github.quillraven.commons.ashley.component.TransformComponent
-import com.github.quillraven.commons.ashley.component.box2dCmp
-import com.github.quillraven.commons.ashley.component.transformCmp
+import com.github.quillraven.commons.ashley.component.*
 import ktx.ashley.allOf
+import ktx.ashley.exclude
 import ktx.log.error
 import ktx.log.logger
 import kotlin.math.min
@@ -36,7 +34,7 @@ import kotlin.math.min
 class Box2DSystem(
     private val world: World,
     private val physicTimeStep: Float
-) : IteratingSystem(allOf(Box2DComponent::class, TransformComponent::class).get()) {
+) : IteratingSystem(allOf(Box2DComponent::class, TransformComponent::class).exclude(RemoveComponent::class).get()) {
     private var accumulator = 0f
 
     /**

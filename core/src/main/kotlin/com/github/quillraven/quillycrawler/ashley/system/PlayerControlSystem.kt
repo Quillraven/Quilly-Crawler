@@ -9,6 +9,7 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.math.MathUtils
+import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ai.MessageType
@@ -16,6 +17,7 @@ import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
 import ktx.ashley.allOf
+import ktx.ashley.exclude
 import ktx.ashley.get
 import kotlin.math.PI
 import kotlin.math.abs
@@ -24,7 +26,7 @@ import kotlin.math.atan2
 class PlayerControlSystem(
     private val messageManager: MessageManager
 ) : InputProcessor, XboxInputProcessor,
-    IteratingSystem(allOf(PlayerControlComponent::class).get()) {
+    IteratingSystem(allOf(PlayerControlComponent::class).exclude(RemoveComponent::class).get()) {
     private var valueLeftX = 0f
     private var valueLeftY = 0f
     private var stopMovement = true

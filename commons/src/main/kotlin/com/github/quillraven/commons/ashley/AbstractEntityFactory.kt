@@ -72,6 +72,8 @@ abstract class AbstractEntityFactory<ConfigType : AbstractEntityConfiguration>(
         return configCache[id] ?: throw GdxRuntimeException("There is no configuration for id '$id'")
     }
 
+    operator fun contains(id: String): Boolean = id in configCache
+
     /**
      * Creates and adds a new [Entity] to the [engine] using the configuration of [cfgId].
      * Sets the [TransformComponent.position] to [x] and [y].

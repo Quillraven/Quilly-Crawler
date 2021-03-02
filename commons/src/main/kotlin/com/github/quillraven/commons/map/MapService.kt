@@ -1,9 +1,10 @@
 package com.github.quillraven.commons.map
 
 import com.badlogic.ashley.core.Engine
+import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.maps.Map
-import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import kotlinx.coroutines.launch
 import ktx.assets.async.AssetStorage
@@ -13,14 +14,20 @@ import ktx.log.error
 import ktx.log.logger
 
 interface MapListener {
-    fun onMapChange(mapService: MapService, map: Map)
+    fun beforeMapChange(mapService: MapService, map: Map)
+
+    fun afterMapChange(mapService: MapService, map: Map)
+
+    fun onMapEntityCreation(entity: Entity)
 }
 
 abstract class MapService(
-    protected val assetStorage: AssetStorage
+    val assetStorage: AssetStorage,
+    val engine: Engine
 ) {
     protected val listeners = GdxSet<MapListener>()
     abstract val mapRenderer: OrthogonalTiledMapRenderer
+    abstract val mapEntities: ImmutableArray<Entity>
 
     init {
         KtxAsync.launch {
@@ -41,8 +48,6 @@ abstract class MapService(
     }
 
     abstract fun setMap(engine: Engine, mapFilePath: String)
-
-    abstract fun forEachMapObject(lambda: (MapObject) -> Unit)
 
     abstract fun setViewBounds(camera: OrthographicCamera)
 

@@ -1,53 +1,45 @@
 package com.github.quillraven.commons.map
 
 import com.badlogic.ashley.core.Engine
+import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.maps.MapLayer
 import com.badlogic.gdx.maps.MapLayers
-import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.maps.MapObjects
 import com.badlogic.gdx.maps.objects.*
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile
 import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Polyline
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.AbstractEntityConfiguration
 import com.github.quillraven.commons.ashley.AbstractEntityFactory
-import com.github.quillraven.commons.ashley.component.Box2DComponent
-import com.github.quillraven.commons.ashley.component.Z_BACKGROUND
-import com.github.quillraven.commons.ashley.component.Z_DEFAULT
+import com.github.quillraven.commons.ashley.component.*
 import kotlinx.coroutines.launch
+import ktx.ashley.allOf
+import ktx.ashley.configureEntity
 import ktx.ashley.entity
 import ktx.ashley.with
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
 import ktx.box2d.*
-import ktx.collections.GdxArray
 import ktx.collections.gdxArrayOf
 import ktx.log.debug
-import ktx.tiled.property
-import ktx.tiled.shape
-import ktx.tiled.x
-import ktx.tiled.y
+import ktx.log.error
+import ktx.tiled.*
 import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 
 // TODO make pull request to LibKTX
-inline operator fun <reified T : MapLayer> MapLayers.invoke(fill: GdxArray<T>? = null, lambda: (T) -> Unit = {}) {
-    if (fill != null) {
-        this.getByType(T::class.java, fill).forEach { lambda(it) }
-    } else {
-        this.getByType(T::class.java).forEach { lambda(it) }
-    }
-}
-
 inline fun <reified T : MapLayer> TiledMap.forEachLayer(lambda: (T) -> Unit) {
     this.layers.forEach {
         if (it::class == T::class) {
@@ -56,17 +48,25 @@ inline fun <reified T : MapLayer> TiledMap.forEachLayer(lambda: (T) -> Unit) {
     }
 }
 
+fun MapObjects.isEmpty() = this.count <= 0
+
+fun MapObjects.isNotEmpty() = this.count > 0
+
+fun MapLayers.isEmpty() = this.count <= 0
+
+fun MapLayers.isNotEmpty() = this.count > 0
+
 class TiledMapService(
     private val entityFactory: AbstractEntityFactory<out AbstractEntityConfiguration>,
     assetStorage: AssetStorage,
     batch: Batch,
     private val unitScale: Float,
     override val mapRenderer: OrthogonalTiledMapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
-) : MapService(assetStorage) {
+) : MapService(assetStorage, entityFactory.engine) {
+    override val mapEntities: ImmutableArray<Entity> = engine.getEntitiesFor(allOf(TiledComponent::class).get())
+
     private var currentMapFilePath = ""
     private var currentMap: TiledMap = EMPTY_MAP
-
-    private val tmpTileLayerArray = gdxArrayOf<TiledMapTileLayer>()
     private val backgroundLayers = gdxArrayOf<TiledMapTileLayer>()
     private val foregroundLayers = gdxArrayOf<TiledMapTileLayer>()
 
@@ -81,10 +81,14 @@ class TiledMapService(
 
         KtxAsync.launch {
             if (currentMap != EMPTY_MAP) {
+                // unload current map and remove map entities
+                listeners.forEach { it.beforeMapChange(this@TiledMapService, currentMap) }
                 assetStorage.unload<TiledMap>(currentMapFilePath)
-                // TODO remove entities (maybe TiledMapObjectComponent?)
+                LOG.debug { "Removing ${mapEntities.size()} map entities" }
+                mapEntities.forEach { it.removeFromEngine(engine) }
             }
 
+            // load new map
             if (Gdx.app.logLevel == Application.LOG_DEBUG) {
                 LOG.debug {
                     "Loading of map $mapFilePath took '${
@@ -97,20 +101,23 @@ class TiledMapService(
                 currentMap = assetStorage.loadSync(mapFilePath)
             }
 
+            // and create map entities like collision entities and game object entities
+            val currentSize = mapEntities.size()
             parseRenderLayers()
             parseObjectLayers()
+            LOG.debug { "Created ${mapEntities.size() - currentSize} map entities" }
 
             currentMapFilePath = mapFilePath
             mapRenderer.map = currentMap
-            listeners.forEach { it.onMapChange(this@TiledMapService, currentMap) }
+            listeners.forEach { it.afterMapChange(this@TiledMapService, currentMap) }
         }
     }
 
     private fun parseRenderLayers() {
         backgroundLayers.clear()
         foregroundLayers.clear()
-        currentMap.layers(tmpTileLayerArray) { layer ->
-            if (layer.property(Z_PROPERTY, Z_BACKGROUND) <= Z_DEFAULT) {
+        currentMap.forEachLayer<TiledMapTileLayer> { layer ->
+            if (layer.property(Z_PROPERTY, Z_DEFAULT) <= Z_DEFAULT) {
                 backgroundLayers.add(layer)
             } else {
                 foregroundLayers.add(layer)
@@ -120,73 +127,110 @@ class TiledMapService(
 
     private fun parseObjectLayers() {
         currentMap.forEachLayer<MapLayer> { layer ->
-            if (layer.property("collisionLayer", false)) {
-                createCollisionBody(layer.objects)
+            if (layer.property(COLLISION_LAYER_PROPERTY, false)) {
+                createCollisionBody(layer)
             } else {
                 createEntities(layer.objects)
             }
         }
     }
 
+    private fun createCollisionBody(layer: MapLayer) {
+        val objects = layer.objects
+        if (entityFactory.world == null || objects.isEmpty()) {
+            LOG.debug {
+                "There is no world (${entityFactory.world}) specified or " +
+                        "there are no collision objects for layer '${layer.name}'"
+            }
+            return
+        }
+
+        engine.entity {
+            with<TiledComponent>()
+            with<Box2DComponent> {
+                body = entityFactory.world.body(BodyDef.BodyType.StaticBody) {
+                    fixedRotation = true
+
+                    objects.forEach { mapObject ->
+                        when (val shape = mapObject.shape) {
+                            is Polyline -> {
+                                shape.setPosition(shape.x * unitScale, shape.y * unitScale)
+                                shape.setScale(unitScale, unitScale)
+                                chain(shape.transformedVertices)
+                            }
+                            is Polygon -> {
+                                shape.setPosition(shape.x * unitScale, shape.y * unitScale)
+                                shape.setScale(unitScale, unitScale)
+                                loop(shape.transformedVertices)
+                            }
+                            is Rectangle -> {
+                                val x = shape.x * unitScale
+                                val y = shape.y * unitScale
+                                val width = shape.width * unitScale
+                                val height = shape.height * unitScale
+
+                                if (width <= 0f || height <= 0f) {
+                                    LOG.error { "MapObject '${mapObject.id}' on layer '${layer.name}' is a rectangle with zero width or height" }
+                                    return@forEach
+                                }
+
+                                // define loop vertices
+                                // bottom left corner
+                                TMP_RECTANGLE_VERTICES[0] = x
+                                TMP_RECTANGLE_VERTICES[1] = y
+                                // top left corner
+                                TMP_RECTANGLE_VERTICES[2] = x
+                                TMP_RECTANGLE_VERTICES[3] = y + height
+                                // top right corner
+                                TMP_RECTANGLE_VERTICES[4] = x + width
+                                TMP_RECTANGLE_VERTICES[5] = y + height
+                                // bottom right corner
+                                TMP_RECTANGLE_VERTICES[6] = x + width
+                                TMP_RECTANGLE_VERTICES[7] = y
+
+                                loop(TMP_RECTANGLE_VERTICES)
+                            }
+                            else -> {
+                                LOG.error { "MapObject '${mapObject.id}' has an unsupported collision type: ${shape::class.simpleName}" }
+                            }
+                        }
+                    }
+
+                    userData = this@entity.entity
+                }
+            }
+        }
+    }
+
     private fun createEntities(objects: MapObjects) {
         objects.forEach { mapObject ->
+            val cfgId = mapObject.name ?: ""
+            if (cfgId !in entityFactory) {
+                LOG.error { "MapObject '${mapObject.id}' has a name '${cfgId}' that does not match any entity configuration" }
+                return@forEach
+            }
+
             entityFactory.newEntity(
                 mapObject.x * unitScale,
                 mapObject.y * unitScale,
-                mapObject.property("id")
-            )
-        }
-    }
-
-    private fun createCollisionBody(objects: MapObjects) {
-        // TODO provide LibKTX isEmpty extension
-        if (entityFactory.world != null && objects.count > 0) {
-            entityFactory.engine.entity {
-                with<Box2DComponent> {
-                    body = entityFactory.world.body(BodyDef.BodyType.StaticBody) {
-                        fixedRotation = true
-
-                        objects.forEach { mapObject ->
-                            val shape = mapObject.shape
-                            when (shape) {
-                                is Polyline -> {
-                                    val x = shape.x
-                                    val y = shape.y
-                                    // transformed vertices also adds the position to each
-                                    // vertex. Therefore, we need to set position first to ZERO
-                                    // and then restore it afterwards
-                                    shape.setPosition(x * unitScale, y * unitScale)
-                                    shape.setScale(unitScale, unitScale)
-                                    chain(shape.transformedVertices)
-                                    shape.setPosition(x, y)
-                                }
-                                is Polygon -> {
-                                    val x = shape.x
-                                    val y = shape.y
-                                    // transformed vertices also adds the position to each
-                                    // vertex. Therefore, we need to set position first to ZERO
-                                    // and then restore it afterwards
-                                    shape.setPosition(x * unitScale, y * unitScale)
-                                    shape.setScale(unitScale, unitScale)
-                                    loop(shape.transformedVertices)
-                                    shape.setPosition(x, y)
-                                }
-                            }
-                        }
-
-                        userData = this@entity.entity
+                cfgId
+            ).also { entity ->
+                engine.configureEntity(entity) {
+                    with<TiledComponent> {
+                        id = mapObject.id
                     }
                 }
+
+                listeners.forEach { it.onMapEntityCreation(entity) }
             }
-
         }
-    }
-
-    override fun forEachMapObject(lambda: (MapObject) -> Unit) {
-        TODO("Not yet implemented")
     }
 
     override fun setViewBounds(camera: OrthographicCamera) {
+        // update animation tiles
+        AnimatedTiledMapTile.updateAnimationBaseTime()
+
+        // set view bounds
         val width: Float = camera.viewportWidth * camera.zoom
         val height: Float = camera.viewportHeight * camera.zoom
         val w: Float = width * abs(camera.up.y) + height * abs(camera.up.x)
@@ -204,6 +248,8 @@ class TiledMapService(
 
     companion object {
         const val Z_PROPERTY = "z"
+        const val COLLISION_LAYER_PROPERTY = "collisionLayer"
         private val EMPTY_MAP: TiledMap = TiledMap()
+        private val TMP_RECTANGLE_VERTICES = FloatArray(8)
     }
 }

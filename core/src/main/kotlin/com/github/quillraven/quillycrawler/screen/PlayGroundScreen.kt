@@ -53,6 +53,7 @@ class PlayGroundScreen(
                 if (game.isDevMode()) {
                     addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
                 }
+                addSystem(RemoveSystem())
             }
         }
 
@@ -70,6 +71,8 @@ class PlayGroundScreen(
             mapService.setMap(engine, "maps/test1.tmx")
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
             mapService.setMap(engine, "maps/test2.tmx")
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
+            mapService.setMap(engine, "maps/tutorial.tmx")
         }
 
         engine.update(delta)

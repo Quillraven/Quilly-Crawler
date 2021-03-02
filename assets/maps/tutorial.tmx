@@ -39,22 +39,13 @@
   </object>
  </objectgroup>
  <objectgroup id="6" name="entities">
-  <object id="3" x="224" y="177.25">
-   <properties>
-    <property name="id" value="CHEST"/>
-   </properties>
+  <object id="3" name="CHEST" x="224" y="177.25">
    <point/>
   </object>
-  <object id="5" x="152.25" y="170">
-   <properties>
-    <property name="id" value="BIG_DEMON"/>
-   </properties>
+  <object id="5" name="BIG_DEMON" x="152.25" y="170">
    <point/>
   </object>
-  <object id="6" x="72" y="276.5">
-   <properties>
-    <property name="id" value="PLAYER"/>
-   </properties>
+  <object id="6" name="PLAYER" x="72" y="276.5">
    <point/>
   </object>
  </objectgroup>

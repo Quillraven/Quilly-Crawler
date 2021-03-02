@@ -10,9 +10,7 @@ import com.badlogic.gdx.utils.Pool
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 
-const val Z_BACKGROUND = -1
 const val Z_DEFAULT = 0
-const val Z_FOREGROUND = 1
 
 /**
  * Component to store transformation related data.
