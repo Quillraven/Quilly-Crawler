@@ -22,20 +22,20 @@ import ktx.ashley.mapperFor
  * the component is not null. Otherwise, it will throw a [GdxRuntimeException].
  */
 class RenderComponent : Component, Pool.Poolable {
-    val sprite = Sprite()
+  val sprite = Sprite()
 
-    override fun reset() {
-        sprite.texture = null
-    }
+  override fun reset() {
+    sprite.texture = null
+  }
 
-    companion object {
-        val MAPPER = mapperFor<RenderComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<RenderComponent>()
+  }
 }
 
 /**
  * Returns a [RenderComponent] or throws a [GdxRuntimeException] if it doesn't exist.
  */
 val Entity.renderCmp: RenderComponent
-    get() = this[RenderComponent.MAPPER]
-        ?: throw GdxRuntimeException("RenderComponent for entity '$this' is null")
+  get() = this[RenderComponent.MAPPER]
+    ?: throw GdxRuntimeException("RenderComponent for entity '$this' is null")

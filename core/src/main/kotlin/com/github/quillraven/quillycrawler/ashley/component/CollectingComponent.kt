@@ -7,13 +7,13 @@ import ktx.ashley.mapperFor
 import ktx.collections.GdxSet
 
 class CollectingComponent : Component, Pool.Poolable {
-    val entitiesInRange = GdxSet<Entity>()
+  val entitiesInRange = GdxSet<Entity>()
 
-    override fun reset() {
-        entitiesInRange.clear()
-    }
+  override fun reset() {
+    entitiesInRange.clear()
+  }
 
-    companion object {
-        val MAPPER = mapperFor<CollectingComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<CollectingComponent>()
+  }
 }

@@ -22,31 +22,31 @@ import ktx.log.logger
  * Any [Screen] of the [KtxGame] must implement the [AbstractScreen] class.
  */
 abstract class AbstractGame : KtxGame<AbstractScreen>() {
-    val batch: Batch by lazy { SpriteBatch() }
-    val assetStorage by lazy {
-        KtxAsync.initiate()
-        AssetStorage()
+  val batch: Batch by lazy { SpriteBatch() }
+  val assetStorage by lazy {
+    KtxAsync.initiate()
+    AssetStorage()
+  }
+
+  override fun dispose() {
+    super.dispose()
+
+    if (Gdx.app.logLevel == Application.LOG_DEBUG) {
+      if (batch is SpriteBatch) {
+        val spriteBatch = batch as SpriteBatch
+        LOG.debug { "Max sprites in batch: '${spriteBatch.maxSpritesInBatch}'" }
+        LOG.debug { "Previous renderCalls: '${spriteBatch.renderCalls}'" }
+      } else {
+        LOG.info { "Batch is not of type SpriteBatch. Debug performance logging is skipped!" }
+      }
     }
+    batch.dispose()
 
-    override fun dispose() {
-        super.dispose()
+    LOG.debug { assetStorage.takeSnapshot().prettyPrint() }
+    assetStorage.dispose()
+  }
 
-        if (Gdx.app.logLevel == Application.LOG_DEBUG) {
-            if (batch is SpriteBatch) {
-                val spriteBatch = batch as SpriteBatch
-                LOG.debug { "Max sprites in batch: '${spriteBatch.maxSpritesInBatch}'" }
-                LOG.debug { "Previous renderCalls: '${spriteBatch.renderCalls}'" }
-            } else {
-                LOG.info { "Batch is not of type SpriteBatch. Debug performance logging is skipped!" }
-            }
-        }
-        batch.dispose()
-
-        LOG.debug { assetStorage.takeSnapshot().prettyPrint() }
-        assetStorage.dispose()
-    }
-
-    companion object {
-        val LOG = logger<AbstractGame>()
-    }
+  companion object {
+    val LOG = logger<AbstractGame>()
+  }
 }

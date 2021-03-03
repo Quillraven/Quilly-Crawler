@@ -23,64 +23,64 @@ import ktx.ashley.with
 import ktx.box2d.circle
 
 enum class EntityType {
-    PLAYER,
-    BIG_DEMON,
-    CHEST,
+  PLAYER,
+  BIG_DEMON,
+  CHEST,
 }
 
 class EntityConfiguration(
-    var playerControlled: Boolean = false,
-    var actionable: Boolean = false
+  var playerControlled: Boolean = false,
+  var actionable: Boolean = false
 ) : AbstractEntityConfiguration()
 
 class EntityFactory(
-    engine: Engine,
-    world: World
+  engine: Engine,
+  world: World
 ) : AbstractEntityFactory<EntityConfiguration>(engine, { EntityConfiguration() }, world) {
-    override fun configureEntity(engineEntity: EngineEntity, configuration: EntityConfiguration) {
-        engineEntity.run {
-            if (configuration.playerControlled) {
-                with<PlayerComponent>()
-                with<PlayerControlComponent>()
-                with<CollectingComponent>()
-                this.entity.box2dCmp.body.circle(this.entity.transformCmp.size.x) {
-                    isSensor = true
-                }
-                with<MoveComponent> {
-                    maxSpeed = configuration.moveSpeed
-                }
-                with<CameraLockComponent>()
-            }
-
-            if (configuration.actionable) {
-                with<CollectableComponent>()
-            }
+  override fun configureEntity(engineEntity: EngineEntity, configuration: EntityConfiguration) {
+    engineEntity.run {
+      if (configuration.playerControlled) {
+        with<PlayerComponent>()
+        with<PlayerControlComponent>()
+        with<CollectingComponent>()
+        this.entity.box2dCmp.body.circle(this.entity.transformCmp.size.x) {
+          isSensor = true
         }
+        with<MoveComponent> {
+          maxSpeed = configuration.moveSpeed
+        }
+        with<CameraLockComponent>()
+      }
+
+      if (configuration.actionable) {
+        with<CollectableComponent>()
+      }
     }
+  }
 }
 
 fun newEntityFactory(engine: Engine, world: World): EntityFactory =
-    EntityFactory(engine, world).configurations {
-        config(EntityType.PLAYER.name) {
-            playerControlled = true
-            atlasFilePath = TextureAtlasAssets.CHARACTERS_AND_PROPS.descriptor.fileName
-            regionKey = "wizard-m"
-            moveSpeed = 5f
-            initialState = PlayerState.IDLE
-            bodyType = BodyDef.BodyType.DynamicBody
-            boundingBoxHeightPercentage = 0.2f
-        }
-        config(EntityType.BIG_DEMON.name) {
-            atlasFilePath = TextureAtlasAssets.CHARACTERS_AND_PROPS.descriptor.fileName
-            regionKey = "big-demon"
-            size.set(0.75f, 0.75f)
-            initialState = BigDemonState.RUN
-        }
-        config(EntityType.CHEST.name) {
-            atlasFilePath = TextureAtlasAssets.CHARACTERS_AND_PROPS.descriptor.fileName
-            regionKey = "chest"
-            initialState = ChestState.IDLE
-            bodyType = BodyDef.BodyType.StaticBody
-            actionable = true
-        }
+  EntityFactory(engine, world).configurations {
+    config(EntityType.PLAYER.name) {
+      playerControlled = true
+      atlasFilePath = TextureAtlasAssets.CHARACTERS_AND_PROPS.descriptor.fileName
+      regionKey = "wizard-m"
+      moveSpeed = 5f
+      initialState = PlayerState.IDLE
+      bodyType = BodyDef.BodyType.DynamicBody
+      boundingBoxHeightPercentage = 0.2f
     }
+    config(EntityType.BIG_DEMON.name) {
+      atlasFilePath = TextureAtlasAssets.CHARACTERS_AND_PROPS.descriptor.fileName
+      regionKey = "big-demon"
+      size.set(0.75f, 0.75f)
+      initialState = BigDemonState.RUN
+    }
+    config(EntityType.CHEST.name) {
+      atlasFilePath = TextureAtlasAssets.CHARACTERS_AND_PROPS.descriptor.fileName
+      regionKey = "chest"
+      initialState = ChestState.IDLE
+      bodyType = BodyDef.BodyType.StaticBody
+      actionable = true
+    }
+  }

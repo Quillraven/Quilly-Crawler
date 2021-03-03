@@ -6,10 +6,10 @@ import ktx.ashley.mapperFor
 
 class CollectableComponent : Component, Pool.Poolable {
 
-    override fun reset() {
-    }
+  override fun reset() {
+  }
 
-    companion object {
-        val MAPPER = mapperFor<CollectableComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<CollectableComponent>()
+  }
 }

@@ -45,153 +45,153 @@ import ktx.log.logger
  * Both values can be changed if necessary.
  */
 class AnimationSystem(
-    private val assetStorage: AssetStorage,
-    private val unitScale: Float,
-    private val defaultFrameDuration: Float = 1 / 10f,
-    private val maxCacheSize: Int = 100
+  private val assetStorage: AssetStorage,
+  private val unitScale: Float,
+  private val defaultFrameDuration: Float = 1 / 10f,
+  private val maxCacheSize: Int = 100
 ) : IteratingSystem(allOf(AnimationComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get()) {
-    private val animationCache = ObjectMap<String, ObjectMap<String, Animation<TextureRegion>>>(maxCacheSize)
-    private val stateKeyStringCache = ObjectMap<String, ObjectMap<String, ObjectMap<String, String>>>(maxCacheSize)
+  private val animationCache = ObjectMap<String, ObjectMap<String, Animation<TextureRegion>>>(maxCacheSize)
+  private val stateKeyStringCache = ObjectMap<String, ObjectMap<String, ObjectMap<String, String>>>(maxCacheSize)
 
-    override fun processEntity(entity: Entity, deltaTime: Float) {
-        with(entity.animationCmp) {
-            // set or update animation
-            if (dirty) {
-                // some animation related properties changed -> get new animation
-                gdxAnimation = cachedAnimation(atlasFilePath, regionKey, stateKey)
-            } else {
-                stateTime += (deltaTime * animationSpeed)
-            }
+  override fun processEntity(entity: Entity, deltaTime: Float) {
+    with(entity.animationCmp) {
+      // set or update animation
+      if (dirty) {
+        // some animation related properties changed -> get new animation
+        gdxAnimation = cachedAnimation(atlasFilePath, regionKey, stateKey)
+      } else {
+        stateTime += (deltaTime * animationSpeed)
+      }
 
-            // get current region (=keyFrame) of animation
-            val keyFrame = if (gdxAnimation == AnimationComponent.EMPTY_ANIMATION) {
-                // something went wrong when trying to set animation -> check log errors
-                // we will render an error texture to visualize it in game
-                errorRegion()
-            } else {
-                gdxAnimation.playMode = playMode
-                gdxAnimation.getKeyFrame(stateTime)
-            }
+      // get current region (=keyFrame) of animation
+      val keyFrame = if (gdxAnimation == AnimationComponent.EMPTY_ANIMATION) {
+        // something went wrong when trying to set animation -> check log errors
+        // we will render an error texture to visualize it in game
+        errorRegion()
+      } else {
+        gdxAnimation.playMode = playMode
+        gdxAnimation.getKeyFrame(stateTime)
+      }
 
-            // update the sprite's texture according to the current animation frame
-            entity.renderCmp.sprite.run {
-                val flipX = isFlipX
-                val flipY = isFlipY
-                setRegion(keyFrame)
-                setSize(keyFrame.regionWidth * unitScale, keyFrame.regionHeight * unitScale)
-                setOrigin(width * 0.5f, height * 0.5f)
-                setFlip(flipX, flipY)
-            }
-        }
+      // update the sprite's texture according to the current animation frame
+      entity.renderCmp.sprite.run {
+        val flipX = isFlipX
+        val flipY = isFlipY
+        setRegion(keyFrame)
+        setSize(keyFrame.regionWidth * unitScale, keyFrame.regionHeight * unitScale)
+        setOrigin(width * 0.5f, height * 0.5f)
+        setFlip(flipX, flipY)
+      }
+    }
+  }
+
+  /**
+   * Makes sure that a [cache] does not exceed the given [AnimationSystem.maxCacheSize] size.
+   */
+  private fun validateCacheSize(cache: ObjectMap<String, *>) {
+    if (cache.size >= maxCacheSize) {
+      LOG.info { "Maximum cache size reached. Cache will be cleared now" }
+      cache.clear()
+    }
+  }
+
+  /**
+   * Returns a cached [Animation] or creates and caches a new one, if it doesn't exist yet.
+   */
+  private fun cachedAnimation(
+    atlasFilePath: String,
+    regionKey: String,
+    stateKey: String
+  ): Animation<TextureRegion> {
+    validateCacheSize(animationCache)
+    val atlasAnimations = animationCache.getOrPut(atlasFilePath) {
+      ObjectMap<String, Animation<TextureRegion>>(maxCacheSize)
     }
 
-    /**
-     * Makes sure that a [cache] does not exceed the given [AnimationSystem.maxCacheSize] size.
-     */
-    private fun validateCacheSize(cache: ObjectMap<String, *>) {
-        if (cache.size >= maxCacheSize) {
-            LOG.info { "Maximum cache size reached. Cache will be cleared now" }
-            cache.clear()
-        }
+    validateCacheSize(atlasAnimations)
+    val aniRegionKey = if (stateKey.isBlank()) {
+      regionKey
+    } else {
+      stateRegionKey(atlasFilePath, regionKey, stateKey)
+    }
+    return atlasAnimations.getOrPut(aniRegionKey) {
+      newGdxAnimation(atlasFilePath, aniRegionKey)
+    }
+  }
+
+  /**
+   * Returns the regionKey of a state animation. The format is "regionKey/stateKey".
+   * [stateKey] must represent
+   */
+  private fun stateRegionKey(atlasFilePath: String, regionKey: String, stateKey: String): String {
+    validateCacheSize(stateKeyStringCache)
+    return stateKeyStringCache.getOrPut(atlasFilePath) { ObjectMap() }
+      .getOrPut(regionKey) { ObjectMap() }
+      .getOrPut(stateKey) {
+        val result = "${regionKey}/${stateKey}"
+        LOG.debug { "Caching state animation region key string '$result'" }
+        result
+      }
+  }
+
+  /**
+   * Creates a new [Animation] from the [regionKey][] [regions][TextureRegion] of a given [atlasFilePath] atlas.
+   */
+  private fun newGdxAnimation(atlasFilePath: String, regionKey: String): Animation<TextureRegion> {
+    val regions = atlasRegions(atlasFilePath, regionKey)
+
+    if (regions.isEmpty) {
+      LOG.error { "No regions available for animation: (atlasFilePath=${atlasFilePath}, regionKey=${regionKey})" }
+      return AnimationComponent.EMPTY_ANIMATION
     }
 
-    /**
-     * Returns a cached [Animation] or creates and caches a new one, if it doesn't exist yet.
-     */
-    private fun cachedAnimation(
-        atlasFilePath: String,
-        regionKey: String,
-        stateKey: String
-    ): Animation<TextureRegion> {
-        validateCacheSize(animationCache)
-        val atlasAnimations = animationCache.getOrPut(atlasFilePath) {
-            ObjectMap<String, Animation<TextureRegion>>(maxCacheSize)
-        }
+    LOG.debug { "New animation: (atlasFilePath=${atlasFilePath}, regionKey=${regionKey})" }
+    return Animation(defaultFrameDuration, regions)
+  }
 
-        validateCacheSize(atlasAnimations)
-        val aniRegionKey = if (stateKey.isBlank()) {
-            regionKey
-        } else {
-            stateRegionKey(atlasFilePath, regionKey, stateKey)
+  /**
+   * Returns the [regions][TextureRegion] to a given [regionKey] of the atlas [atlasFilePath].
+   * If the [AnimationSystem.assetStorage] did not load the atlas yet then it will be lazily loaded by this function.
+   */
+  private fun atlasRegions(atlasFilePath: String, regionKey: String): Array<TextureAtlas.AtlasRegion> {
+    return if (!assetStorage.isLoaded<TextureAtlas>(atlasFilePath)) {
+      if (assetStorage.fileResolver.resolve(atlasFilePath).exists()) {
+        LOG.error { "Atlas '${atlasFilePath}' not loaded yet! Will load it now lazily" }
+        assetStorage.loadSync<TextureAtlas>(atlasFilePath).findRegions(regionKey)
+      } else {
+        LOG.error { "Invalid atlas '${atlasFilePath}'" }
+        gdxArrayOf()
+      }
+    } else {
+      assetStorage.get<TextureAtlas>(atlasFilePath).findRegions(regionKey)
+    }
+  }
+
+  /**
+   * Creates an error [TextureRegion] that will be used in case an [Animation] could not be set.
+   * This region will then be rendered instead. It is a red square.
+   */
+  private fun errorRegion(): TextureRegion {
+    val errorRegionKey = "commonsErrorRegion"
+    if (!assetStorage.isLoaded<TextureRegion>(errorRegionKey)) {
+      LOG.debug { "Creating error TextureRegion" }
+      KtxAsync.launch {
+        val pixmap = Pixmap((1 / unitScale).toInt(), (1 / unitScale).toInt(), Pixmap.Format.RGB888).apply {
+          setColor(1f, 0f, 0f, 1f)
+          fill()
         }
-        return atlasAnimations.getOrPut(aniRegionKey) {
-            newGdxAnimation(atlasFilePath, aniRegionKey)
-        }
+        val texture = Texture(pixmap)
+
+        assetStorage.add("${errorRegionKey}Pixmap", pixmap)
+        assetStorage.add("${errorRegionKey}Texture", texture)
+        assetStorage.add(errorRegionKey, TextureRegion(texture))
+      }
     }
 
-    /**
-     * Returns the regionKey of a state animation. The format is "regionKey/stateKey".
-     * [stateKey] must represent
-     */
-    private fun stateRegionKey(atlasFilePath: String, regionKey: String, stateKey: String): String {
-        validateCacheSize(stateKeyStringCache)
-        return stateKeyStringCache.getOrPut(atlasFilePath) { ObjectMap() }
-            .getOrPut(regionKey) { ObjectMap() }
-            .getOrPut(stateKey) {
-                val result = "${regionKey}/${stateKey}"
-                LOG.debug { "Caching state animation region key string '$result'" }
-                result
-            }
-    }
+    return assetStorage[errorRegionKey]
+  }
 
-    /**
-     * Creates a new [Animation] from the [regionKey][] [regions][TextureRegion] of a given [atlasFilePath] atlas.
-     */
-    private fun newGdxAnimation(atlasFilePath: String, regionKey: String): Animation<TextureRegion> {
-        val regions = atlasRegions(atlasFilePath, regionKey)
-
-        if (regions.isEmpty) {
-            LOG.error { "No regions available for animation: (atlasFilePath=${atlasFilePath}, regionKey=${regionKey})" }
-            return AnimationComponent.EMPTY_ANIMATION
-        }
-
-        LOG.debug { "New animation: (atlasFilePath=${atlasFilePath}, regionKey=${regionKey})" }
-        return Animation(defaultFrameDuration, regions)
-    }
-
-    /**
-     * Returns the [regions][TextureRegion] to a given [regionKey] of the atlas [atlasFilePath].
-     * If the [AnimationSystem.assetStorage] did not load the atlas yet then it will be lazily loaded by this function.
-     */
-    private fun atlasRegions(atlasFilePath: String, regionKey: String): Array<TextureAtlas.AtlasRegion> {
-        return if (!assetStorage.isLoaded<TextureAtlas>(atlasFilePath)) {
-            if (assetStorage.fileResolver.resolve(atlasFilePath).exists()) {
-                LOG.error { "Atlas '${atlasFilePath}' not loaded yet! Will load it now lazily" }
-                assetStorage.loadSync<TextureAtlas>(atlasFilePath).findRegions(regionKey)
-            } else {
-                LOG.error { "Invalid atlas '${atlasFilePath}'" }
-                gdxArrayOf()
-            }
-        } else {
-            assetStorage.get<TextureAtlas>(atlasFilePath).findRegions(regionKey)
-        }
-    }
-
-    /**
-     * Creates an error [TextureRegion] that will be used in case an [Animation] could not be set.
-     * This region will then be rendered instead. It is a red square.
-     */
-    private fun errorRegion(): TextureRegion {
-        val errorRegionKey = "commonsErrorRegion"
-        if (!assetStorage.isLoaded<TextureRegion>(errorRegionKey)) {
-            LOG.debug { "Creating error TextureRegion" }
-            KtxAsync.launch {
-                val pixmap = Pixmap((1 / unitScale).toInt(), (1 / unitScale).toInt(), Pixmap.Format.RGB888).apply {
-                    setColor(1f, 0f, 0f, 1f)
-                    fill()
-                }
-                val texture = Texture(pixmap)
-
-                assetStorage.add("${errorRegionKey}Pixmap", pixmap)
-                assetStorage.add("${errorRegionKey}Texture", texture)
-                assetStorage.add(errorRegionKey, TextureRegion(texture))
-            }
-        }
-
-        return assetStorage[errorRegionKey]
-    }
-
-    companion object {
-        private val LOG = logger<AnimationSystem>()
-    }
+  companion object {
+    private val LOG = logger<AnimationSystem>()
+  }
 }

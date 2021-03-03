@@ -14,48 +14,48 @@ import ktx.log.error
 import ktx.log.logger
 
 interface MapListener {
-    fun beforeMapChange(mapService: MapService, map: Map)
+  fun beforeMapChange(mapService: MapService, map: Map)
 
-    fun afterMapChange(mapService: MapService, map: Map)
+  fun afterMapChange(mapService: MapService, map: Map)
 
-    fun onMapEntityCreation(entity: Entity)
+  fun onMapEntityCreation(entity: Entity)
 }
 
 abstract class MapService(
-    val assetStorage: AssetStorage,
-    val engine: Engine
+  val assetStorage: AssetStorage,
+  val engine: Engine
 ) {
-    protected val listeners = GdxSet<MapListener>()
-    abstract val mapRenderer: OrthogonalTiledMapRenderer
-    abstract val mapEntities: ImmutableArray<Entity>
+  protected val listeners = GdxSet<MapListener>()
+  abstract val mapRenderer: OrthogonalTiledMapRenderer
+  abstract val mapEntities: ImmutableArray<Entity>
 
-    init {
-        KtxAsync.launch {
-            assetStorage.add("mapServiceMapRenderer", mapRenderer)
-        }
+  init {
+    KtxAsync.launch {
+      assetStorage.add("mapServiceMapRenderer", mapRenderer)
     }
+  }
 
-    fun addMapListener(listener: MapListener) {
-        if (!listeners.add(listener)) {
-            LOG.error { "Trying to add MapListener $listener multiple times" }
-        }
+  fun addMapListener(listener: MapListener) {
+    if (!listeners.add(listener)) {
+      LOG.error { "Trying to add MapListener $listener multiple times" }
     }
+  }
 
-    fun removeMapListener(listener: MapListener) {
-        if (!listeners.remove(listener)) {
-            LOG.error { "MapListener $listener was not registered yet" }
-        }
+  fun removeMapListener(listener: MapListener) {
+    if (!listeners.remove(listener)) {
+      LOG.error { "MapListener $listener was not registered yet" }
     }
+  }
 
-    abstract fun setMap(engine: Engine, mapFilePath: String)
+  abstract fun setMap(engine: Engine, mapFilePath: String)
 
-    abstract fun setViewBounds(camera: OrthographicCamera)
+  abstract fun setViewBounds(camera: OrthographicCamera)
 
-    abstract fun renderBackground()
+  abstract fun renderBackground()
 
-    abstract fun renderForeground()
+  abstract fun renderForeground()
 
-    companion object {
-        val LOG = logger<MapService>()
-    }
+  companion object {
+    val LOG = logger<MapService>()
+  }
 }

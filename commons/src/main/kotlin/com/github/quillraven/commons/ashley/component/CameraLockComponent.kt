@@ -11,5 +11,5 @@ import com.github.quillraven.commons.ashley.system.CameraLockSystem
  * It is used for the [CameraLockSystem].
  */
 class CameraLockComponent : Component, Pool.Poolable {
-    override fun reset() = Unit
+  override fun reset() = Unit
 }

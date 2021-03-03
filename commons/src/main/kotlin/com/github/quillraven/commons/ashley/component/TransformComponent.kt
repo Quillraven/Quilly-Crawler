@@ -25,27 +25,27 @@ const val Z_DEFAULT = 0
  * the component is not null. Otherwise, it will throw a [GdxRuntimeException].
  */
 class TransformComponent : Component, Pool.Poolable, Comparable<TransformComponent> {
-    val position = Vector3()
-    val size = Vector2(1f, 1f)
+  val position = Vector3()
+  val size = Vector2(1f, 1f)
 
-    override fun reset() {
-        position.set(0f, 0f, Z_DEFAULT.toFloat())
-        size.set(1f, 1f)
-    }
+  override fun reset() {
+    position.set(0f, 0f, Z_DEFAULT.toFloat())
+    size.set(1f, 1f)
+  }
 
-    override fun compareTo(other: TransformComponent): Int {
-        val zDiff = other.position.z.compareTo(position.z)
-        return if (zDiff == 0) other.position.y.compareTo(position.y) else zDiff
-    }
+  override fun compareTo(other: TransformComponent): Int {
+    val zDiff = other.position.z.compareTo(position.z)
+    return if (zDiff == 0) other.position.y.compareTo(position.y) else zDiff
+  }
 
-    companion object {
-        val MAPPER = mapperFor<TransformComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<TransformComponent>()
+  }
 }
 
 /**
  * Returns a [TransformComponent] or throws a [GdxRuntimeException] if it doesn't exist.
  */
 val Entity.transformCmp: TransformComponent
-    get() = this[TransformComponent.MAPPER]
-        ?: throw GdxRuntimeException("TransformComponent for entity '$this' is null")
+  get() = this[TransformComponent.MAPPER]
+    ?: throw GdxRuntimeException("TransformComponent for entity '$this' is null")

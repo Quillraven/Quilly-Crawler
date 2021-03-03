@@ -21,22 +21,22 @@ import com.github.quillraven.commons.ashley.component.*
  * Use [bodyType] and [boundingBoxHeightPercentage] to configure the body of the [Box2DComponent].
  */
 abstract class AbstractEntityConfiguration(
-    var size: Vector2 = Vector2(1f, 1f),
-    var moveSpeed: Float = 0f,
-    var atlasFilePath: String = "",
-    var regionKey: String = "",
-    var initialState: EntityState = EntityState.EMPTY_STATE,
-    var bodyType: BodyDef.BodyType? = null,
-    var boundingBoxHeightPercentage: Float = 1f,
+  var size: Vector2 = Vector2(1f, 1f),
+  var moveSpeed: Float = 0f,
+  var atlasFilePath: String = "",
+  var regionKey: String = "",
+  var initialState: EntityState = EntityState.EMPTY_STATE,
+  var bodyType: BodyDef.BodyType? = null,
+  var boundingBoxHeightPercentage: Float = 1f,
 ) {
-    override fun toString(): String {
-        return "AbstractEntityConfiguration(" +
-                "size=$size, " +
-                "moveSpeed=$moveSpeed, " +
-                "atlasFilePath='$atlasFilePath', " +
-                "regionKey='$regionKey', " +
-                "initialState=$initialState, " +
-                "bodyType=$bodyType, " +
-                "boundingBoxHeightPercentage=$boundingBoxHeightPercentage)"
-    }
+  override fun toString(): String {
+    return "AbstractEntityConfiguration(" +
+      "size=$size, " +
+      "moveSpeed=$moveSpeed, " +
+      "atlasFilePath='$atlasFilePath', " +
+      "regionKey='$regionKey', " +
+      "initialState=$initialState, " +
+      "bodyType=$bodyType, " +
+      "boundingBoxHeightPercentage=$boundingBoxHeightPercentage)"
+  }
 }

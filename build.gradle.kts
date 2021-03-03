@@ -1,22 +1,22 @@
 plugins {
-    kotlin("jvm") version "1.4.30" apply false
+  kotlin("jvm") version "1.4.30" apply false
 }
 
 subprojects {
-    apply {
-        plugin("org.jetbrains.kotlin.jvm")
-    }
+  apply {
+    plugin("org.jetbrains.kotlin.jvm")
+  }
 
-    val implementation by configurations
+  val implementation by configurations
 
-    dependencies {
-        implementation(kotlin("stdlib"))
-    }
+  dependencies {
+    implementation(kotlin("stdlib"))
+  }
 
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "1.8"
-            freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.contracts.ExperimentalContracts"
-        }
+  tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+      jvmTarget = "1.8"
+      freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.contracts.ExperimentalContracts"
     }
+  }
 }

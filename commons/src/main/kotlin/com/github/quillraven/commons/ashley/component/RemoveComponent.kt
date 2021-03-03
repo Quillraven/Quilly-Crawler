@@ -6,9 +6,9 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.Pool
 
 class RemoveComponent : Component, Pool.Poolable {
-    override fun reset() = Unit
+  override fun reset() = Unit
 }
 
 fun Entity.removeFromEngine(engine: Engine) {
-    this.add(engine.createComponent(RemoveComponent::class.java))
+  this.add(engine.createComponent(RemoveComponent::class.java))
 }

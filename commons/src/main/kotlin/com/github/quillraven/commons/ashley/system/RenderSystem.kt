@@ -27,67 +27,67 @@ import ktx.log.logger
  * is not scaled (=100%). A size smaller 1 will shrink the sprite while a size greater 1 will increase it.
  */
 class RenderSystem(
-    private val batch: Batch,
-    private val viewport: Viewport,
-    private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
-    private val mapService: MapService? = null
+  private val batch: Batch,
+  private val viewport: Viewport,
+  private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
+  private val mapService: MapService? = null
 ) : SortedIteratingSystem(
-    allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
-    compareBy { it[TransformComponent.MAPPER] }
+  allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
+  compareBy { it[TransformComponent.MAPPER] }
 ) {
-    /**
-     * Sorts the entities, applies the viewport to the batch and renders each entity.
-     */
-    override fun update(deltaTime: Float) {
-        forceSort()
+  /**
+   * Sorts the entities, applies the viewport to the batch and renders each entity.
+   */
+  override fun update(deltaTime: Float) {
+    forceSort()
 
-        viewport.apply()
-        mapService?.setViewBounds(camera)
+    viewport.apply()
+    mapService?.setViewBounds(camera)
 
-        batch.use(camera) {
-            mapService?.renderBackground()
-            super.update(deltaTime)
-            mapService?.renderForeground()
-        }
+    batch.use(camera) {
+      mapService?.renderBackground()
+      super.update(deltaTime)
+      mapService?.renderForeground()
+    }
+  }
+
+  /**
+   * Renders an [entity] by using its [sprite][RenderComponent.sprite].
+   */
+  override fun processEntity(entity: Entity, deltaTime: Float) {
+    val transformCmp = entity.transformCmp
+    val renderCmp = entity.renderCmp
+    val box2dCmp = entity[Box2DComponent.MAPPER]
+
+    if (renderCmp.sprite.texture == null) {
+      LOG.error { "Entity '$entity' does not have a texture" }
+      return
     }
 
-    /**
-     * Renders an [entity] by using its [sprite][RenderComponent.sprite].
-     */
-    override fun processEntity(entity: Entity, deltaTime: Float) {
-        val transformCmp = entity.transformCmp
-        val renderCmp = entity.renderCmp
-        val box2dCmp = entity[Box2DComponent.MAPPER]
+    renderCmp.sprite.run {
+      // scale sprite by the entity's size
+      setScale(transformCmp.size.x, transformCmp.size.y)
 
-        if (renderCmp.sprite.texture == null) {
-            LOG.error { "Entity '$entity' does not have a texture" }
-            return
-        }
+      // update sprite position according to the physic's interpolated position
+      // or normal transform position
+      if (box2dCmp == null) {
+        setPosition(
+          transformCmp.position.x - originX * (1f - scaleX),
+          transformCmp.position.y - originY * (1f - scaleY)
+        )
+      } else {
+        setPosition(
+          box2dCmp.renderPosition.x - originX * (1f - scaleX),
+          box2dCmp.renderPosition.y - originY * (1f - scaleY)
+        )
+      }
 
-        renderCmp.sprite.run {
-            // scale sprite by the entity's size
-            setScale(transformCmp.size.x, transformCmp.size.y)
-
-            // update sprite position according to the physic's interpolated position
-            // or normal transform position
-            if (box2dCmp == null) {
-                setPosition(
-                    transformCmp.position.x - originX * (1f - scaleX),
-                    transformCmp.position.y - originY * (1f - scaleY)
-                )
-            } else {
-                setPosition(
-                    box2dCmp.renderPosition.x - originX * (1f - scaleX),
-                    box2dCmp.renderPosition.y - originY * (1f - scaleY)
-                )
-            }
-
-            // render entity
-            draw(batch)
-        }
+      // render entity
+      draw(batch)
     }
+  }
 
-    companion object {
-        private val LOG = logger<RenderSystem>()
-    }
+  companion object {
+    private val LOG = logger<RenderSystem>()
+  }
 }

@@ -18,28 +18,28 @@ import ktx.log.logger
  * Otherwise it uses the [TransformComponent.position].
  */
 class CameraLockSystem(private val camera: Camera) :
-    IteratingSystem(
-        allOf(CameraLockComponent::class, TransformComponent::class).exclude(RemoveComponent::class).get()
-    ) {
-    override fun processEntity(entity: Entity, deltaTime: Float) {
-        if (entities.size() > 1) {
-            LOG.error { "There are more than 1 entities with a locked camera" }
-        }
-
-        val box2DCmp = entity[Box2DComponent.MAPPER]
-        if (box2DCmp == null) {
-            with(entity.transformCmp.position) {
-                camera.position.set(x, y, 0f)
-            }
-        } else {
-            // in case an entity has a box2d component then we need to use its interpolated
-            // render position to avoid sprite jitter
-            camera.position.set(box2DCmp.renderPosition.x, box2DCmp.renderPosition.y, 0f)
-        }
-        camera.update()
+  IteratingSystem(
+    allOf(CameraLockComponent::class, TransformComponent::class).exclude(RemoveComponent::class).get()
+  ) {
+  override fun processEntity(entity: Entity, deltaTime: Float) {
+    if (entities.size() > 1) {
+      LOG.error { "There are more than 1 entities with a locked camera" }
     }
 
-    companion object {
-        private val LOG = logger<CameraLockSystem>()
+    val box2DCmp = entity[Box2DComponent.MAPPER]
+    if (box2DCmp == null) {
+      with(entity.transformCmp.position) {
+        camera.position.set(x, y, 0f)
+      }
+    } else {
+      // in case an entity has a box2d component then we need to use its interpolated
+      // render position to avoid sprite jitter
+      camera.position.set(box2DCmp.renderPosition.x, box2DCmp.renderPosition.y, 0f)
     }
+    camera.update()
+  }
+
+  companion object {
+    private val LOG = logger<CameraLockSystem>()
+  }
 }

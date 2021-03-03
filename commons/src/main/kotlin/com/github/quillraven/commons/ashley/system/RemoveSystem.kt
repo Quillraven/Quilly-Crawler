@@ -6,7 +6,7 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import ktx.ashley.allOf
 
 class RemoveSystem : IteratingSystem(allOf(RemoveComponent::class).get()) {
-    override fun processEntity(entity: Entity, deltaTime: Float) {
-        engine.removeEntity(entity)
-    }
+  override fun processEntity(entity: Entity, deltaTime: Float) {
+    engine.removeEntity(entity)
+  }
 }

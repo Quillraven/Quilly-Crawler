@@ -11,9 +11,9 @@ import ktx.ashley.mapperFor
  * only run them for player entities.
  */
 class PlayerComponent : Component, Pool.Poolable {
-    override fun reset() = Unit
+  override fun reset() = Unit
 
-    companion object {
-        val MAPPER = mapperFor<PlayerComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<PlayerComponent>()
+  }
 }
