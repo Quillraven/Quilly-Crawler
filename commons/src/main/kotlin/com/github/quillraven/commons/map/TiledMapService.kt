@@ -8,7 +8,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.maps.MapLayer
-import com.badlogic.gdx.maps.MapObjects
+import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.maps.objects.*
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
@@ -19,15 +19,12 @@ import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Polyline
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.physics.box2d.BodyDef
+import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.GdxRuntimeException
-import com.github.quillraven.commons.ashley.AbstractEntityConfiguration
-import com.github.quillraven.commons.ashley.AbstractEntityFactory
 import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.map.MapService.Companion.LOG
 import kotlinx.coroutines.launch
-import ktx.ashley.allOf
-import ktx.ashley.configureEntity
-import ktx.ashley.entity
-import ktx.ashley.with
+import ktx.ashley.*
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
 import ktx.box2d.*
@@ -39,13 +36,15 @@ import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 
 class TiledMapService(
-  private val entityFactory: AbstractEntityFactory<out AbstractEntityConfiguration>,
-  assetStorage: AssetStorage,
+  private val engine: Engine,
+  private val assetStorage: AssetStorage,
   batch: Batch,
   private val unitScale: Float,
-  override val mapRenderer: OrthogonalTiledMapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
-) : MapService(assetStorage, entityFactory.engine) {
-  override val mapEntities: ImmutableArray<Entity> = engine.getEntitiesFor(allOf(TiledComponent::class).get())
+  private val configureEntity: EngineEntity.(MapObject, World?) -> Boolean,
+  private val world: World? = null
+) : MapService {
+  private val mapRenderer: OrthogonalTiledMapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
+  private val mapEntities: ImmutableArray<Entity> = engine.getEntitiesFor(allOf(TiledComponent::class).get())
 
   private var currentMapFilePath = ""
   private var currentMap: TiledMap = EMPTY_MAP
@@ -54,6 +53,9 @@ class TiledMapService(
 
   init {
     assetStorage.setLoader<TiledMap> { TmxMapLoader(assetStorage.fileResolver) }
+    KtxAsync.launch {
+      assetStorage.add("mapServiceMapRenderer", mapRenderer)
+    }
   }
 
   override fun setMap(engine: Engine, mapFilePath: String) {
@@ -64,7 +66,6 @@ class TiledMapService(
     KtxAsync.launch {
       if (currentMap != EMPTY_MAP) {
         // unload current map and remove map entities
-        listeners.forEach { it.beforeMapChange(this@TiledMapService, currentMap) }
         assetStorage.unload<TiledMap>(currentMapFilePath)
         LOG.debug { "Removing ${mapEntities.size()} map entities" }
         mapEntities.forEach { it.removeFromEngine(engine) }
@@ -91,7 +92,6 @@ class TiledMapService(
 
       currentMapFilePath = mapFilePath
       mapRenderer.map = currentMap
-      listeners.forEach { it.afterMapChange(this@TiledMapService, currentMap) }
     }
   }
 
@@ -112,16 +112,38 @@ class TiledMapService(
       if (layer.property(COLLISION_LAYER_PROPERTY, false)) {
         createCollisionBody(layer)
       } else {
-        createEntities(layer.objects)
+        var engineEntity = EngineEntity(engine, engine.createEntity())
+        var newEntityRequired = false
+
+        // call 'configureEntity' for every MapObject
+        layer.objects.forEach {
+          newEntityRequired = engineEntity.configureEntity(it, world)
+          if (newEntityRequired) {
+            // entity was successfully configured -> add TiledComponent to keep it inside mapEntities array and
+            // to automatically remove those entities when setMap gets called
+            engineEntity.with<TiledComponent> {
+              id = it.id
+            }
+            engine.addEntity(engineEntity.entity)
+            // create new entity for next 'configureEntity' call
+            engineEntity = EngineEntity(engine, engine.createEntity())
+          }
+        }
+
+        if (!newEntityRequired) {
+          // the last call to 'configureEntity' returned false and the entity was not successfully configured.
+          // -> Remove it from the engine
+          engineEntity.with<RemoveComponent>()
+        }
       }
     }
   }
 
   private fun createCollisionBody(layer: MapLayer) {
     val objects = layer.objects
-    if (entityFactory.world == null || objects.isEmpty()) {
+    if (world == null || objects.isEmpty()) {
       LOG.debug {
-        "There is no world (${entityFactory.world}) specified or " +
+        "There is no world (${world}) specified or " +
           "there are no collision objects for layer '${layer.name}'"
       }
       return
@@ -130,7 +152,7 @@ class TiledMapService(
     engine.entity {
       with<TiledComponent>()
       with<Box2DComponent> {
-        body = entityFactory.world.body(BodyDef.BodyType.StaticBody) {
+        body = world.body(BodyDef.BodyType.StaticBody) {
           fixedRotation = true
 
           objects.forEach { mapObject ->
@@ -180,30 +202,6 @@ class TiledMapService(
 
           userData = this@entity.entity
         }
-      }
-    }
-  }
-
-  private fun createEntities(objects: MapObjects) {
-    objects.forEach { mapObject ->
-      val cfgId = mapObject.name ?: ""
-      if (cfgId !in entityFactory) {
-        LOG.error { "MapObject '${mapObject.id}' has a name '${cfgId}' that does not match any entity configuration" }
-        return@forEach
-      }
-
-      entityFactory.newEntity(
-        mapObject.x * unitScale,
-        mapObject.y * unitScale,
-        cfgId
-      ).also { entity ->
-        engine.configureEntity(entity) {
-          with<TiledComponent> {
-            id = mapObject.id
-          }
-        }
-
-        listeners.forEach { it.onMapEntityCreation(entity) }
       }
     }
   }

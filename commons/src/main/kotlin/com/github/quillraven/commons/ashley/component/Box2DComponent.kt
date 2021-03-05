@@ -50,6 +50,7 @@ class Box2DComponent : Component, Pool.Poolable {
 
   companion object {
     val MAPPER = mapperFor<Box2DComponent>()
+    val TMP_VECTOR2 = Vector2()
   }
 }
 

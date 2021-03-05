@@ -14,10 +14,11 @@ import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
-import com.github.quillraven.quillycrawler.ashley.newEntityFactory
+import com.github.quillraven.quillycrawler.ashley.configureEntity
 import com.github.quillraven.quillycrawler.ashley.system.CollisionSystem
 import com.github.quillraven.quillycrawler.ashley.system.MoveSystem
 import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
+import ktx.ashley.EngineEntity
 
 class PlayGroundScreen(
   private val game: QuillyCrawler,
@@ -29,9 +30,8 @@ class PlayGroundScreen(
   }
   private val box2DDebugRenderer = Box2DDebugRenderer()
   private val engine = PooledEngine()
-  private val entityFactory = newEntityFactory(engine, world)
   private val mapService: MapService =
-    TiledMapService(entityFactory, assetStorage, batch, QuillyCrawler.UNIT_SCALE)
+    TiledMapService(engine, assetStorage, batch, QuillyCrawler.UNIT_SCALE, EngineEntity::configureEntity, world)
 
   override fun resize(width: Int, height: Int) {
     viewport.update(width, height, true)

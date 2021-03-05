@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.map.DefaultMapService
 import com.github.quillraven.commons.map.MapService
 import ktx.ashley.allOf
 import ktx.ashley.exclude
@@ -30,7 +31,7 @@ class RenderSystem(
   private val batch: Batch,
   private val viewport: Viewport,
   private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
-  private val mapService: MapService? = null
+  private val mapService: MapService = DefaultMapService()
 ) : SortedIteratingSystem(
   allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
   compareBy { it[TransformComponent.MAPPER] }
@@ -42,12 +43,12 @@ class RenderSystem(
     forceSort()
 
     viewport.apply()
-    mapService?.setViewBounds(camera)
+    mapService.setViewBounds(camera)
 
     batch.use(camera) {
-      mapService?.renderBackground()
+      mapService.renderBackground()
       super.update(deltaTime)
-      mapService?.renderForeground()
+      mapService.renderForeground()
     }
   }
 
