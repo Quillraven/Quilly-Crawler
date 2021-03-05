@@ -8,7 +8,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.maps.MapLayer
-import com.badlogic.gdx.maps.MapLayers
 import com.badlogic.gdx.maps.MapObjects
 import com.badlogic.gdx.maps.objects.*
 import com.badlogic.gdx.maps.tiled.TiledMap
@@ -38,23 +37,6 @@ import ktx.log.error
 import ktx.tiled.*
 import kotlin.math.abs
 import kotlin.system.measureTimeMillis
-
-// TODO make pull request to LibKTX
-inline fun <reified T : MapLayer> TiledMap.forEachLayer(lambda: (T) -> Unit) {
-  this.layers.forEach {
-    if (it::class == T::class) {
-      lambda(it as T)
-    }
-  }
-}
-
-fun MapObjects.isEmpty() = this.count <= 0
-
-fun MapObjects.isNotEmpty() = this.count > 0
-
-fun MapLayers.isEmpty() = this.count <= 0
-
-fun MapLayers.isNotEmpty() = this.count > 0
 
 class TiledMapService(
   private val entityFactory: AbstractEntityFactory<out AbstractEntityConfiguration>,
