@@ -10,12 +10,12 @@ import com.badlogic.gdx.utils.viewport.Viewport
  * Make sure to call [Box2DDebugRenderer.dispose] once you don't need the renderer anymore.
  */
 class Box2DDebugRenderSystem(
-    private val world: World,
-    private val viewport: Viewport,
-    private val renderer: Box2DDebugRenderer
+  private val world: World,
+  private val viewport: Viewport,
+  private val renderer: Box2DDebugRenderer
 ) : EntitySystem() {
-    override fun update(deltaTime: Float) {
-        viewport.apply()
-        renderer.render(world, viewport.camera.combined)
-    }
+  override fun update(deltaTime: Float) {
+    viewport.apply()
+    renderer.render(world, viewport.camera.combined)
+  }
 }

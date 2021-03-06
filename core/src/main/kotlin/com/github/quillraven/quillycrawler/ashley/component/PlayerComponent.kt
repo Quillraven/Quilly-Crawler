@@ -1,4 +1,4 @@
-package com.github.quillraven.commons.ashley.component
+package com.github.quillraven.quillycrawler.ashley.component
 
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
@@ -11,9 +11,9 @@ import ktx.ashley.mapperFor
  * only run them for player entities.
  */
 class PlayerComponent : Component, Pool.Poolable {
-    override fun reset() = Unit
+  override fun reset() = Unit
 
-    companion object {
-        val MAPPER = mapperFor<PlayerComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<PlayerComponent>()
+  }
 }

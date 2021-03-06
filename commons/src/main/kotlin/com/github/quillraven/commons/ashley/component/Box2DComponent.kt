@@ -32,30 +32,31 @@ import ktx.ashley.mapperFor
  * that the component is not null. Otherwise, it will throw a [GdxRuntimeException].
  */
 class Box2DComponent : Component, Pool.Poolable {
-    lateinit var body: Body
-    val renderPosition = Vector2()
-    val impulse = Vector2()
+  lateinit var body: Body
+  val renderPosition = Vector2()
+  val impulse = Vector2()
 
-    fun stopMovementImmediately() {
-        impulse.x = body.mass * (0f - body.linearVelocity.x)
-        impulse.y = body.mass * (0f - body.linearVelocity.y)
-    }
+  fun stopMovementImmediately() {
+    impulse.x = body.mass * (0f - body.linearVelocity.x)
+    impulse.y = body.mass * (0f - body.linearVelocity.y)
+  }
 
-    override fun reset() {
-        body.world.destroyBody(body)
-        body.userData = null
-        renderPosition.set(0f, 0f)
-        impulse.set(0f, 0f)
-    }
+  override fun reset() {
+    body.world.destroyBody(body)
+    body.userData = null
+    renderPosition.set(0f, 0f)
+    impulse.set(0f, 0f)
+  }
 
-    companion object {
-        val MAPPER = mapperFor<Box2DComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<Box2DComponent>()
+    val TMP_VECTOR2 = Vector2()
+  }
 }
 
 /**
  * Returns a [Box2DComponent] or throws a [GdxRuntimeException] if it doesn't exist.
  */
 val Entity.box2dCmp: Box2DComponent
-    get() = this[Box2DComponent.MAPPER]
-        ?: throw GdxRuntimeException("Box2DComponent for entity '$this' is null")
+  get() = this[Box2DComponent.MAPPER]
+    ?: throw GdxRuntimeException("Box2DComponent for entity '$this' is null")

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-up" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+ <tileset firstgid="1" source="../tileset1.tsx"/>
+ <layer id="1" name="Kachelebene 1" width="8" height="8">
+  <data encoding="base64" compression="zlib">
+   eJzjYmBg4CISyxMhh08NsWbgkpMnwR4lIv0EAKijA1Y=
+  </data>
+ </layer>
+ <objectgroup id="2" name="Objektebene 1">
+  <object id="1" name="PLAYER" x="26.8607" y="43.3237">
+   <point/>
+  </object>
+  <object id="2" x="104.085" y="102.461" width="0.108309"/>
+  <object id="3" name="EXIT" x="97.695" y="98.2366" width="13.4304" height="11.6974"/>
+ </objectgroup>
+</map>

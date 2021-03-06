@@ -5,7 +5,7 @@ import ktx.app.KtxScreen
 import ktx.assets.async.AssetStorage
 
 abstract class AbstractScreen(
-    game: AbstractGame,
-    val batch: Batch = game.batch,
-    val assetStorage: AssetStorage = game.assetStorage
+  game: AbstractGame,
+  val batch: Batch = game.batch,
+  val assetStorage: AssetStorage = game.assetStorage
 ) : KtxScreen

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-up" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="9">
+ <tileset firstgid="1" source="tileset1.tsx"/>
+ <layer id="1" name="background" width="20" height="20">
+  <properties>
+   <property name="z" type="int" value="0"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzjYmBg4BrFo3gUj+JRPIpJxAD8UA+h
+  </data>
+ </layer>
+ <layer id="2" name="foreground" width="20" height="20">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUkANkgNiGRD0eOLACEGsDMR8Qc+JRh46ZgNgUiD2RMIhvAcRiQGwFZUujqfHEIqZPol9GwSgAAGbICaY=
+  </data>
+ </layer>
+ <objectgroup id="3" name="emptyCollision">
+  <properties>
+   <property name="collisionLayer" type="bool" value="true"/>
+  </properties>
+ </objectgroup>
+ <objectgroup id="4" name="collision">
+  <properties>
+   <property name="collisionLayer" type="bool" value="true"/>
+  </properties>
+  <object id="1" x="17.5" y="240.25" width="39.25" height="29.5"/>
+  <object id="2" x="76" y="247.25">
+   <ellipse/>
+  </object>
+  <object id="3" x="105.75" y="224.25" width="35.75" height="21.75">
+   <ellipse/>
+  </object>
+  <object id="4" x="136.25" y="263.25">
+   <polyline points="0,0 22,-24.75"/>
+  </object>
+  <object id="5" x="177.5" y="286">
+   <polygon points="0,0 18.5,-50.5 54.25,-34"/>
+  </object>
+  <object id="6" x="77.5" y="296.75"/>
+ </objectgroup>
+ <objectgroup id="5" name="entities">
+  <object id="7" x="254.5" y="260.5">
+   <point/>
+  </object>
+  <object id="8" name="PLAYER" x="149.75" y="306.25">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

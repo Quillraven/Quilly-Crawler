@@ -2,11 +2,16 @@ package com.github.quillraven.commons.ashley.system
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.SortedIteratingSystem
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.map.DefaultMapService
+import com.github.quillraven.commons.map.MapService
+import com.github.quillraven.commons.map.TiledMapService
 import ktx.ashley.allOf
+import ktx.ashley.exclude
 import ktx.ashley.get
 import ktx.graphics.use
 import ktx.log.error
@@ -22,63 +27,75 @@ import ktx.log.logger
  *
  * The size of the sprite is defined by [TransformComponent.size]. A size of 1 means that the [Sprite]
  * is not scaled (=100%). A size smaller 1 will shrink the sprite while a size greater 1 will increase it.
+ *
+ * Use [mapService] to define a specific [MapService] that should be used for 2d-map rendering like [TiledMapService].
+ * [MapService.renderBackground] is called before any entity is rendered.
+ * [MapService.renderForeground] is called afterwards.
  */
 class RenderSystem(
-    private val batch: Batch,
-    private val viewport: Viewport,
+  private val batch: Batch,
+  private val viewport: Viewport,
+  private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
+  private val mapService: MapService = DefaultMapService()
 ) : SortedIteratingSystem(
-    allOf(TransformComponent::class, RenderComponent::class).get(),
-    compareBy { it[TransformComponent.MAPPER] }
+  allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
+  compareBy { it[TransformComponent.MAPPER] }
 ) {
-    /**
-     * Sorts the entities, applies the viewport to the batch and renders each entity.
-     */
-    override fun update(deltaTime: Float) {
-        forceSort()
+  /**
+   * Sorts the entities, applies the viewport to the batch and renders each entity.
+   * If a [mapService] is defined then its renderBackground and renderForeground functions
+   * are called accordingly.
+   */
+  override fun update(deltaTime: Float) {
+    forceSort()
 
-        viewport.apply()
-        batch.use(viewport.camera) {
-            super.update(deltaTime)
-        }
+    viewport.apply()
+    mapService.setViewBounds(camera)
+
+    batch.use(camera) {
+      mapService.renderBackground()
+      super.update(deltaTime)
+      mapService.renderForeground()
+    }
+  }
+
+  /**
+   * Renders an [entity] by using its [sprite][RenderComponent.sprite].
+   */
+  override fun processEntity(entity: Entity, deltaTime: Float) {
+    val transformCmp = entity.transformCmp
+    val renderCmp = entity.renderCmp
+    val box2dCmp = entity[Box2DComponent.MAPPER]
+
+    if (renderCmp.sprite.texture == null) {
+      LOG.error { "Entity '$entity' does not have a texture" }
+      return
     }
 
-    /**
-     * Renders an [entity] by using its [sprite][RenderComponent.sprite].
-     */
-    override fun processEntity(entity: Entity, deltaTime: Float) {
-        val transformCmp = entity.transformCmp
-        val renderCmp = entity.renderCmp
-        val box2dCmp = entity[Box2DComponent.MAPPER]
+    renderCmp.sprite.run {
+      // scale sprite by the entity's size
+      setScale(transformCmp.size.x, transformCmp.size.y)
 
-        if (renderCmp.sprite.texture == null) {
-            LOG.error { "Entity '$entity' does not have a texture" }
-            return
-        }
+      // update sprite position according to the physic's interpolated position
+      // or normal transform position
+      if (box2dCmp == null) {
+        setPosition(
+          transformCmp.position.x - originX * (1f - scaleX),
+          transformCmp.position.y - originY * (1f - scaleY)
+        )
+      } else {
+        setPosition(
+          box2dCmp.renderPosition.x - originX * (1f - scaleX),
+          box2dCmp.renderPosition.y - originY * (1f - scaleY)
+        )
+      }
 
-        renderCmp.sprite.run {
-            // scale sprite by the entity's size
-            setScale(transformCmp.size.x, transformCmp.size.y)
-
-            // update sprite position according to the physic's interpolated position
-            // or normal transform position
-            if (box2dCmp == null) {
-                setPosition(
-                    transformCmp.position.x - originX * (1f - scaleX),
-                    transformCmp.position.y - originY * (1f - scaleY)
-                )
-            } else {
-                setPosition(
-                    box2dCmp.renderPosition.x - originX * (1f - scaleX),
-                    box2dCmp.renderPosition.y - originY * (1f - scaleY)
-                )
-            }
-
-            // render entity
-            draw(batch)
-        }
+      // render entity
+      draw(batch)
     }
+  }
 
-    companion object {
-        private val LOG = logger<RenderSystem>()
-    }
+  companion object {
+    private val LOG = logger<RenderSystem>()
+  }
 }

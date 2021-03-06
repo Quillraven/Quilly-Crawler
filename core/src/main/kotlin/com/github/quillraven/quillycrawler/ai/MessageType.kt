@@ -1,5 +1,5 @@
 package com.github.quillraven.quillycrawler.ai
 
 enum class MessageType {
-    PLAYER_COLLECT_ENTITY
+  PLAYER_INTERACT_ENTITY
 }

@@ -4,8 +4,8 @@ import com.badlogic.gdx.assets.AssetDescriptor
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 
 enum class TextureAtlasAssets(
-    filePath: String,
-    val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor(filePath, TextureAtlas::class.java)
+  filePath: String,
+  val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor(filePath, TextureAtlas::class.java)
 ) {
-    CHARACTERS_AND_PROPS("graphics/characters-and-props.atlas")
+  CHARACTERS_AND_PROPS("graphics/characters-and-props.atlas")
 }

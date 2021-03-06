@@ -16,17 +16,17 @@ import ktx.ashley.mapperFor
  * all [State] functions.
  */
 interface EntityState : State<Entity> {
-    override fun enter(entity: Entity) = Unit
+  override fun enter(entity: Entity) = Unit
 
-    override fun update(entity: Entity) = Unit
+  override fun update(entity: Entity) = Unit
 
-    override fun exit(entity: Entity) = Unit
+  override fun exit(entity: Entity) = Unit
 
-    override fun onMessage(entity: Entity, telegram: Telegram) = false
+  override fun onMessage(entity: Entity, telegram: Telegram) = false
 
-    companion object {
-        val EMPTY_STATE = object : EntityState {}
-    }
+  companion object {
+    val EMPTY_STATE = object : EntityState {}
+  }
 }
 
 /**
@@ -41,29 +41,29 @@ interface EntityState : State<Entity> {
  * the component is not null. Otherwise, it will throw a [GdxRuntimeException].
  */
 class StateComponent : Component, Pool.Poolable {
-    var state = EntityState.EMPTY_STATE
-    var stateTime = 0f
-        internal set
+  var state = EntityState.EMPTY_STATE
+  var stateTime = 0f
+    internal set
 
-    // Keep stateMachine internal to avoid calling changeState at any time during a frame.
-    // That way we can guarantee that AI is always processed within the StateSystem.
-    internal val stateMachine = DefaultStateMachine<Entity, State<Entity>>()
+  // Keep stateMachine internal to avoid calling changeState at any time during a frame.
+  // That way we can guarantee that AI is always processed within the StateSystem.
+  internal val stateMachine = DefaultStateMachine<Entity, State<Entity>>()
 
-    override fun reset() {
-        stateTime = 0f
-        state = EntityState.EMPTY_STATE
-        stateMachine.globalState = null
-        stateMachine.owner = null
-    }
+  override fun reset() {
+    stateTime = 0f
+    state = EntityState.EMPTY_STATE
+    stateMachine.globalState = null
+    stateMachine.owner = null
+  }
 
-    companion object {
-        val MAPPER = mapperFor<StateComponent>()
-    }
+  companion object {
+    val MAPPER = mapperFor<StateComponent>()
+  }
 }
 
 /**
  * Returns a [StateComponent] or throws a [GdxRuntimeException] if it doesn't exist.
  */
 val Entity.stateCmp: StateComponent
-    get() = this[StateComponent.MAPPER]
-        ?: throw GdxRuntimeException("StateComponent for entity '$this' is null")
+  get() = this[StateComponent.MAPPER]
+    ?: throw GdxRuntimeException("StateComponent for entity '$this' is null")

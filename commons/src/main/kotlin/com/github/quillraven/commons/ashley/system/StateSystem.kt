@@ -10,11 +10,9 @@ import com.badlogic.gdx.ai.fsm.StateMachine
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.ObjectMap
-import com.github.quillraven.commons.ashley.component.AnimationComponent
-import com.github.quillraven.commons.ashley.component.EntityState
-import com.github.quillraven.commons.ashley.component.StateComponent
-import com.github.quillraven.commons.ashley.component.stateCmp
+import com.github.quillraven.commons.ashley.component.*
 import ktx.ashley.allOf
+import ktx.ashley.exclude
 import ktx.ashley.get
 import ktx.collections.getOrPut
 
@@ -38,83 +36,83 @@ import ktx.collections.getOrPut
  * must be called "wizard/idle".
  */
 class StateSystem(
-    private val messageManager: MessageManager,
-    private val messageTypes: Set<Int> = setOf()
-) : IteratingSystem(allOf(StateComponent::class).get()), EntityListener {
-    private val stateAnimationStringCache = ObjectMap<EntityState, String>()
+  private val messageManager: MessageManager,
+  private val messageTypes: Set<Int> = setOf()
+) : IteratingSystem(allOf(StateComponent::class).exclude(RemoveComponent::class).get()), EntityListener {
+  private val stateAnimationStringCache = ObjectMap<EntityState, String>()
 
-    /**
-     * Adds the system as an [EntityListener] for the [family]
-     */
-    override fun addedToEngine(engine: Engine) {
-        super.addedToEngine(engine)
-        engine.addEntityListener(family, this)
+  /**
+   * Adds the system as an [EntityListener] for the [family]
+   */
+  override fun addedToEngine(engine: Engine) {
+    super.addedToEngine(engine)
+    engine.addEntityListener(family, this)
+  }
+
+  /**
+   * Removes the system as an [EntityListener]
+   */
+  override fun removedFromEngine(engine: Engine) {
+    super.removedFromEngine(engine)
+    engine.removeEntityListener(this)
+  }
+
+  /**
+   * Sets the [state machine's][StateComponent.stateMachine] [owner][DefaultStateMachine.owner]
+   * and adds the machine as a listener for all [messageTypes].
+   */
+  override fun entityAdded(entity: Entity) {
+    with(entity.stateCmp) {
+      stateMachine.owner = entity
+
+      for (messageType in messageTypes) {
+        messageManager.addListener(stateMachine, messageType)
+      }
     }
+  }
 
-    /**
-     * Removes the system as an [EntityListener]
-     */
-    override fun removedFromEngine(engine: Engine) {
-        super.removedFromEngine(engine)
-        engine.removeEntityListener(this)
+  /**
+   * Removes the [state machine][StateComponent.stateMachine] as a listener for all [messageTypes].
+   */
+  override fun entityRemoved(entity: Entity) {
+    with(entity.stateCmp) {
+      for (messageType in messageTypes) {
+        messageManager.removeListener(stateMachine, messageType)
+      }
     }
+  }
 
-    /**
-     * Sets the [state machine's][StateComponent.stateMachine] [owner][DefaultStateMachine.owner]
-     * and adds the machine as a listener for all [messageTypes].
-     */
-    override fun entityAdded(entity: Entity) {
-        with(entity.stateCmp) {
-            stateMachine.owner = entity
+  /**
+   * Updates the [time piece][GdxAI.getTimepiece], [messageManager] and all entities.
+   */
+  override fun update(deltaTime: Float) {
+    GdxAI.getTimepiece().update(deltaTime)
+    messageManager.update()
+    super.update(deltaTime)
+  }
 
-            for (messageType in messageTypes) {
-                messageManager.addListener(stateMachine, messageType)
-            }
+  /**
+   * Updates the entity's [StateComponent] by either switching to a new [EntityState]
+   * or by updating the current [EntityState].
+   */
+  override fun processEntity(entity: Entity, deltaTime: Float) {
+    with(entity.stateCmp) {
+      when {
+        EntityState.EMPTY_STATE != state -> {
+          // switch to new state
+          stateTime = 0f
+          stateMachine.changeState(state)
+          entity[AnimationComponent.MAPPER]?.let {
+            it.stateKey = stateAnimationStringCache.getOrPut(state) { state.toString().toLowerCase() }
+          }
+          state = EntityState.EMPTY_STATE
         }
-    }
-
-    /**
-     * Removes the [state machine][StateComponent.stateMachine] as a listener for all [messageTypes].
-     */
-    override fun entityRemoved(entity: Entity) {
-        with(entity.stateCmp) {
-            for (messageType in messageTypes) {
-                messageManager.removeListener(stateMachine, messageType)
-            }
+        else -> {
+          // update current state
+          stateTime += deltaTime
+          stateMachine.update()
         }
+      }
     }
-
-    /**
-     * Updates the [time piece][GdxAI.getTimepiece], [messageManager] and all entities.
-     */
-    override fun update(deltaTime: Float) {
-        GdxAI.getTimepiece().update(deltaTime)
-        messageManager.update()
-        super.update(deltaTime)
-    }
-
-    /**
-     * Updates the entity's [StateComponent] by either switching to a new [EntityState]
-     * or by updating the current [EntityState].
-     */
-    override fun processEntity(entity: Entity, deltaTime: Float) {
-        with(entity.stateCmp) {
-            when {
-                EntityState.EMPTY_STATE != state -> {
-                    // switch to new state
-                    stateTime = 0f
-                    stateMachine.changeState(state)
-                    entity[AnimationComponent.MAPPER]?.let {
-                        it.stateKey = stateAnimationStringCache.getOrPut(state) { state.toString().toLowerCase() }
-                    }
-                    state = EntityState.EMPTY_STATE
-                }
-                else -> {
-                    // update current state
-                    stateTime += deltaTime
-                    stateMachine.update()
-                }
-            }
-        }
-    }
+  }
 }
