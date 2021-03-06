@@ -1,8 +1,6 @@
 package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.PooledEngine
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -16,6 +14,7 @@ import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureEntity
 import com.github.quillraven.quillycrawler.ashley.system.CollisionSystem
+import com.github.quillraven.quillycrawler.ashley.system.MapSystem
 import com.github.quillraven.quillycrawler.ashley.system.MoveSystem
 import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
 import ktx.ashley.EngineEntity
@@ -53,11 +52,10 @@ class PlayGroundScreen(
         if (game.isDevMode()) {
           addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
         }
+        addSystem(MapSystem(mapService))
         addSystem(RemoveSystem())
       }
     }
-
-    mapService.setMap(engine, "maps/tutorial.tmx")
   }
 
   override fun hide() {
@@ -66,15 +64,6 @@ class PlayGroundScreen(
   }
 
   override fun render(delta: Float) {
-    //TODO remove debug stuff
-    if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-      mapService.setMap(engine, "maps/test1.tmx")
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-      mapService.setMap(engine, "maps/test2.tmx")
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-      mapService.setMap(engine, "maps/tutorial.tmx")
-    }
-
     engine.update(delta)
   }
 

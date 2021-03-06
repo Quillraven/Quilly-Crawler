@@ -10,10 +10,7 @@ import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.BigDemonState
 import com.github.quillraven.quillycrawler.ai.ChestState
 import com.github.quillraven.quillycrawler.ai.PlayerState
-import com.github.quillraven.quillycrawler.ashley.component.CollectableComponent
-import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
-import com.github.quillraven.quillycrawler.ashley.component.MoveComponent
-import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
+import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import ktx.ashley.EngineEntity
 import ktx.ashley.with
@@ -33,6 +30,7 @@ private fun EngineEntity.withBox2DComponents(
   width: Float = 1f,
   height: Float = 1f,
   boundingBoxHeightPercentage: Float = 1f,
+  onlySensor: Boolean = false,
   optionalInit: BodyDefinition.() -> Unit = {}
 ) {
   val transformCmp = with<TransformComponent> {
@@ -54,6 +52,7 @@ private fun EngineEntity.withBox2DComponents(
         Box2DComponent.TMP_VECTOR2.set(0f, -transformCmp.size.y * 0.5f + boundingBoxHeight * 0.5f)
       ) {
         friction = 0f
+        isSensor = onlySensor
       }
 
       this.apply(optionalInit)
@@ -90,7 +89,7 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
       with<StateComponent> { state = PlayerState.IDLE }
       with<PlayerComponent>()
       with<PlayerControlComponent>()
-      with<CollectingComponent>()
+      with<InteractComponent>()
       with<MoveComponent> { maxSpeed = 5f }
       with<CameraLockComponent>()
     }
@@ -98,12 +97,18 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "chest")
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
-      with<CollectableComponent>()
+      with<ActionableComponent>()
     }
     "BIG_DEMON" -> {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "big-demon")
       with<TransformComponent> { position.set(x, y, position.z) }
       with<StateComponent> { state = BigDemonState.RUN }
+    }
+    "EXIT" -> {
+      withBox2DComponents(world, BodyType.StaticBody, x, y, onlySensor = true)
+      with<ActionableComponent> {
+        isExit = true
+      }
     }
     else -> {
       MapService.LOG.error { "Unsupported MapObject name '${mapObject.name}'" }

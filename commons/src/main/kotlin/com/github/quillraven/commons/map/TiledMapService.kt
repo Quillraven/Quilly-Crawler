@@ -2,7 +2,6 @@ package com.github.quillraven.commons.map
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
-import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -63,8 +62,8 @@ class TiledMapService(
   private val configureEntity: EngineEntity.(MapObject, World?) -> Boolean,
   private val world: World? = null
 ) : MapService {
-  private val mapRenderer: OrthogonalTiledMapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
-  private val mapEntities: ImmutableArray<Entity> = engine.getEntitiesFor(allOf(TiledComponent::class).get())
+  private val mapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
+  private val mapEntities = engine.getEntitiesFor(allOf(TiledComponent::class).get())
   private var currentMapFilePath = ""
   private var currentMap: TiledMap = EMPTY_MAP
   private val backgroundLayers = gdxArrayOf<TiledMapTileLayer>()
@@ -112,10 +111,8 @@ class TiledMapService(
       }
 
       // and create map entities like collision entities and game object entities
-      val currentSize = mapEntities.size()
       updateRenderLayers()
       parseObjectLayers()
-      LOG.debug { "Created ${mapEntities.size() - currentSize} map entities" }
 
       currentMapFilePath = mapFilePath
       mapRenderer.map = currentMap
@@ -151,11 +148,13 @@ class TiledMapService(
       } else {
         var engineEntity = EngineEntity(engine, engine.createEntity())
         var newEntityRequired = false
+        var numCreated = 0
 
         // call 'configureEntity' for every MapObject
         layer.objects.forEach {
           newEntityRequired = engineEntity.configureEntity(it, world)
           if (newEntityRequired) {
+            ++numCreated
             // entity was successfully configured -> add TiledComponent to keep it inside mapEntities array and
             // to automatically remove those entities when setMap gets called
             engineEntity.with<TiledComponent> {
@@ -168,10 +167,13 @@ class TiledMapService(
         }
 
         if (!newEntityRequired) {
+          --numCreated
           // the last call to 'configureEntity' returned false and the entity was not successfully configured.
           // -> Remove it from the engine
           engineEntity.with<RemoveComponent>()
         }
+
+        LOG.debug { "Created $numCreated map entities" }
       }
     }
   }

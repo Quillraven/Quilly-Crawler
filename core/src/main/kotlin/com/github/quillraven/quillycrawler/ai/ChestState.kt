@@ -10,7 +10,7 @@ import com.github.quillraven.commons.ashley.component.stateCmp
 enum class ChestState : EntityState {
   IDLE {
     override fun onMessage(entity: Entity, telegram: Telegram): Boolean {
-      if (telegram.message == MessageType.PLAYER_COLLECT_ENTITY.ordinal) {
+      if (telegram.message == MessageType.PLAYER_INTERACT_ENTITY.ordinal) {
         entity.stateCmp.state = OPEN
         return true
       }

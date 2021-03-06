@@ -4,12 +4,8 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.physics.box2d.*
-import com.github.quillraven.commons.ashley.component.PlayerComponent
 import com.github.quillraven.commons.ashley.component.RenderComponent
-import com.github.quillraven.quillycrawler.ashley.component.CollectableComponent
-import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
-import com.github.quillraven.quillycrawler.ashley.component.CollisionComponent
-import com.github.quillraven.quillycrawler.ashley.component.collisionCmp
+import com.github.quillraven.quillycrawler.ashley.component.*
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.log.debug
@@ -69,21 +65,21 @@ class CollisionSystem(
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val collisionCmp = entity.collisionCmp
-    val collectingCmp = entity[CollectingComponent.MAPPER]
+    val interactCmp = entity[InteractComponent.MAPPER]
 
     LOG.debug { "beginContactEntities=${collisionCmp.beginContactEntities}" }
     LOG.debug { "endContactEntities=${collisionCmp.endContactEntities}" }
-    if (collectingCmp != null) {
-      // entity can collect other entities -> check if there is contact with a collectable entity
+    if (interactCmp != null) {
+      // entity can interact with other entities -> check if there is contact with an actionable entity
       collisionCmp.beginContactEntities.forEach { collEntity ->
-        if (collEntity[CollectableComponent.MAPPER] != null) {
-          collectingCmp.entitiesInRange.add(collEntity)
+        if (collEntity[ActionableComponent.MAPPER] != null) {
+          interactCmp.entitiesInRange.add(collEntity)
           collEntity[RenderComponent.MAPPER]?.sprite?.setColor(1f, 0f, 0f, 1f)
         }
       }
       collisionCmp.endContactEntities.forEach { collEntity ->
-        if (collEntity[CollectableComponent.MAPPER] != null) {
-          collectingCmp.entitiesInRange.remove(collEntity)
+        if (collEntity[ActionableComponent.MAPPER] != null) {
+          interactCmp.entitiesInRange.remove(collEntity)
           collEntity[RenderComponent.MAPPER]?.sprite?.setColor(1f, 1f, 1f, 1f)
         }
       }

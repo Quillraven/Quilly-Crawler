@@ -13,7 +13,7 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ai.MessageType
-import com.github.quillraven.quillycrawler.ashley.component.CollectingComponent
+import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
 import ktx.ashley.allOf
@@ -207,11 +207,11 @@ class PlayerControlSystem(
       return
     }
 
-    entity[CollectingComponent.MAPPER]?.let { collectingCmp ->
-      collectingCmp.entitiesInRange.forEach { collectableEntity ->
-        collectableEntity[StateComponent.MAPPER]?.let {
+    entity[InteractComponent.MAPPER]?.let { interactCmp ->
+      interactCmp.entitiesInRange.forEach { actionableEntity ->
+        actionableEntity[StateComponent.MAPPER]?.let {
           // dispatch message to update entity state
-          messageManager.dispatchMessage(MessageType.PLAYER_COLLECT_ENTITY.ordinal)
+          messageManager.dispatchMessage(MessageType.PLAYER_INTERACT_ENTITY.ordinal)
         }
       }
     }
