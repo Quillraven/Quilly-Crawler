@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.map.DefaultMapService
 import com.github.quillraven.commons.map.MapService
+import com.github.quillraven.commons.map.TiledMapService
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
@@ -26,6 +27,10 @@ import ktx.log.logger
  *
  * The size of the sprite is defined by [TransformComponent.size]. A size of 1 means that the [Sprite]
  * is not scaled (=100%). A size smaller 1 will shrink the sprite while a size greater 1 will increase it.
+ *
+ * Use [mapService] to define a specific [MapService] that should be used for 2d-map rendering like [TiledMapService].
+ * [MapService.renderBackground] is called before any entity is rendered.
+ * [MapService.renderForeground] is called afterwards.
  */
 class RenderSystem(
   private val batch: Batch,
@@ -38,6 +43,8 @@ class RenderSystem(
 ) {
   /**
    * Sorts the entities, applies the viewport to the batch and renders each entity.
+   * If a [mapService] is defined then its renderBackground and renderForeground functions
+   * are called accordingly.
    */
   override fun update(deltaTime: Float) {
     forceSort()

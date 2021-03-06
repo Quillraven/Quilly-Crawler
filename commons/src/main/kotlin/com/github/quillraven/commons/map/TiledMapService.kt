@@ -23,6 +23,8 @@ import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.map.MapService.Companion.LOG
+import com.github.quillraven.commons.map.TiledMapService.Companion.COLLISION_LAYER_PROPERTY
+import com.github.quillraven.commons.map.TiledMapService.Companion.Z_PROPERTY
 import kotlinx.coroutines.launch
 import ktx.ashley.*
 import ktx.assets.async.AssetStorage
@@ -35,6 +37,24 @@ import ktx.tiled.*
 import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 
+/**
+ * Implementation of [MapService] for Tiled map editor support. It uses an [engine] to create [entities][Entity]
+ * out of map [objects][MapObject]. It uses an [OrthogonalTiledMapRenderer] for rendering. The renderer will be
+ * added to the [assetStorage] to dispose it once the [assetStorage] gets disposed. Also, a [TmxMapLoader]
+ * will be set for the [assetStorage].
+ *
+ * [TiledMapTileLayer] layers with a [Z_PROPERTY] value lower equal [Z_DEFAULT] or without the [Z_PROPERTY] property
+ * are background layers. Other [TiledMapTileLayer] layers are foreground layers.
+ *
+ * Use [configureEntity] to define a function that creates your game specific entities out of map objects.
+ *
+ * When a [world] is passed to the service and the map contains a layer with a boolean [property][COLLISION_LAYER_PROPERTY]
+ * set to true then a single [Entity] is created with a [Box2DComponent] that contains all shapes of that layer
+ * for the collision objects.
+ *
+ * Additionally, any entity created by this service gets a [TiledComponent] to mark it as a tiled map entity. Whenever
+ * [setMap] is called then all entities with a [TiledComponent] get removed from the [engine].
+ */
 class TiledMapService(
   private val engine: Engine,
   private val assetStorage: AssetStorage,
@@ -45,7 +65,6 @@ class TiledMapService(
 ) : MapService {
   private val mapRenderer: OrthogonalTiledMapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
   private val mapEntities: ImmutableArray<Entity> = engine.getEntitiesFor(allOf(TiledComponent::class).get())
-
   private var currentMapFilePath = ""
   private var currentMap: TiledMap = EMPTY_MAP
   private val backgroundLayers = gdxArrayOf<TiledMapTileLayer>()
@@ -58,6 +77,14 @@ class TiledMapService(
     }
   }
 
+  /**
+   * Unloads the previous map - if any - from the [assetStorage] and loads the new map. It also removes
+   * any [entities][Entity] from the [engine] that have a [TiledComponent].
+   *
+   * Updates the foreground and background layers for rendering and calls [configureEntity] for every [MapObject]
+   * of an object layer in Tiled. If a [world] is defined then also an entity with a [Box2DComponent] is created
+   * that represents the collision shapes if there are layers with a [COLLISION_LAYER_PROPERTY] set to true.
+   */
   override fun setMap(engine: Engine, mapFilePath: String) {
     if (!assetStorage.fileResolver.resolve(mapFilePath).exists()) {
       throw GdxRuntimeException("Map '$mapFilePath' does not exist!")
@@ -86,7 +113,7 @@ class TiledMapService(
 
       // and create map entities like collision entities and game object entities
       val currentSize = mapEntities.size()
-      parseRenderLayers()
+      updateRenderLayers()
       parseObjectLayers()
       LOG.debug { "Created ${mapEntities.size() - currentSize} map entities" }
 
@@ -95,7 +122,11 @@ class TiledMapService(
     }
   }
 
-  private fun parseRenderLayers() {
+  /**
+   * Updates [backgroundLayers] and [foregroundLayers]. Any [TiledMapTileLayer] without a [Z_PROPERTY] or
+   * with a [Z_PROPERTY] value less or equal to [Z_DEFAULT] is a background layer. Otherwise it is a foreground layer.
+   */
+  private fun updateRenderLayers() {
     backgroundLayers.clear()
     foregroundLayers.clear()
     currentMap.forEachLayer<TiledMapTileLayer> { layer ->
@@ -107,6 +138,12 @@ class TiledMapService(
     }
   }
 
+  /**
+   * Calls [configureEntity] for any [MapObject] of object layers in Tiled and creates the collision body
+   * [Entity] if a [world] is defined and a layers with a [COLLISION_LAYER_PROPERTY] set to true exists.
+   *
+   * Any entity created by this function has a [TiledComponent] with the id of the object in Tiled.
+   */
   private fun parseObjectLayers() {
     currentMap.forEachLayer<MapLayer> { layer ->
       if (layer.property(COLLISION_LAYER_PROPERTY, false)) {
@@ -139,6 +176,10 @@ class TiledMapService(
     }
   }
 
+  /**
+   * Creates an [Entity] with a [Box2DComponent] out of the given [layer]. Any shape of the [layer] will be
+   * added to the [body][Box2DComponent.body] of the entity.
+   */
   private fun createCollisionBody(layer: MapLayer) {
     val objects = layer.objects
     if (world == null || objects.isEmpty()) {
@@ -150,7 +191,10 @@ class TiledMapService(
     }
 
     engine.entity {
+      // we cannot set an id because there could be multiple objects in Tiled that are used for the collision
+      // and therefore we do not have a unique id
       with<TiledComponent>()
+      // create collision body
       with<Box2DComponent> {
         body = world.body(BodyDef.BodyType.StaticBody) {
           fixedRotation = true
@@ -206,6 +250,10 @@ class TiledMapService(
     }
   }
 
+  /**
+   * Sets the view bounds of the [mapRenderer] by the given [camera].
+   * Also, makes a call to [AnimatedTiledMapTile.updateAnimationBaseTime] to update map animations.
+   */
   override fun setViewBounds(camera: OrthographicCamera) {
     // update animation tiles
     AnimatedTiledMapTile.updateAnimationBaseTime()
@@ -218,10 +266,16 @@ class TiledMapService(
     mapRenderer.viewBounds.set(camera.position.x - w / 2, camera.position.y - h / 2, w, h)
   }
 
+  /**
+   * Renders all [backgroundLayers]-
+   */
   override fun renderBackground() {
     backgroundLayers.forEach { mapRenderer.renderTileLayer(it) }
   }
 
+  /**
+   * Renders all [foregroundLayers].
+   */
   override fun renderForeground() {
     foregroundLayers.forEach { mapRenderer.renderTileLayer(it) }
   }
