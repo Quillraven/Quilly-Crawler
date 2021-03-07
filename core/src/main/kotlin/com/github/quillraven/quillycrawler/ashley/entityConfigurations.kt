@@ -12,8 +12,7 @@ import com.github.quillraven.quillycrawler.ai.ChestState
 import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
-import ktx.ashley.EngineEntity
-import ktx.ashley.with
+import ktx.ashley.*
 import ktx.box2d.BodyDefinition
 import ktx.box2d.body
 import ktx.box2d.box
@@ -21,6 +20,8 @@ import ktx.box2d.circle
 import ktx.log.error
 import ktx.tiled.x
 import ktx.tiled.y
+
+private val playerFamily = allOf(PlayerComponent::class).exclude(RemoveComponent::class).get()
 
 private fun EngineEntity.withBox2DComponents(
   world: World,
@@ -80,18 +81,37 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
 
   when (mapObject.name) {
     "PLAYER" -> {
-      withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "wizard-m")
-      withBox2DComponents(world, BodyType.DynamicBody, x, y, boundingBoxHeightPercentage = 0.2f) {
-        circle(1f) {
-          isSensor = true
+      val playerEntities = engine.getEntitiesFor(playerFamily)
+      if (playerEntities.size() <= 0) {
+        // player entity does not exist yet -> create it
+        engine.entity {
+          withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "wizard-m")
+          withBox2DComponents(world, BodyType.DynamicBody, x, y, boundingBoxHeightPercentage = 0.2f) {
+            circle(1f) {
+              isSensor = true
+            }
+          }
+          with<StateComponent> { state = PlayerState.IDLE }
+          with<PlayerComponent>()
+          with<PlayerControlComponent>()
+          with<InteractComponent>()
+          with<MoveComponent> { maxSpeed = 5f }
+          with<CameraLockComponent>()
+        }
+      } else {
+        // player already existing -> move it to new position
+        playerEntities.forEach { player ->
+          with(player.box2dCmp) {
+            body.setTransform(x, y, body.angle)
+            body.isAwake = true
+            renderPosition.set(x, y)
+          }
+          with(player.transformCmp) {
+            position.set(x, y, position.z)
+          }
         }
       }
-      with<StateComponent> { state = PlayerState.IDLE }
-      with<PlayerComponent>()
-      with<PlayerControlComponent>()
-      with<InteractComponent>()
-      with<MoveComponent> { maxSpeed = 5f }
-      with<CameraLockComponent>()
+      return false
     }
     "CHEST" -> {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "chest")

@@ -32,35 +32,28 @@ class PlayGroundScreen(
   private val mapService: MapService =
     TiledMapService(engine, assetStorage, batch, QuillyCrawler.UNIT_SCALE, EngineEntity::configureEntity, world)
 
-  override fun resize(width: Int, height: Int) {
-    viewport.update(width, height, true)
-  }
-
-  override fun show() {
-    super.show()
-
-    if (engine.systems.size() <= 0) {
-      engine.run {
-        addSystem(PlayerControlSystem(messageManager))
-        addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
-        addSystem(MoveSystem())
-        addSystem(Box2DSystem(world, 1 / 60f))
-        addSystem(CameraLockSystem(viewport.camera))
-        addSystem(CollisionSystem(world))
-        addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
-        addSystem(RenderSystem(batch, viewport, mapService = mapService))
-        if (game.isDevMode()) {
-          addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
-        }
-        addSystem(MapSystem(mapService))
-        addSystem(RemoveSystem())
+  init {
+    // systems must be added before any entity is added to the engine because some systems react on
+    // entity creation with certain components for initialization
+    engine.run {
+      addSystem(PlayerControlSystem(messageManager))
+      addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
+      addSystem(MoveSystem())
+      addSystem(Box2DSystem(world, 1 / 60f))
+      addSystem(CameraLockSystem(viewport.camera))
+      addSystem(CollisionSystem(world))
+      addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
+      addSystem(RenderSystem(batch, viewport, mapService = mapService))
+      if (game.isDevMode()) {
+        addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
       }
+      addSystem(MapSystem(mapService))
+      addSystem(RemoveSystem())
     }
   }
 
-  override fun hide() {
-    super.hide()
-    engine.removeAllEntities()
+  override fun resize(width: Int, height: Int) {
+    viewport.update(width, height, true)
   }
 
   override fun render(delta: Float) {
