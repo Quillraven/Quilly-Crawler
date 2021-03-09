@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.physics.box2d.*
-import com.github.quillraven.commons.ashley.component.RenderComponent
 import com.github.quillraven.quillycrawler.ashley.component.*
 import ktx.ashley.allOf
 import ktx.ashley.get
@@ -26,14 +25,18 @@ class CollisionSystem(
     world.setContactListener(null)
   }
 
-  private fun forEachPlayerSensorCollision(contact: Contact, lambda: (Entity, Entity) -> Unit) {
-    val entityA = contact.fixtureA.body.userData
-    val entityB = contact.fixtureB.body.userData
+  private fun Any.isPlayerEntity() = this is Entity && this[PlayerComponent.MAPPER] != null && !this.isRemoving
 
-    if (entityA is Entity && entityA[PlayerComponent.MAPPER] != null && contact.fixtureA.isSensor && entityB is Entity) {
-      lambda(entityA, entityB)
-    } else if (entityB is Entity && entityB[PlayerComponent.MAPPER] != null && contact.fixtureB.isSensor && entityA is Entity) {
-      lambda(entityB, entityA)
+  private fun Any.isActionableEntity() = this is Entity && this[ActionableComponent.MAPPER] != null && !this.isRemoving
+
+  private fun forEachPlayerSensorCollision(contact: Contact, lambda: (Entity, Entity) -> Unit) {
+    val userDataA = contact.fixtureA.body.userData
+    val userDataB = contact.fixtureB.body.userData
+
+    if (contact.fixtureA.isSensor && userDataA.isPlayerEntity() && userDataB.isActionableEntity()) {
+      lambda(userDataA as Entity, userDataB as Entity)
+    } else if (contact.fixtureB.isSensor && userDataB.isPlayerEntity() && userDataA.isActionableEntity()) {
+      lambda(userDataB as Entity, userDataA as Entity)
     }
   }
 
@@ -70,18 +73,12 @@ class CollisionSystem(
     LOG.debug { "beginContactEntities=${collisionCmp.beginContactEntities}" }
     LOG.debug { "endContactEntities=${collisionCmp.endContactEntities}" }
     if (interactCmp != null) {
-      // entity can interact with other entities -> check if there is contact with an actionable entity
+      // entity can interact with actionable entities
       collisionCmp.beginContactEntities.forEach { collEntity ->
-        if (collEntity[ActionableComponent.MAPPER] != null) {
-          interactCmp.entitiesInRange.add(collEntity)
-          collEntity[RenderComponent.MAPPER]?.sprite?.setColor(1f, 0f, 0f, 1f)
-        }
+        interactCmp.entitiesInRange.add(collEntity)
       }
       collisionCmp.endContactEntities.forEach { collEntity ->
-        if (collEntity[ActionableComponent.MAPPER] != null) {
-          interactCmp.entitiesInRange.remove(collEntity)
-          collEntity[RenderComponent.MAPPER]?.sprite?.setColor(1f, 1f, 1f, 1f)
-        }
+        interactCmp.entitiesInRange.remove(collEntity)
       }
     }
 

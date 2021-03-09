@@ -117,7 +117,7 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "chest")
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
-      with<ActionableComponent>()
+      with<ActionableComponent> { type = ActionType.CHEST }
     }
     "BIG_DEMON" -> {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "big-demon")
@@ -126,9 +126,7 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
     }
     "EXIT" -> {
       withBox2DComponents(world, BodyType.StaticBody, x, y, onlySensor = true)
-      with<ActionableComponent> {
-        isExit = true
-      }
+      with<ActionableComponent> { type = ActionType.EXIT }
     }
     else -> {
       MapService.LOG.error { "Unsupported MapObject name '${mapObject.name}'" }

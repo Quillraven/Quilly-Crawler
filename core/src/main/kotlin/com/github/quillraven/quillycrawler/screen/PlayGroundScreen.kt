@@ -13,10 +13,7 @@ import com.github.quillraven.commons.map.TiledMapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureEntity
-import com.github.quillraven.quillycrawler.ashley.system.CollisionSystem
-import com.github.quillraven.quillycrawler.ashley.system.MapSystem
-import com.github.quillraven.quillycrawler.ashley.system.MoveSystem
-import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
+import com.github.quillraven.quillycrawler.ashley.system.*
 import ktx.ashley.EngineEntity
 
 class PlayGroundScreen(
@@ -36,7 +33,8 @@ class PlayGroundScreen(
     // systems must be added before any entity is added to the engine because some systems react on
     // entity creation with certain components for initialization
     engine.run {
-      addSystem(PlayerControlSystem(messageManager))
+      addSystem(PlayerControlSystem())
+      addSystem(InteractSystem(messageManager))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
       addSystem(MoveSystem())
       addSystem(Box2DSystem(world, 1 / 60f))

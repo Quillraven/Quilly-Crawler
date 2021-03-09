@@ -6,13 +6,10 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
-import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.RemoveComponent
-import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.input.XboxInputProcessor
-import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
@@ -23,9 +20,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
 
-class PlayerControlSystem(
-  private val messageManager: MessageManager
-) : InputProcessor, XboxInputProcessor,
+class PlayerControlSystem : InputProcessor, XboxInputProcessor,
   IteratingSystem(allOf(PlayerControlComponent::class).exclude(RemoveComponent::class).get()) {
   private var valueLeftX = 0f
   private var valueLeftY = 0f
@@ -207,14 +202,8 @@ class PlayerControlSystem(
       return
     }
 
-    entity[InteractComponent.MAPPER]?.let { interactCmp ->
-      interactCmp.entitiesInRange.forEach { actionableEntity ->
-        actionableEntity[StateComponent.MAPPER]?.let {
-          // dispatch message to update entity state
-          messageManager.dispatchMessage(MessageType.PLAYER_INTERACT_ENTITY.ordinal)
-        }
-      }
-    }
+    actionPressed = false
+    entity[InteractComponent.MAPPER]?.let { it.interact = true }
   }
 
   companion object {

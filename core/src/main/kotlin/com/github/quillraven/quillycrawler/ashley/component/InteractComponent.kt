@@ -10,9 +10,11 @@ import ktx.collections.GdxSet
 
 class InteractComponent : Component, Pool.Poolable {
   val entitiesInRange = GdxSet<Entity>()
+  var interact = false
 
   override fun reset() {
     entitiesInRange.clear()
+    interact = false
   }
 
   companion object {
