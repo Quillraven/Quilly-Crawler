@@ -10,7 +10,6 @@
   <object id="1" name="PLAYER" x="26.8607" y="43.3237">
    <point/>
   </object>
-  <object id="2" x="104.085" y="102.461" width="0.108309"/>
   <object id="3" name="EXIT" x="97.695" y="98.2366" width="13.4304" height="11.6974"/>
  </objectgroup>
 </map>
