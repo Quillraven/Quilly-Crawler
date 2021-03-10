@@ -15,6 +15,8 @@ import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
 import ktx.ashley.EngineEntity
+import ktx.log.debug
+import ktx.log.logger
 
 class PlayGroundScreen(
   private val game: QuillyCrawler,
@@ -36,6 +38,7 @@ class PlayGroundScreen(
       addSystem(PlayerControlSystem())
       addSystem(InteractSystem(messageManager))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
+      addSystem(LootSystem())
       addSystem(MoveSystem())
       addSystem(Box2DSystem(world, 1 / 60f))
       addSystem(CameraLockSystem(viewport.camera))
@@ -61,5 +64,10 @@ class PlayGroundScreen(
   override fun dispose() {
     world.dispose()
     box2DDebugRenderer.dispose()
+    LOG.debug { "'${engine.entities.size()}' entities in engine" }
+  }
+
+  companion object {
+    private val LOG = logger<PlayGroundScreen>()
   }
 }

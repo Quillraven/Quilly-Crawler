@@ -94,6 +94,7 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
           with<StateComponent> { state = PlayerState.IDLE }
           with<PlayerComponent>()
           with<PlayerControlComponent>()
+          with<BagComponent>()
           with<InteractComponent>()
           with<MoveComponent> { maxSpeed = 5f }
           with<CameraLockComponent>()
