@@ -8,6 +8,7 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.quillycrawler.ashley.component.GoToNextLevelComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerComponent
+import com.github.quillraven.quillycrawler.ashley.component.playerCmp
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.log.debug
@@ -15,8 +16,7 @@ import ktx.log.error
 import ktx.log.logger
 
 class MapSystem(
-  private val mapService: MapService,
-  private var currentLevel: Int = 0
+  private val mapService: MapService
 ) : IteratingSystem(
   allOf(PlayerComponent::class, GoToNextLevelComponent::class).exclude(RemoveComponent::class).get()
 ) {
@@ -26,14 +26,15 @@ class MapSystem(
   }
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
-    currentLevel++
-    LOG.debug { "Moving to dungeon level $currentLevel" }
+    val playerCmp = entity.playerCmp
+    playerCmp.dungeonLevel++
+    LOG.debug { "Moving to dungeon level $playerCmp.dungeonLevel" }
 
-    val nextMapFilePath = nextMap(currentLevel)
+    val nextMapFilePath = nextMap(playerCmp.dungeonLevel)
     if (nextMapFilePath.isNotBlank()) {
       mapService.setMap(engine, nextMapFilePath)
     } else {
-      --currentLevel
+      --playerCmp.dungeonLevel
       LOG.debug { "You reached the end of the dungeon!" }
     }
 
