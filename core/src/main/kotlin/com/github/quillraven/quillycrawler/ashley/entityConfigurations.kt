@@ -98,6 +98,19 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
           with<InteractComponent>()
           with<MoveComponent> { maxSpeed = 5f }
           with<CameraLockComponent>()
+          with<StatsComponent> {
+            stats[StatsType.LIFE] = 30f
+            stats[StatsType.MAX_LIFE] = 30f
+            stats[StatsType.MANA] = 10f
+            stats[StatsType.MAX_MANA] = 10f
+            stats[StatsType.STRENGTH] = 5f
+            stats[StatsType.AGILITY] = 5f
+            stats[StatsType.INTELLIGENCE] = 5f
+            stats[StatsType.PHYSICAL_DAMAGE] = 7f
+            stats[StatsType.MAGIC_DAMAGE] = 4f
+            stats[StatsType.PHYSICAL_ARMOR] = 3f
+            stats[StatsType.MAGIC_ARMOR] = 1f
+          }
         }
       } else {
         // player already existing -> move it to new position
@@ -114,11 +127,23 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
       }
       return false
     }
-    "CHEST" -> {
+    "CHEST_COMMON", "CHEST_RARE", "CHEST_EPIC" -> {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "chest")
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
-      with<ActionableComponent> { type = ActionType.CHEST }
+      when (mapObject.name) {
+          "CHEST_COMMON" -> {
+            with<ActionableComponent> { type = ActionType.CHEST_COMMON }
+          }
+          "CHEST_RARE" -> {
+            with<ActionableComponent> { type = ActionType.CHEST_RARE }
+            this.entity.renderCmp.sprite.setColor(0.75f, 0.7f, 1f, 1f)
+          }
+          else -> {
+            with<ActionableComponent> { type = ActionType.CHEST_EPIC }
+            this.entity.renderCmp.sprite.setColor(0.5f, 0.3f, 1f, 1f)
+          }
+      }
     }
     "BIG_DEMON" -> {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "big-demon")

@@ -14,7 +14,7 @@ enum class ItemType {
   companion object {
     private val VALUES = values()
 
-    fun random() = VALUES[Random.nextInt(1, VALUES.size - 1)]
+    fun random() = VALUES[Random.nextInt(1, VALUES.size)]
   }
 }
 

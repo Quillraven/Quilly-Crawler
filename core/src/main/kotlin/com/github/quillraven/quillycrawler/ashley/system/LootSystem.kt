@@ -86,11 +86,31 @@ class LootSystem : EntityListener, IteratingSystem(
           amount = 1
         }
 
-        // TODO add item stats depending on type
+        when (type) {
+          ItemType.HAT -> {
+            with<StatsComponent> {
+              stats[StatsType.PHYSICAL_ARMOR] = 1f
+              stats[StatsType.INTELLIGENCE] = 1f
+            }
+          }
+          ItemType.ROBE -> {
+            with<StatsComponent> {
+              stats[StatsType.PHYSICAL_ARMOR] = 3f
+              stats[StatsType.INTELLIGENCE] = 3f
+            }
+          }
+          else -> {
+            LOG.error { "Unsupported ItemType '$type'" }
+          }
+        }
       }
     }
 
-    LOG.debug { "Added item of type '$type' to bag: ${bagCmp.items.keys()}" }
+    LOG.debug {
+      "Added item of type '$type' to bag: ${
+        bagCmp.items.entries().joinToString(", ") { "${it.value.itemCmp.amount}x ${it.key.name}" }
+      }"
+    }
   }
 
   companion object {

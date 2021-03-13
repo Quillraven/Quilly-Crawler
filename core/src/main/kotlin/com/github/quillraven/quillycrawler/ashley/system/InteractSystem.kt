@@ -80,9 +80,19 @@ class InteractSystem(
       ActionType.EXIT -> {
         player.add(engine.createComponent(GoToNextLevelComponent::class.java))
       }
-      ActionType.CHEST -> {
+      ActionType.CHEST_COMMON -> {
         engine.configureEntity(player) {
           with<LootComponent> { lootType = LootType.COMMON }
+        }
+      }
+      ActionType.CHEST_RARE -> {
+        engine.configureEntity(player) {
+          with<LootComponent> { lootType = LootType.RARE }
+        }
+      }
+      ActionType.CHEST_EPIC -> {
+        engine.configureEntity(player) {
+          with<LootComponent> { lootType = LootType.EPIC }
         }
       }
       else -> {

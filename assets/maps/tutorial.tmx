@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="9">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="15">
  <tileset firstgid="1" source="tileset1.tsx"/>
  <layer id="1" name="ground" width="20" height="20">
   <data encoding="base64" compression="zlib">
@@ -39,9 +39,6 @@
   </object>
  </objectgroup>
  <objectgroup id="6" name="entities">
-  <object id="3" name="CHEST" x="224.75" y="193">
-   <point/>
-  </object>
   <object id="5" name="BIG_DEMON" x="152.25" y="170">
    <point/>
   </object>
@@ -49,7 +46,25 @@
    <point/>
   </object>
   <object id="7" name="EXIT" x="144.535" y="17.1513" width="13.4304" height="11.6974"/>
-  <object id="8" name="CHEST" x="225.25" y="171.75">
+  <object id="8" name="CHEST_COMMON" x="225.25" y="171.75">
+   <point/>
+  </object>
+  <object id="9" name="CHEST_RARE" x="239.75" y="245.25">
+   <point/>
+  </object>
+  <object id="10" name="CHEST_COMMON" x="224.75" y="191">
+   <point/>
+  </object>
+  <object id="11" name="CHEST_RARE" x="225.5" y="225">
+   <point/>
+  </object>
+  <object id="12" name="CHEST_EPIC" x="100.75" y="223">
+   <point/>
+  </object>
+  <object id="13" name="CHEST_EPIC" x="129.75" y="239.75">
+   <point/>
+  </object>
+  <object id="14" name="CHEST_EPIC" x="165.75" y="242.5">
    <point/>
   </object>
  </objectgroup>
