@@ -1,6 +1,8 @@
 package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.PooledEngine
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -12,9 +14,14 @@ import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
+import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.ashley.configureEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
 import ktx.ashley.EngineEntity
+import ktx.ashley.allOf
+import ktx.ashley.configureEntity
+import ktx.ashley.with
+import ktx.collections.isNotEmpty
 import ktx.log.debug
 import ktx.log.logger
 
@@ -39,6 +46,7 @@ class PlayGroundScreen(
       addSystem(InteractSystem(messageManager))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
       addSystem(LootSystem())
+      addSystem(GearSystem())
       addSystem(MoveSystem())
       addSystem(Box2DSystem(world, 1 / 60f))
       addSystem(CameraLockSystem(viewport.camera))
@@ -58,6 +66,45 @@ class PlayGroundScreen(
   }
 
   override fun render(delta: Float) {
+    // TODO remove debug stuff
+    when {
+      Gdx.input.isKeyJustPressed(Input.Keys.E) -> {
+        engine.getEntitiesFor(allOf(PlayerComponent::class, BagComponent::class, GearComponent::class).get()).forEach {
+          val bagCmp = it.bagCmp
+
+          if (bagCmp.items.isNotEmpty()) {
+            engine.configureEntity(it) {
+              with<EquipComponent> {
+                addToGear.add(bagCmp.items.first().value)
+              }
+            }
+          }
+        }
+      }
+      Gdx.input.isKeyJustPressed(Input.Keys.U) -> {
+        engine.getEntitiesFor(allOf(PlayerComponent::class, BagComponent::class, GearComponent::class).get()).forEach {
+          val bagCmp = it.bagCmp
+
+          if (bagCmp.items.isNotEmpty()) {
+            engine.configureEntity(it) {
+              with<EquipComponent> {
+                removeFromGear.add(bagCmp.items.first().value)
+              }
+            }
+          }
+        }
+      }
+      Gdx.input.isKeyJustPressed(Input.Keys.P) -> {
+        engine.getEntitiesFor(allOf(PlayerComponent::class, BagComponent::class, GearComponent::class).get()).forEach {
+          with(it.statsCmp) {
+            StatsType.values().forEach { statsType ->
+              LOG.debug { "${statsType.name} -> ${this.totalStatValue(it, statsType)}" }
+            }
+          }
+        }
+      }
+    }
+
     engine.update(delta)
   }
 

@@ -83,6 +83,7 @@ class LootSystem : EntityListener, IteratingSystem(
       bagCmp.items[type] = engine.entity {
         with<ItemComponent> {
           itemType = type
+          gearType = type.gearType
           amount = 1
         }
 

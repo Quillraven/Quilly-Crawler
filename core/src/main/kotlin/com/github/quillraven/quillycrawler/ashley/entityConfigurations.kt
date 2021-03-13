@@ -98,6 +98,7 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
           with<InteractComponent>()
           with<MoveComponent> { maxSpeed = 5f }
           with<CameraLockComponent>()
+          with<GearComponent>()
           with<StatsComponent> {
             stats[StatsType.LIFE] = 30f
             stats[StatsType.MAX_LIFE] = 30f
@@ -132,17 +133,17 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
       when (mapObject.name) {
-          "CHEST_COMMON" -> {
-            with<ActionableComponent> { type = ActionType.CHEST_COMMON }
-          }
-          "CHEST_RARE" -> {
-            with<ActionableComponent> { type = ActionType.CHEST_RARE }
-            this.entity.renderCmp.sprite.setColor(0.75f, 0.7f, 1f, 1f)
-          }
-          else -> {
-            with<ActionableComponent> { type = ActionType.CHEST_EPIC }
-            this.entity.renderCmp.sprite.setColor(0.5f, 0.3f, 1f, 1f)
-          }
+        "CHEST_COMMON" -> {
+          with<ActionableComponent> { type = ActionType.CHEST_COMMON }
+        }
+        "CHEST_RARE" -> {
+          with<ActionableComponent> { type = ActionType.CHEST_RARE }
+          this.entity.renderCmp.sprite.setColor(0.75f, 0.7f, 1f, 1f)
+        }
+        else -> {
+          with<ActionableComponent> { type = ActionType.CHEST_EPIC }
+          this.entity.renderCmp.sprite.setColor(0.5f, 0.3f, 1f, 1f)
+        }
       }
     }
     "BIG_DEMON" -> {

@@ -23,6 +23,25 @@ class StatsComponent : Component, Pool.Poolable {
     stats.clear()
   }
 
+  fun totalStatValue(entity: Entity, type: StatsType): Float {
+    val baseValue = stats.getOrDefault(type, 0f)
+
+    val gearComponent = entity[GearComponent.MAPPER]
+    return if (gearComponent == null || gearComponent.gear.isEmpty) {
+      baseValue
+    } else {
+      var gearValue = 0f
+
+      gearComponent.gear.values().forEach { gear ->
+        gear[MAPPER]?.let { gearStats ->
+          gearValue += gearStats.stats.getOrDefault(type, 0f)
+        }
+      }
+
+      baseValue + gearValue
+    }
+  }
+
   companion object {
     val MAPPER = mapperFor<StatsComponent>()
   }

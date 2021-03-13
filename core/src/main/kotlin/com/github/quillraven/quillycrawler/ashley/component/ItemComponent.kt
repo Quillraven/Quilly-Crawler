@@ -8,8 +8,10 @@ import ktx.ashley.get
 import ktx.ashley.mapperFor
 import kotlin.random.Random
 
-enum class ItemType {
-  UNDEFINED, HAT, ROBE;
+enum class ItemType(val gearType: GearType) {
+  UNDEFINED(GearType.UNDEFINED),
+  HAT(GearType.HELMET),
+  ROBE(GearType.ARMOR);
 
   companion object {
     private val VALUES = values()
@@ -20,9 +22,11 @@ enum class ItemType {
 
 class ItemComponent : Component, Pool.Poolable {
   var itemType = ItemType.UNDEFINED
+  var gearType = GearType.UNDEFINED
   var amount = 1
 
   override fun reset() {
+    gearType = GearType.UNDEFINED
     itemType = ItemType.UNDEFINED
     amount = 1
   }
