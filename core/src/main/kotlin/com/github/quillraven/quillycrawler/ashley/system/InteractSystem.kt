@@ -45,8 +45,6 @@ class InteractSystem(
     val interactCmp = entity.interactCmp
 
     if (interactCmp.interact && interactCmp.entitiesInRange.isNotEmpty()) {
-      interactCmp.interact = false
-
       // interact with closest entity
       val entityTransformCmp = entity.transformCmp
       TMP_VECTOR_1.set(entityTransformCmp.position.x, entityTransformCmp.position.y)
@@ -55,6 +53,8 @@ class InteractSystem(
       closestEntity[StateComponent.MAPPER]?.dispatchMessage(messageManager, MessageType.PLAYER_INTERACT.ordinal)
       doEntityAction(entity, closestEntity)
     }
+
+    interactCmp.interact = false
   }
 
   private fun closestEntity(entitiesInRange: GdxSet<Entity>): Entity {
