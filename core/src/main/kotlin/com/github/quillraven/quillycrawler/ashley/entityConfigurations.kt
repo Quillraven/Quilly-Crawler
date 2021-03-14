@@ -1,5 +1,7 @@
 package com.github.quillraven.quillycrawler.ashley
 
+import com.badlogic.ashley.core.Engine
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.World
@@ -9,7 +11,6 @@ import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.BigDemonState
 import com.github.quillraven.quillycrawler.ai.ChestState
-import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import ktx.ashley.*
@@ -71,7 +72,7 @@ private fun EngineEntity.withAnimationComponents(atlas: TextureAtlasAssets, regi
   with<RenderComponent>()
 }
 
-fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
+fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): Boolean {
   if (world == null) {
     throw GdxRuntimeException("Box2D world must not be null")
   }
@@ -84,35 +85,7 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
       val playerEntities = engine.getEntitiesFor(playerFamily)
       if (playerEntities.size() <= 0) {
         // player entity does not exist yet -> create it
-        engine.entity {
-          withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "wizard-m")
-          withBox2DComponents(world, BodyType.DynamicBody, x, y, boundingBoxHeightPercentage = 0.2f) {
-            circle(1f) {
-              isSensor = true
-            }
-          }
-          with<StateComponent> { state = PlayerState.IDLE }
-          with<PlayerComponent>()
-          with<PlayerControlComponent>()
-          with<BagComponent>()
-          with<InteractComponent>()
-          with<MoveComponent> { maxSpeed = 5f }
-          with<CameraLockComponent>()
-          with<GearComponent>()
-          with<StatsComponent> {
-            stats[StatsType.LIFE] = 30f
-            stats[StatsType.MAX_LIFE] = 30f
-            stats[StatsType.MANA] = 10f
-            stats[StatsType.MAX_MANA] = 10f
-            stats[StatsType.STRENGTH] = 5f
-            stats[StatsType.AGILITY] = 5f
-            stats[StatsType.INTELLIGENCE] = 5f
-            stats[StatsType.PHYSICAL_DAMAGE] = 7f
-            stats[StatsType.MAGIC_DAMAGE] = 4f
-            stats[StatsType.PHYSICAL_ARMOR] = 3f
-            stats[StatsType.MAGIC_ARMOR] = 1f
-          }
-        }
+        engine.createPlayerEntity(world, x, y)
       } else {
         // player already existing -> move it to new position
         playerEntities.forEach { player ->
@@ -132,17 +105,18 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
       withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "chest")
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
+      with<ActionableComponent> { type = ActionType.CHEST }
       when (mapObject.name) {
         "CHEST_COMMON" -> {
-          with<ActionableComponent> { type = ActionType.CHEST_COMMON }
+          with<LootComponent> { lootType = LootType.COMMON }
         }
         "CHEST_RARE" -> {
-          with<ActionableComponent> { type = ActionType.CHEST_RARE }
           this.entity.renderCmp.sprite.setColor(0.75f, 0.7f, 1f, 1f)
+          with<LootComponent> { lootType = LootType.RARE }
         }
         else -> {
-          with<ActionableComponent> { type = ActionType.CHEST_EPIC }
           this.entity.renderCmp.sprite.setColor(0.5f, 0.3f, 1f, 1f)
+          with<LootComponent> { lootType = LootType.EPIC }
         }
       }
     }
@@ -162,4 +136,63 @@ fun EngineEntity.configureEntity(mapObject: MapObject, world: World?): Boolean {
   }
 
   return true
+}
+
+fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
+  return this.entity {
+    withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "wizard-m")
+    withBox2DComponents(world, BodyType.DynamicBody, x, y, boundingBoxHeightPercentage = 0.2f) {
+      circle(1f) {
+        isSensor = true
+      }
+    }
+    with<StateComponent> { state = com.github.quillraven.quillycrawler.ai.PlayerState.IDLE }
+    with<PlayerComponent>()
+    with<PlayerControlComponent>()
+    with<BagComponent>()
+    with<InteractComponent>()
+    with<MoveComponent> { maxSpeed = 5f }
+    with<CameraLockComponent>()
+    with<GearComponent>()
+    with<StatsComponent> {
+      stats[StatsType.LIFE] = 30f
+      stats[StatsType.MAX_LIFE] = 30f
+      stats[StatsType.MANA] = 10f
+      stats[StatsType.MAX_MANA] = 10f
+      stats[StatsType.STRENGTH] = 5f
+      stats[StatsType.AGILITY] = 5f
+      stats[StatsType.INTELLIGENCE] = 5f
+      stats[StatsType.PHYSICAL_DAMAGE] = 7f
+      stats[StatsType.MAGIC_DAMAGE] = 4f
+      stats[StatsType.PHYSICAL_ARMOR] = 3f
+      stats[StatsType.MAGIC_ARMOR] = 1f
+    }
+  }
+}
+
+fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
+  return this.entity {
+    with<ItemComponent> {
+      itemType = type
+      gearType = type.gearType
+      amount = numItems
+    }
+
+    when (type) {
+      ItemType.HAT -> {
+        with<StatsComponent> {
+          stats[StatsType.PHYSICAL_ARMOR] = 1f
+          stats[StatsType.INTELLIGENCE] = 1f
+        }
+      }
+      ItemType.ROBE -> {
+        with<StatsComponent> {
+          stats[StatsType.PHYSICAL_ARMOR] = 3f
+          stats[StatsType.INTELLIGENCE] = 3f
+        }
+      }
+      ItemType.UNDEFINED -> {
+      }
+    }
+  }
 }

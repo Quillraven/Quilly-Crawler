@@ -15,7 +15,7 @@ import com.github.quillraven.commons.map.TiledMapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.ashley.configureEntity
+import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
 import ktx.ashley.EngineEntity
 import ktx.ashley.allOf
@@ -36,7 +36,7 @@ class PlayGroundScreen(
   private val box2DDebugRenderer = Box2DDebugRenderer()
   private val engine = PooledEngine()
   private val mapService: MapService =
-    TiledMapService(engine, assetStorage, batch, QuillyCrawler.UNIT_SCALE, EngineEntity::configureEntity, world)
+    TiledMapService(engine, assetStorage, batch, QuillyCrawler.UNIT_SCALE, EngineEntity::configureTiledMapEntity, world)
 
   init {
     // systems must be added before any entity is added to the engine because some systems react on

@@ -7,10 +7,9 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.ashley.createItemEntity
 import ktx.ashley.allOf
-import ktx.ashley.entity
 import ktx.ashley.exclude
-import ktx.ashley.with
 import ktx.collections.contains
 import ktx.collections.set
 import ktx.log.debug
@@ -43,7 +42,11 @@ class LootSystem : EntityListener, IteratingSystem(
   }
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
-    when (entity.lootCmp.lootType) {
+    val lootCmp = entity.lootCmp
+
+    LOG.debug { "Process '${lootCmp.lootType}' loot" }
+
+    when (lootCmp.lootType) {
       LootType.COMMON -> {
         addPlayerLoot(entity, Random.nextInt(0, 11), 25)
       }
@@ -80,31 +83,7 @@ class LootSystem : EntityListener, IteratingSystem(
     if (type in bagCmp.items) {
       bagCmp.items[type].itemCmp.amount++
     } else {
-      bagCmp.items[type] = engine.entity {
-        with<ItemComponent> {
-          itemType = type
-          gearType = type.gearType
-          amount = 1
-        }
-
-        when (type) {
-          ItemType.HAT -> {
-            with<StatsComponent> {
-              stats[StatsType.PHYSICAL_ARMOR] = 1f
-              stats[StatsType.INTELLIGENCE] = 1f
-            }
-          }
-          ItemType.ROBE -> {
-            with<StatsComponent> {
-              stats[StatsType.PHYSICAL_ARMOR] = 3f
-              stats[StatsType.INTELLIGENCE] = 3f
-            }
-          }
-          else -> {
-            LOG.error { "Unsupported ItemType '$type'" }
-          }
-        }
-      }
+      bagCmp.items[type] = engine.createItemEntity(type)
     }
 
     LOG.debug {
