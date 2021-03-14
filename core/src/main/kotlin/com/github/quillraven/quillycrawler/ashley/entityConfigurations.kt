@@ -11,6 +11,7 @@ import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.BigDemonState
 import com.github.quillraven.quillycrawler.ai.ChestState
+import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import ktx.ashley.*
@@ -146,7 +147,7 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
         isSensor = true
       }
     }
-    with<StateComponent> { state = com.github.quillraven.quillycrawler.ai.PlayerState.IDLE }
+    with<StateComponent> { state = PlayerState.IDLE }
     with<PlayerComponent>()
     with<PlayerControlComponent>()
     with<BagComponent>()

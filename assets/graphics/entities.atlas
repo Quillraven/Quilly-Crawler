@@ -1,117 +1,145 @@
 
 entities.png
-size: 128,128
+size: 512,64
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 big-demon/idle
   rotate: false
-  xy: 2, 50
+  xy: 36, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 0
 big-demon/idle
   rotate: false
-  xy: 36, 88
+  xy: 70, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 1
 big-demon/idle
   rotate: false
-  xy: 36, 50
+  xy: 138, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 3
 big-demon/idle
   rotate: false
-  xy: 70, 88
+  xy: 172, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 2
 big-demon/run
   rotate: false
-  xy: 2, 88
+  xy: 2, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 1
 big-demon/run
   rotate: false
-  xy: 2, 12
+  xy: 104, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 3
 big-demon/run
   rotate: false
-  xy: 36, 12
+  xy: 206, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 2
 big-demon/run
   rotate: false
-  xy: 70, 50
+  xy: 240, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 0
 chest/idle
   rotate: false
-  xy: 106, 48
+  xy: 20, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
 chest/open
   rotate: false
-  xy: 70, 2
+  xy: 2, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
 chest/open
   rotate: false
-  xy: 88, 2
+  xy: 418, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 chest/open
   rotate: false
-  xy: 106, 30
+  xy: 436, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
 wizard-m/idle
   rotate: false
-  xy: 104, 96
+  xy: 274, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 0
 wizard-m/idle
   rotate: false
-  xy: 70, 20
+  xy: 292, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 1
 wizard-m/idle
   rotate: false
-  xy: 104, 66
+  xy: 310, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 2
 wizard-m/idle
   rotate: false
-  xy: 88, 20
+  xy: 328, 28
+  size: 16, 28
+  orig: 16, 28
+  offset: 0, 0
+  index: 3
+wizard-m/run
+  rotate: false
+  xy: 346, 28
+  size: 16, 28
+  orig: 16, 28
+  offset: 0, 0
+  index: 0
+wizard-m/run
+  rotate: false
+  xy: 364, 28
+  size: 16, 28
+  orig: 16, 28
+  offset: 0, 0
+  index: 1
+wizard-m/run
+  rotate: false
+  xy: 382, 28
+  size: 16, 28
+  orig: 16, 28
+  offset: 0, 0
+  index: 2
+wizard-m/run
+  rotate: false
+  xy: 400, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0

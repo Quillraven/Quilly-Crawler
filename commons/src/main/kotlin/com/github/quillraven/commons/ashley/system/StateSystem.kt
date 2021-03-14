@@ -94,6 +94,8 @@ class StateSystem(
   /**
    * Updates the entity's [StateComponent] by either switching to a new [EntityState]
    * or by updating the current [EntityState].
+   * If the entity has an [AnimationComponent] then its [stateKey][AnimationComponent.stateKey] is set to
+   * the lower case of [state's][StateComponent.state] toString() result.
    */
   override fun processEntity(entity: Entity, deltaTime: Float) {
     with(entity.stateCmp) {
