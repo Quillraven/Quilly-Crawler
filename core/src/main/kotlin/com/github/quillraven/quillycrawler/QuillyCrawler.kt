@@ -3,6 +3,7 @@ package com.github.quillraven.quillycrawler
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.github.quillraven.commons.game.AbstractGame
+import com.github.quillraven.quillycrawler.screen.InventoryScreen
 import com.github.quillraven.quillycrawler.screen.PlayGroundScreen
 
 class QuillyCrawler : AbstractGame() {
@@ -14,6 +15,7 @@ class QuillyCrawler : AbstractGame() {
     }
 
     addScreen(PlayGroundScreen(this))
+    addScreen(InventoryScreen(this))
     setScreen<PlayGroundScreen>()
   }
 

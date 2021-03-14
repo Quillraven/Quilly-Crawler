@@ -9,10 +9,12 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.RemoveComponent
+import com.github.quillraven.commons.game.AbstractGame
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
+import com.github.quillraven.quillycrawler.screen.InventoryScreen
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
@@ -20,7 +22,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
 
-class PlayerControlSystem : InputProcessor, XboxInputProcessor,
+class PlayerControlSystem(private val game: AbstractGame) : InputProcessor, XboxInputProcessor,
   IteratingSystem(allOf(PlayerControlComponent::class).exclude(RemoveComponent::class).get()) {
   private var valueLeftX = 0f
   private var valueLeftY = 0f
@@ -53,28 +55,16 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
 
   override fun keyDown(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.D -> {
-        updateMovementValues(1f, valueLeftY)
-        return true
-      }
-      Input.Keys.A -> {
-        updateMovementValues(-1f, valueLeftY)
-        return true
-      }
-      Input.Keys.W -> {
-        updateMovementValues(valueLeftX, -1f)
-        return true
-      }
-      Input.Keys.S -> {
-        updateMovementValues(valueLeftX, 1f)
-        return true
-      }
-      Input.Keys.SPACE -> {
-        actionPressed = true
-        return true
-      }
+      Input.Keys.D -> updateMovementValues(1f, valueLeftY)
+      Input.Keys.A -> updateMovementValues(-1f, valueLeftY)
+      Input.Keys.W -> updateMovementValues(valueLeftX, -1f)
+      Input.Keys.S -> updateMovementValues(valueLeftX, 1f)
+      Input.Keys.SPACE -> actionPressed = true
+      Input.Keys.I -> game.setScreen<InventoryScreen>()
+      else -> return false
     }
-    return false
+
+    return true
   }
 
   override fun keyUp(keycode: Int): Boolean {
@@ -85,7 +75,6 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
         } else {
           updateMovementValues(0f, valueLeftY)
         }
-        return true
       }
       Input.Keys.A -> {
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
@@ -93,7 +82,6 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
         } else {
           updateMovementValues(0f, valueLeftY)
         }
-        return true
       }
       Input.Keys.W -> {
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
@@ -101,7 +89,6 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
         } else {
           updateMovementValues(valueLeftX, 0f)
         }
-        return true
       }
       Input.Keys.S -> {
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
@@ -109,15 +96,12 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
         } else {
           updateMovementValues(valueLeftX, 0f)
         }
-
-        return true
       }
-      Input.Keys.SPACE -> {
-        actionPressed = false
-        return true
-      }
+      Input.Keys.SPACE -> actionPressed = false
+      else -> return false
     }
-    return false
+
+    return true
   }
 
   override fun keyTyped(character: Char): Boolean {
@@ -145,11 +129,13 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
   }
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
-    if (buttonCode == XboxInputProcessor.BUTTON_A) {
-      actionPressed = true
-      return true
+    when (buttonCode) {
+      XboxInputProcessor.BUTTON_A -> actionPressed = true
+      XboxInputProcessor.BUTTON_Y -> game.setScreen<InventoryScreen>()
+      else -> return false
     }
-    return false
+
+    return true
   }
 
   override fun buttonUp(controller: Controller?, buttonCode: Int): Boolean {

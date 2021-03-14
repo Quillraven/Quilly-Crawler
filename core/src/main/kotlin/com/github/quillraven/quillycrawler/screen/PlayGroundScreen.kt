@@ -29,7 +29,7 @@ class PlayGroundScreen(
   private val game: QuillyCrawler,
   private val messageManager: MessageManager = MessageManager.getInstance()
 ) : AbstractScreen(game) {
-  private val viewport = FitViewport(16f, 9f)
+  private val gameViewport = FitViewport(16f, 9f)
   private val world = World(Vector2.Zero, true).apply {
     autoClearForces = false
   }
@@ -42,19 +42,19 @@ class PlayGroundScreen(
     // systems must be added before any entity is added to the engine because some systems react on
     // entity creation with certain components for initialization
     engine.run {
-      addSystem(PlayerControlSystem())
+      addSystem(PlayerControlSystem(game))
       addSystem(InteractSystem(messageManager))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
       addSystem(LootSystem())
       addSystem(GearSystem())
       addSystem(MoveSystem())
       addSystem(Box2DSystem(world, 1 / 60f))
-      addSystem(CameraLockSystem(viewport.camera))
+      addSystem(CameraLockSystem(gameViewport.camera))
       addSystem(CollisionSystem(world))
       addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
-      addSystem(RenderSystem(batch, viewport, mapService = mapService))
+      addSystem(RenderSystem(batch, gameViewport, mapService = mapService))
       if (game.isDevMode()) {
-        addSystem(Box2DDebugRenderSystem(world, viewport, box2DDebugRenderer))
+        addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
       }
       addSystem(MapSystem(mapService))
       addSystem(RemoveSystem())
@@ -62,7 +62,7 @@ class PlayGroundScreen(
   }
 
   override fun resize(width: Int, height: Int) {
-    viewport.update(width, height, true)
+    gameViewport.update(width, height, true)
   }
 
   override fun render(delta: Float) {
