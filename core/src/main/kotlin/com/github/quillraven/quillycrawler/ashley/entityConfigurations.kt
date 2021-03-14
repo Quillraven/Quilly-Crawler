@@ -102,7 +102,7 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
       return false
     }
     "CHEST_COMMON", "CHEST_RARE", "CHEST_EPIC" -> {
-      withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "chest")
+      withAnimationComponents(TextureAtlasAssets.ENTITIES, "chest")
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
       with<ActionableComponent> { type = ActionType.CHEST }
@@ -121,7 +121,7 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
       }
     }
     "BIG_DEMON" -> {
-      withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "big-demon")
+      withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon")
       with<TransformComponent> { position.set(x, y, position.z) }
       with<StateComponent> { state = BigDemonState.RUN }
     }
@@ -140,7 +140,7 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
 
 fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
   return this.entity {
-    withAnimationComponents(TextureAtlasAssets.CHARACTERS_AND_PROPS, "wizard-m")
+    withAnimationComponents(TextureAtlasAssets.ENTITIES, "wizard-m")
     withBox2DComponents(world, BodyType.DynamicBody, x, y, boundingBoxHeightPercentage = 0.2f) {
       circle(1f) {
         isSensor = true

@@ -7,5 +7,5 @@ enum class TextureAtlasAssets(
   filePath: String,
   val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor(filePath, TextureAtlas::class.java)
 ) {
-  CHARACTERS_AND_PROPS("graphics/characters-and-props.atlas")
+  ENTITIES("graphics/entities.atlas")
 }
