@@ -26,3 +26,4 @@ TBD
 - greatdocbrown: [Gamepad Icons](https://greatdocbrown.itch.io/gamepad-ui)
 - vrtxrry: [Dungeon Font](https://vrtxrry.itch.io/dungeonfont)
 - Mounir Tohami: [Pixel Art GUI](https://mounirtohami.itch.io/pixel-art-gui-elements?download)
+- Alex's Assets: [16x16 RPG Icon Pack](https://alexs-assets.itch.io/16x16-rpg-item-pack)
