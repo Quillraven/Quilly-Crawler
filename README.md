@@ -23,3 +23,6 @@ TBD
 - Twitch chat for supporting with some questions during development
 - czyzby for his quick support and adjustments in [LibKTX](https://github.com/libktx/ktx)
 - 0x72: [16x16 Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii)
+- greatdocbrown: [Gamepad Icons](https://greatdocbrown.itch.io/gamepad-ui)
+- vrtxrry: [Dungeon Font](https://vrtxrry.itch.io/dungeonfont)
+- Mounir Tohami: [Pixel Art GUI](https://mounirtohami.itch.io/pixel-art-gui-elements?download)
