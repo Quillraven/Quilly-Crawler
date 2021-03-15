@@ -9,26 +9,27 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.RemoveComponent
-import com.github.quillraven.commons.game.AbstractGame
+import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
+import com.github.quillraven.quillycrawler.ashley.component.SetScreenComponent
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
 import com.github.quillraven.quillycrawler.screen.InventoryScreen
-import ktx.ashley.allOf
-import ktx.ashley.exclude
-import ktx.ashley.get
+import ktx.ashley.*
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.reflect.KClass
 
-class PlayerControlSystem(private val game: AbstractGame) : InputProcessor, XboxInputProcessor,
+class PlayerControlSystem : InputProcessor, XboxInputProcessor,
   IteratingSystem(allOf(PlayerControlComponent::class).exclude(RemoveComponent::class).get()) {
   private var valueLeftX = 0f
   private var valueLeftY = 0f
   private var stopMovement = true
   private var moveDirectionDeg = 0f
   private var actionPressed = false
+  private var nextScreen: KClass<out AbstractScreen> = AbstractScreen::class
 
   override fun addedToEngine(engine: Engine?) {
     super.addedToEngine(engine)
@@ -60,7 +61,7 @@ class PlayerControlSystem(private val game: AbstractGame) : InputProcessor, Xbox
       Input.Keys.W -> updateMovementValues(valueLeftX, -1f)
       Input.Keys.S -> updateMovementValues(valueLeftX, 1f)
       Input.Keys.SPACE -> actionPressed = true
-      Input.Keys.I -> game.setScreen<InventoryScreen>()
+      Input.Keys.I -> nextScreen = InventoryScreen::class
       else -> return false
     }
 
@@ -104,34 +105,22 @@ class PlayerControlSystem(private val game: AbstractGame) : InputProcessor, Xbox
     return true
   }
 
-  override fun keyTyped(character: Char): Boolean {
-    return false
-  }
+  override fun keyTyped(character: Char) = false
 
-  override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-    return false
-  }
+  override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
 
-  override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-    return false
-  }
+  override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
 
-  override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
-    return false
-  }
+  override fun touchDragged(screenX: Int, screenY: Int, pointer: Int) = false
 
-  override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
-    return false
-  }
+  override fun mouseMoved(screenX: Int, screenY: Int) = false
 
-  override fun scrolled(amountX: Float, amountY: Float): Boolean {
-    return false
-  }
+  override fun scrolled(amountX: Float, amountY: Float) = false
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
     when (buttonCode) {
       XboxInputProcessor.BUTTON_A -> actionPressed = true
-      XboxInputProcessor.BUTTON_Y -> game.setScreen<InventoryScreen>()
+      XboxInputProcessor.BUTTON_Y -> nextScreen = InventoryScreen::class
       else -> return false
     }
 
@@ -171,6 +160,11 @@ class PlayerControlSystem(private val game: AbstractGame) : InputProcessor, Xbox
   override fun processEntity(entity: Entity, deltaTime: Float) {
     updateMovement(entity)
     processAction(entity)
+
+    if (nextScreen != AbstractScreen::class) {
+      engine.configureEntity(entity) { with<SetScreenComponent> { screenType = nextScreen } }
+      nextScreen = AbstractScreen::class
+    }
   }
 
   private fun updateMovement(entity: Entity) {

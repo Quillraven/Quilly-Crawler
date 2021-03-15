@@ -3,8 +3,7 @@ package com.github.quillraven.quillycrawler
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.github.quillraven.commons.game.AbstractGame
-import com.github.quillraven.quillycrawler.screen.InventoryScreen
-import com.github.quillraven.quillycrawler.screen.PlayGroundScreen
+import com.github.quillraven.quillycrawler.screen.GameScreen
 
 class QuillyCrawler : AbstractGame() {
   fun isDevMode() = "true" == System.getProperty("devMode", "false")
@@ -14,9 +13,8 @@ class QuillyCrawler : AbstractGame() {
       Gdx.app.logLevel = Application.LOG_DEBUG
     }
 
-    addScreen(PlayGroundScreen(this))
-    addScreen(InventoryScreen(this))
-    setScreen<PlayGroundScreen>()
+    addScreen(GameScreen(this))
+    setScreen<GameScreen>()
   }
 
   companion object {
