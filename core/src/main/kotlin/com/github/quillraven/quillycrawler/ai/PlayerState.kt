@@ -7,6 +7,7 @@ import com.github.quillraven.commons.ashley.component.animationCmp
 import com.github.quillraven.commons.ashley.component.renderCmp
 import com.github.quillraven.commons.ashley.component.stateCmp
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
+import kotlin.math.abs
 
 enum class PlayerState : EntityState {
   IDLE {
@@ -51,7 +52,9 @@ enum class PlayerState : EntityState {
       } else {
         // flip player sprite depending on the move direction
         with(entity.renderCmp) {
-          sprite.setFlip(moveCmp.cosDeg < 0, sprite.isFlipY)
+          if (abs(moveCmp.cosDeg) > 0.01f) {
+            sprite.setFlip(moveCmp.cosDeg < 0, sprite.isFlipY)
+          }
         }
       }
     }
