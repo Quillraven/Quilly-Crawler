@@ -56,12 +56,15 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
 
   override fun keyDown(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.D -> updateMovementValues(1f, valueLeftY)
-      Input.Keys.A -> updateMovementValues(-1f, valueLeftY)
-      Input.Keys.W -> updateMovementValues(valueLeftX, -1f)
-      Input.Keys.S -> updateMovementValues(valueLeftX, 1f)
+      Input.Keys.RIGHT -> updateMovementValues(1f, valueLeftY)
+      Input.Keys.LEFT -> updateMovementValues(-1f, valueLeftY)
+      Input.Keys.UP -> updateMovementValues(valueLeftX, -1f)
+      Input.Keys.DOWN -> updateMovementValues(valueLeftX, 1f)
       Input.Keys.SPACE -> actionPressed = true
-      Input.Keys.I -> nextScreen = InventoryScreen::class
+      Input.Keys.I -> {
+        updateMovementValues(0f, 0f)
+        nextScreen = InventoryScreen::class
+      }
       else -> return false
     }
 
@@ -70,29 +73,29 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
 
   override fun keyUp(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.D -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+      Input.Keys.RIGHT -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
           updateMovementValues(-1f, valueLeftY)
         } else {
           updateMovementValues(0f, valueLeftY)
         }
       }
-      Input.Keys.A -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+      Input.Keys.LEFT -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
           updateMovementValues(1f, valueLeftY)
         } else {
           updateMovementValues(0f, valueLeftY)
         }
       }
-      Input.Keys.W -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+      Input.Keys.UP -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
           updateMovementValues(valueLeftX, 1f)
         } else {
           updateMovementValues(valueLeftX, 0f)
         }
       }
-      Input.Keys.S -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+      Input.Keys.DOWN -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
           updateMovementValues(valueLeftX, -1f)
         } else {
           updateMovementValues(valueLeftX, 0f)

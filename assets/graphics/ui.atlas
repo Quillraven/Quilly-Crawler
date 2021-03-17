@@ -6,7 +6,7 @@ filter: Nearest,Nearest
 repeat: none
 bar_blue
   rotate: false
-  xy: 86, 373
+  xy: 86, 141
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -15,7 +15,7 @@ bar_blue
   index: -1
 bar_frame-1
   rotate: false
-  xy: 572, 885
+  xy: 572, 653
   size: 45, 7
   split: 1, 5, 2, 2
   pad: 0, 0, 0, 0
@@ -24,7 +24,7 @@ bar_frame-1
   index: -1
 bar_red
   rotate: false
-  xy: 572, 878
+  xy: 572, 646
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -33,7 +33,7 @@ bar_red
   index: -1
 bar_yellow
   rotate: false
-  xy: 520, 835
+  xy: 520, 603
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -42,7 +42,7 @@ bar_yellow
   index: -1
 button-1
   rotate: false
-  xy: 4, 280
+  xy: 4, 48
   size: 30, 14
   split: 10, 10, 4, 3
   pad: 0, 0, 0, 0
@@ -51,23 +51,51 @@ button-1
   index: -1
 button-2
   rotate: false
-  xy: 520, 842
+  xy: 520, 610
   size: 46, 14
   split: 15, 15, 4, 3
   pad: 0, 0, 0, 0
   orig: 46, 14
   offset: 0, 0
   index: -1
+button-down
+  rotate: false
+  xy: 520, 567
+  size: 12, 12
+  orig: 12, 12
+  offset: 0, 0
+  index: -1
+button-esc
+  rotate: false
+  xy: 540, 587
+  size: 12, 12
+  orig: 12, 12
+  offset: 0, 0
+  index: -1
+button-space
+  rotate: false
+  xy: 588, 630
+  size: 12, 12
+  orig: 12, 12
+  offset: 0, 0
+  index: -1
+button-up
+  rotate: false
+  xy: 520, 551
+  size: 12, 12
+  orig: 12, 12
+  offset: 0, 0
+  index: -1
 dungeonFont
   rotate: false
-  xy: 4, 380
+  xy: 4, 148
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 frame-1
   rotate: false
-  xy: 4, 298
+  xy: 4, 66
   size: 30, 30
   split: 10, 10, 10, 10
   pad: 0, 0, 0, 0
@@ -76,7 +104,7 @@ frame-1
   index: -1
 frame-2
   rotate: false
-  xy: 52, 346
+  xy: 52, 114
   size: 30, 30
   split: 10, 10, 10, 10
   pad: 0, 0, 0, 0
@@ -85,7 +113,7 @@ frame-2
   index: -1
 frame-3
   rotate: false
-  xy: 4, 332
+  xy: 4, 100
   size: 44, 44
   split: 13, 13, 13, 13
   pad: 0, 0, 0, 0
@@ -94,350 +122,91 @@ frame-3
   index: -1
 gamepad-a
   rotate: false
-  xy: 540, 579
+  xy: 4, 16
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gamepad-b
   rotate: false
-  xy: 4, 4
+  xy: 20, 32
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gamepad-down
   rotate: false
-  xy: 24, 264
+  xy: 604, 630
   size: 8, 12
   orig: 8, 12
   offset: 0, 0
   index: -1
 gamepad-left
   rotate: false
-  xy: 588, 866
+  xy: 4, 4
   size: 12, 8
   orig: 12, 8
   offset: 0, 0
   index: -1
 gamepad-right
   rotate: false
-  xy: 52, 334
+  xy: 52, 102
   size: 12, 8
   orig: 12, 8
   offset: 0, 0
   index: -1
 gamepad-up
   rotate: false
-  xy: 38, 316
+  xy: 38, 84
   size: 8, 12
   orig: 8, 12
   offset: 0, 0
   index: -1
 gamepad-x
   rotate: false
-  xy: 572, 862
+  xy: 572, 630
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gamepad-y
   rotate: false
-  xy: 520, 559
+  xy: 4, 32
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gold
   rotate: false
-  xy: 621, 886
+  xy: 621, 654
   size: 5, 6
   orig: 5, 6
   offset: 0, 0
   index: -1
-item-01
+item-55
   rotate: false
-  xy: 540, 615
+  xy: 86, 121
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-item-010
+item-56
   rotate: false
-  xy: 520, 795
+  xy: 520, 583
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
-item-011
+undefined
   rotate: false
-  xy: 540, 815
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-012
-  rotate: false
-  xy: 4, 240
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-013
-  rotate: false
-  xy: 520, 775
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-014
-  rotate: false
-  xy: 540, 795
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-015
-  rotate: false
-  xy: 4, 220
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-016
-  rotate: false
-  xy: 520, 755
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-017
-  rotate: false
-  xy: 540, 775
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-018
-  rotate: false
-  xy: 4, 200
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-019
-  rotate: false
-  xy: 520, 735
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-02
-  rotate: false
-  xy: 4, 40
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-020
-  rotate: false
-  xy: 540, 755
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-021
-  rotate: false
-  xy: 4, 180
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-022
-  rotate: false
-  xy: 520, 715
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-023
-  rotate: false
-  xy: 540, 735
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-024
-  rotate: false
-  xy: 4, 160
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-025
-  rotate: false
-  xy: 520, 695
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-026
-  rotate: false
-  xy: 540, 715
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-027
-  rotate: false
-  xy: 4, 140
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-028
-  rotate: false
-  xy: 520, 675
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-029
-  rotate: false
-  xy: 540, 695
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-03
-  rotate: false
-  xy: 520, 575
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-030
-  rotate: false
-  xy: 520, 595
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-031
-  rotate: false
-  xy: 4, 120
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-032
-  rotate: false
-  xy: 520, 655
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-033
-  rotate: false
-  xy: 540, 675
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-034
-  rotate: false
-  xy: 4, 100
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-035
-  rotate: false
-  xy: 520, 635
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-036
-  rotate: false
-  xy: 540, 655
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-037
-  rotate: false
-  xy: 4, 80
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-038
-  rotate: false
-  xy: 520, 615
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-039
-  rotate: false
-  xy: 540, 635
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-04
-  rotate: false
-  xy: 540, 595
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-040
-  rotate: false
-  xy: 4, 60
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-05
-  rotate: false
-  xy: 4, 20
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-06
-  rotate: false
-  xy: 86, 353
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-07
-  rotate: false
-  xy: 520, 815
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-08
-  rotate: false
-  xy: 4, 260
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
-item-09
-  rotate: false
-  xy: 106, 353
-  size: 16, 16
-  orig: 16, 16
+  xy: 106, 125
+  size: 12, 12
+  orig: 12, 12
   offset: 0, 0
   index: -1
 window-1
   rotate: false
-  xy: 520, 860
+  xy: 520, 628
   size: 48, 32
   split: 16, 16, 10, 11
   pad: 0, 0, 0, 0

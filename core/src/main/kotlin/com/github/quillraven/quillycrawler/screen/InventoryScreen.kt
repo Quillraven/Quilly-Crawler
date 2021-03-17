@@ -10,13 +10,14 @@ import com.github.quillraven.commons.game.AbstractGame
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.ashley.system.GearSystem
 import com.github.quillraven.quillycrawler.ashley.system.SetScreenSystem
+import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.ui.configureSkin
 import com.github.quillraven.quillycrawler.ui.model.InventoryViewModel
 import com.github.quillraven.quillycrawler.ui.view.InventoryView
 
 class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEntity: Entity) : AbstractScreen(game) {
-  private val viewModel = InventoryViewModel(engine, playerEntity)
   private val skin = configureSkin(game.assetStorage)
+  private val viewModel = InventoryViewModel(game.assetStorage[I18NAssets.DEFAULT.descriptor], engine, playerEntity)
   private val view = InventoryView(skin, viewModel)
   private val stage = Stage(FitViewport(320f, 180f), batch).apply {
     addActor(view)
@@ -32,10 +33,15 @@ class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEnti
         system.setProcessing(false)
       }
     }
+    view.addXboxControllerListener()
     Gdx.input.inputProcessor = view
+
+    viewModel.initialize()
+    view.initialize()
   }
 
   override fun hide() {
+    view.removeXboxControllerListener()
     Gdx.input.inputProcessor = null
     engine.systems.forEach { system ->
       if (system !is GearSystem && system !is SetScreenSystem) {
@@ -48,7 +54,10 @@ class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEnti
     // TODO remove debug
     if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
       stage.clear()
-      stage.addActor(InventoryView(skin, viewModel))
+      viewModel.initialize()
+      stage.addActor(InventoryView(skin, viewModel).apply {
+        initialize()
+      })
     }
 
     stage.act(delta)
