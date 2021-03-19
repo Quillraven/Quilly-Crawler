@@ -13,11 +13,17 @@ enum class StatsType {
   MANA, MAX_MANA,
   STRENGTH, AGILITY, INTELLIGENCE,
   PHYSICAL_DAMAGE, MAGIC_DAMAGE,
-  PHYSICAL_ARMOR, MAGIC_ARMOR
+  PHYSICAL_ARMOR, MAGIC_ARMOR;
+
+  companion object {
+    val VALUES = values()
+  }
 }
 
 class StatsComponent : Component, Pool.Poolable {
   val stats = EnumMap<StatsType, Float>(StatsType::class.java)
+
+  operator fun get(type: StatsType): Float = stats.getOrDefault(type, 0f)
 
   override fun reset() {
     stats.clear()

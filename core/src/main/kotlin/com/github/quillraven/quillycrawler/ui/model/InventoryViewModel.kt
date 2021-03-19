@@ -3,18 +3,23 @@ package com.github.quillraven.quillycrawler.ui.model
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.I18NBundle
+import com.badlogic.gdx.utils.StringBuilder
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.screen.GameScreen
 import com.github.quillraven.quillycrawler.ui.SkinImages
 import ktx.ashley.configureEntity
+import ktx.ashley.get
 import ktx.ashley.with
 import ktx.collections.GdxArray
+import ktx.collections.contains
 import ktx.collections.gdxArrayOf
+import java.util.*
 
 data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var playerEntity: Entity) {
   private var selectedItemIndex = -1
   private val itemStrings = gdxArrayOf<String>()
   private val itemEntities = gdxArrayOf<Entity>()
+  private val statsInfo = EnumMap<StatsType, StringBuilder>(StatsType::class.java)
 
   private fun itemName(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.name"]
 
@@ -46,17 +51,6 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  private fun addGear(itemEntity: Entity) {
-    engine.run {
-      configureEntity(playerEntity) {
-        with<EquipComponent> {
-          addToGear.add(itemEntity)
-        }
-      }
-      update(0f)
-    }
-  }
-
   fun moveItemSelectionIndex(indicesToMove: Int, callback: (Int, String, String) -> Unit) {
     with(playerEntity.bagCmp) {
       if (items.isEmpty) {
@@ -81,7 +75,126 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun equipOrUseSelectedItem() {
+  private fun StringBuilder.appendStatusValue(value: Float) {
+    if (value > 0f) {
+      append(" [#54CC43]+").append(value.toInt()).append("[]")
+    } else {
+      append(" [#FF4542]").append(value.toInt()).append("[]")
+    }
+  }
+
+  private fun StringBuilder.appendStatDifferenceText(statsCmp: StatsComponent, type: StatsType) {
+    val baseValue = statsCmp[type]
+    val totalValue = statsCmp.totalStatValue(playerEntity, type)
+
+    if (totalValue > baseValue + 0.5f || totalValue < baseValue - 0.5f) {
+      // bonus /malus stats
+      appendStatusValue(totalValue - baseValue)
+    }
+  }
+
+  fun statsInfo(callback: (EnumMap<StatsType, StringBuilder>) -> Unit) {
+    val playerStatsCmp = playerEntity.statsCmp
+    val selectedItem: Entity? = if (hasValidIndex()) {
+      itemEntities[selectedItemIndex]
+    } else {
+      null
+    }
+
+    StatsType.VALUES.forEach { type ->
+      if (type == StatsType.MAX_LIFE || type == StatsType.MAX_MANA) {
+        return@forEach
+      }
+
+      val strBuilder = statsInfo.getOrPut(type) { StringBuilder(20) }
+      strBuilder.clear()
+
+      // build basic stat information (=base stats + current gear)
+      when (type) {
+        StatsType.LIFE -> {
+          strBuilder.append(bundle["LIFE"]).append(": ")
+            .append(playerStatsCmp[StatsType.LIFE].toInt())
+            .append(" / ")
+            .append(playerStatsCmp[StatsType.MAX_LIFE].toInt())
+            .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_LIFE)
+        }
+        StatsType.MANA -> {
+          strBuilder.append(bundle["MANA"]).append(": ")
+            .append(playerStatsCmp[StatsType.MANA].toInt())
+            .append(" / ")
+            .append(playerStatsCmp[StatsType.MAX_MANA].toInt())
+            .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_MANA)
+        }
+        else -> {
+          strBuilder.append(bundle[type.name]).append(": ")
+            .append(playerStatsCmp[type].toInt())
+            .appendStatDifferenceText(playerStatsCmp, type)
+        }
+      }
+
+      // append stat manipulation of currently selected item
+      if (selectedItem != null) {
+        val itemCmp = selectedItem.itemCmp
+        val itemStatsCmp = selectedItem[StatsComponent.MAPPER] ?: return@forEach
+
+        if (itemCmp.gearType == GearType.UNDEFINED) {
+          // no gear -> if it is a consumable then show how it will manipulate the stats
+          when (type) {
+            StatsType.LIFE -> {
+              if (StatsType.MAX_LIFE in itemStatsCmp.stats) {
+                strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_LIFE])
+              }
+            }
+            StatsType.MANA -> {
+              if (StatsType.MAX_MANA in itemStatsCmp.stats) {
+                strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_MANA])
+              }
+            }
+            else -> {
+              if (type in itemStatsCmp.stats) {
+                strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[type])
+              }
+            }
+          }
+        } else {
+          // gear -> compare with current gear
+          val currentGear = playerEntity.gearCmp.gear
+          val diffValue = if (itemCmp.gearType in currentGear) {
+            when (type) {
+              StatsType.LIFE -> currentGear[itemCmp.gearType].statsCmp[StatsType.MAX_LIFE] - itemStatsCmp[StatsType.MAX_LIFE]
+              StatsType.MANA -> currentGear[itemCmp.gearType].statsCmp[StatsType.MAX_MANA] - itemStatsCmp[StatsType.MAX_MANA]
+              else -> currentGear[itemCmp.gearType].statsCmp[type] - itemStatsCmp[type]
+            }
+          } else {
+            when (type) {
+              StatsType.LIFE -> itemStatsCmp[StatsType.MAX_LIFE]
+              StatsType.MANA -> itemStatsCmp[StatsType.MAX_MANA]
+              else -> itemStatsCmp[type]
+            }
+          }
+
+          if (diffValue != 0f) {
+            strBuilder.append(" [#434cFF]<>[]").appendStatusValue(diffValue)
+          }
+        }
+      }
+    }
+
+    callback(statsInfo)
+  }
+
+  private fun addGear(itemEntity: Entity) {
+    engine.run {
+      configureEntity(playerEntity) {
+        with<EquipComponent> {
+          addToGear.add(itemEntity)
+        }
+      }
+      update(0f)
+    }
+  }
+
+  fun equipOrUseSelectedItem(callback: (EnumMap<StatsType, StringBuilder>) -> Unit) {
     if (hasValidIndex()) {
       itemEntities[selectedItemIndex].itemCmp.also { itemCmp ->
         if (itemCmp.gearType != GearType.UNDEFINED) {
@@ -91,6 +204,8 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
         // TODO use item if it is a consumable
       }
     }
+
+    statsInfo(callback)
   }
 
   fun returnToGame() {

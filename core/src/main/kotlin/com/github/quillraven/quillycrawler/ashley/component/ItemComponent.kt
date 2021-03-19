@@ -11,7 +11,8 @@ import kotlin.random.Random
 enum class ItemType(val gearType: GearType) {
   UNDEFINED(GearType.UNDEFINED),
   HAT(GearType.HELMET),
-  ROBE(GearType.ARMOR);
+  ROBE(GearType.ARMOR),
+  CURSED_NECKLACE(GearType.AMULET);
 
   companion object {
     private val VALUES = values()

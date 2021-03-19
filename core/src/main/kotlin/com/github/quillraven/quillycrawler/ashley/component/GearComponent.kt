@@ -9,7 +9,7 @@ import ktx.ashley.get
 import ktx.ashley.mapperFor
 
 enum class GearType {
-  UNDEFINED, HELMET, ARMOR
+  UNDEFINED, HELMET, ARMOR, AMULET
 }
 
 class GearComponent : Component, Pool.Poolable {

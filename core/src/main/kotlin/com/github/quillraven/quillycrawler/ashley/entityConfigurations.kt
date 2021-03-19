@@ -19,6 +19,7 @@ import ktx.box2d.BodyDefinition
 import ktx.box2d.body
 import ktx.box2d.box
 import ktx.box2d.circle
+import ktx.collections.set
 import ktx.log.error
 import ktx.tiled.x
 import ktx.tiled.y
@@ -150,7 +151,11 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<StateComponent> { state = PlayerState.IDLE }
     with<PlayerComponent>()
     with<PlayerControlComponent>()
-    with<BagComponent>()
+    with<BagComponent> {
+      items[ItemType.CURSED_NECKLACE] = createItemEntity(ItemType.CURSED_NECKLACE)
+      items[ItemType.HAT] = createItemEntity(ItemType.HAT)
+      items[ItemType.ROBE] = createItemEntity(ItemType.ROBE)
+    }
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
     with<CameraLockComponent>()
@@ -188,8 +193,17 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
       }
       ItemType.ROBE -> {
         with<StatsComponent> {
-          stats[StatsType.PHYSICAL_ARMOR] = 3f
+          stats[StatsType.PHYSICAL_ARMOR] = 2f
           stats[StatsType.INTELLIGENCE] = 3f
+        }
+      }
+      ItemType.CURSED_NECKLACE -> {
+        with<StatsComponent> {
+          stats[StatsType.MAX_MANA] = 35f
+          stats[StatsType.INTELLIGENCE] = 10f
+          stats[StatsType.MAGIC_DAMAGE] = 8f
+          stats[StatsType.PHYSICAL_DAMAGE] = -4f
+          stats[StatsType.PHYSICAL_ARMOR] = -3f
         }
       }
       ItemType.UNDEFINED -> {

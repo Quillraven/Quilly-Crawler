@@ -15,8 +15,8 @@ import com.github.quillraven.quillycrawler.ui.model.InventoryViewModel
 import com.github.quillraven.quillycrawler.ui.view.InventoryView
 
 class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEntity: Entity) : AbstractScreen(game) {
-  val viewModel = InventoryViewModel(game.assetStorage[I18NAssets.DEFAULT.descriptor], engine, playerEntity)
-  private val view = InventoryView(viewModel)
+  val viewModel = InventoryViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, playerEntity)
+  private val view = InventoryView(viewModel, assetStorage[I18NAssets.DEFAULT.descriptor])
   private val stage = Stage(FitViewport(320f, 180f), batch)
 
   override fun resize(width: Int, height: Int) {
@@ -47,7 +47,7 @@ class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEnti
     // TODO remove debug
     if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
       stage.clear()
-      stage.addActor(InventoryView(viewModel))
+      stage.addActor(InventoryView(viewModel, assetStorage[I18NAssets.DEFAULT.descriptor]))
     }
 
     with(stage) {

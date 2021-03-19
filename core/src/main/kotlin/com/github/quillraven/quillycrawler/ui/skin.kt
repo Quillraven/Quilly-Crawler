@@ -17,6 +17,7 @@ enum class SkinImages(val regionKey: String) {
   BUTTON_2("button-2"),
   WINDOW("window-1"),
   FRAME_1("frame-1"),
+  FRAME_2("frame-2"),
   FRAME_3("frame-3"),
   GAME_PAD_DOWN("gamepad-down"),
   GAME_PAD_UP("gamepad-up"),
