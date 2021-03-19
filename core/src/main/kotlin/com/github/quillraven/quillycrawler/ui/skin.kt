@@ -4,9 +4,10 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
+import kotlinx.coroutines.launch
 import ktx.assets.async.AssetStorage
+import ktx.async.KtxAsync
 import ktx.scene2d.Scene2DSkin
 import ktx.style.*
 
@@ -46,7 +47,12 @@ enum class SkinListStyle {
 
 fun configureSkin(assetStorage: AssetStorage): Skin {
   val atlas = assetStorage.loadSync(TextureAtlasAssets.UI.descriptor)
-  assetStorage.loadSync(I18NAssets.DEFAULT.descriptor)
+
+  KtxAsync.launch {
+    if (!assetStorage.contains<Skin>("defaultSkin")) {
+      assetStorage.add("defaultSkin", Scene2DSkin.defaultSkin)
+    }
+  }
 
   return Scene2DSkin.defaultSkin.also { skin ->
     skin.addRegions(atlas)

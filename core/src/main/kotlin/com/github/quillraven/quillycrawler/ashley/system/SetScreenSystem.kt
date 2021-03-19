@@ -24,8 +24,8 @@ class SetScreenSystem(private val game: QuillyCrawler) :
       return
     }
 
-    // create screen if not yet created
     if (!game.containsScreen(nextScreenType.java)) {
+      // create screen if not yet created
       LOG.debug { "Screen '${nextScreenType.simpleName}' does not exist yet -> create it" }
       when (nextScreenType) {
         InventoryScreen::class -> game.addScreen(InventoryScreen(game, engine, entity))
@@ -33,6 +33,11 @@ class SetScreenSystem(private val game: QuillyCrawler) :
           LOG.error { "Unsupported screen type '${nextScreenType.simpleName}'" }
           return
         }
+      }
+    } else {
+      // screen already exists -> update parameters if necessary
+      if (nextScreenType == InventoryScreen::class) {
+        game.getScreen<InventoryScreen>().viewModel.playerEntity = entity
       }
     }
 

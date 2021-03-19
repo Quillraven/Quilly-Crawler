@@ -8,6 +8,7 @@ import com.github.quillraven.quillycrawler.screen.GameScreen
 import com.github.quillraven.quillycrawler.ui.SkinImages
 import ktx.ashley.configureEntity
 import ktx.ashley.with
+import ktx.collections.GdxArray
 import ktx.collections.gdxArrayOf
 
 data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var playerEntity: Entity) {
@@ -15,15 +16,33 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
   private val itemStrings = gdxArrayOf<String>()
   private val itemEntities = gdxArrayOf<Entity>()
 
-  fun initialize() {
-    selectedItemIndex = -1
+  private fun itemName(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.name"]
+
+  private fun itemDescription(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.description"]
+
+  private fun itemRegionKey(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.skinRegionKey"]
+
+  private fun hasValidIndex() = selectedItemIndex >= 0 && selectedItemIndex < itemEntities.size
+
+  fun load(callback: (GdxArray<String>, Int, String, String) -> Unit) {
     itemStrings.clear()
     itemEntities.clear()
-    playerEntity.bagCmp.items.values().forEach { item ->
-      itemEntities.add(item)
-      item.itemCmp.also { itemCmp ->
-        itemStrings.add("${itemCmp.amount}x ${bundle["Item.${itemCmp.itemType.name}.name"]}")
+    with(playerEntity.bagCmp) {
+      items.values().forEach { item ->
+        itemEntities.add(item)
+        item.itemCmp.also { itemCmp ->
+          itemStrings.add("${itemCmp.amount}x ${itemName(itemCmp)}")
+        }
       }
+
+      selectedItemIndex = if (items.isEmpty) -1 else 0
+    }
+
+    if (hasValidIndex()) {
+      val itemCmp = itemEntities[selectedItemIndex].itemCmp
+      callback(itemStrings, selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp))
+    } else {
+      callback(itemStrings, selectedItemIndex, SkinImages.UNDEFINED.regionKey, "")
     }
   }
 
@@ -38,43 +57,7 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun items() = itemStrings
-
-  private fun selectedItem(): Entity? {
-    with(playerEntity.bagCmp) {
-      return if (selectedItemIndex == -1 || selectedItemIndex >= items.size) {
-        // invalid index
-        null
-      } else {
-        itemEntities[selectedItemIndex]
-      }
-    }
-  }
-
-  fun selectedItemRegionKey(): String {
-    val selectedItem = selectedItem()
-    return if (selectedItem == null) {
-      SkinImages.UNDEFINED.regionKey
-    } else {
-      bundle["Item.${selectedItem.itemCmp.itemType.name}.skinRegionKey"]
-    }
-  }
-
-  fun selectedItemDescription(): String {
-    val selectedItem = selectedItem()
-    return if (selectedItem == null) {
-      ""
-    } else {
-      bundle["Item.${selectedItem.itemCmp.itemType.name}.description"]
-    }
-  }
-
-  fun selectFirstItem(): Int {
-    selectedItemIndex = if (playerEntity.bagCmp.items.isEmpty) -1 else 0
-    return selectedItemIndex
-  }
-
-  fun moveItemSelectionIndex(indicesToMove: Int): Int {
+  fun moveItemSelectionIndex(indicesToMove: Int, callback: (Int, String, String) -> Unit) {
     with(playerEntity.bagCmp) {
       if (items.isEmpty) {
         // entity has no items -> do nothing
@@ -90,15 +73,17 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
       }
     }
 
-    return selectedItemIndex
+    if (hasValidIndex()) {
+      val itemCmp = itemEntities[selectedItemIndex].itemCmp
+      callback(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp))
+    } else {
+      callback(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "")
+    }
   }
 
   fun equipOrUseSelectedItem() {
-    val selectedItem = selectedItem()
-    if (selectedItem == null) {
-      return
-    } else {
-      selectedItem.itemCmp.also { itemCmp ->
+    if (hasValidIndex()) {
+      itemEntities[selectedItemIndex].itemCmp.also { itemCmp ->
         if (itemCmp.gearType != GearType.UNDEFINED) {
           addGear(itemEntities[selectedItemIndex])
         }

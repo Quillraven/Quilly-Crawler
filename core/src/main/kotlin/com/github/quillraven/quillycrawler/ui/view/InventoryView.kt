@@ -1,8 +1,10 @@
 package com.github.quillraven.quillycrawler.ui.view
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.utils.Align
 import com.github.quillraven.commons.input.XboxInputProcessor
@@ -14,7 +16,7 @@ import com.github.quillraven.quillycrawler.ui.model.InventoryViewModel
 import ktx.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
 
-class InventoryView(skin: Skin, private val viewModel: InventoryViewModel) : Table(skin), KTable,
+class InventoryView(private val viewModel: InventoryViewModel) : Table(Scene2DSkin.defaultSkin), KTable,
   InputProcessor, XboxInputProcessor {
   private val bagItems: GdxList<String>
   private val itemImage: Image
@@ -97,28 +99,40 @@ class InventoryView(skin: Skin, private val viewModel: InventoryViewModel) : Tab
     // debugAll()
   }
 
-  fun initialize() {
-    bagItems.run {
-      clearItems()
-      setItems(viewModel.items())
-      updateSelectedIndex(viewModel.selectFirstItem())
+  override fun setStage(stage: Stage?) {
+    if (stage == null) {
+      // active screen changes away from InventoryScreen
+      removeXboxControllerListener()
+      Gdx.input.inputProcessor = null
+    } else {
+      // InventoryScreen becomes active screen
+      addXboxControllerListener()
+      Gdx.input.inputProcessor = this
+
+      bagItems.run {
+        clearItems()
+        viewModel.load { items, firstItemIndex, regionKey, description ->
+          setItems(items)
+          onSelectionChange(firstItemIndex, regionKey, description)
+        }
+      }
     }
+    super.setStage(stage)
   }
 
-  private fun updateSelectedIndex(newIndex: Int) {
+  private fun onSelectionChange(newIndex: Int, regionKey: String, description: String) {
     bagItems.selectedIndex = newIndex
 
-    val itemRegionKey = viewModel.selectedItemRegionKey()
-    itemImage.drawable = skin.getDrawable(itemRegionKey)
-    itemImage.isVisible = itemRegionKey != SkinImages.UNDEFINED.regionKey
+    itemImage.drawable = skin.getDrawable(regionKey)
+    itemImage.isVisible = regionKey != SkinImages.UNDEFINED.regionKey
 
-    itemDescription.setText(viewModel.selectedItemDescription())
+    itemDescription.setText(description)
   }
 
   override fun keyDown(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.DOWN -> updateSelectedIndex(viewModel.moveItemSelectionIndex(1))
-      Input.Keys.UP -> updateSelectedIndex(viewModel.moveItemSelectionIndex(-1))
+      Input.Keys.DOWN -> viewModel.moveItemSelectionIndex(1, ::onSelectionChange)
+      Input.Keys.UP -> viewModel.moveItemSelectionIndex(-1, ::onSelectionChange)
       Input.Keys.SPACE -> viewModel.equipOrUseSelectedItem()
       Input.Keys.ESCAPE -> viewModel.returnToGame()
       else -> return false
@@ -143,8 +157,8 @@ class InventoryView(skin: Skin, private val viewModel: InventoryViewModel) : Tab
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
     when (buttonCode) {
-      XboxInputProcessor.BUTTON_DOWN -> updateSelectedIndex(viewModel.moveItemSelectionIndex(1))
-      XboxInputProcessor.BUTTON_UP -> updateSelectedIndex(viewModel.moveItemSelectionIndex(-1))
+      XboxInputProcessor.BUTTON_DOWN -> viewModel.moveItemSelectionIndex(1, ::onSelectionChange)
+      XboxInputProcessor.BUTTON_UP -> viewModel.moveItemSelectionIndex(-1, ::onSelectionChange)
       XboxInputProcessor.BUTTON_A -> viewModel.equipOrUseSelectedItem()
       XboxInputProcessor.BUTTON_B -> viewModel.returnToGame()
       else -> return false
