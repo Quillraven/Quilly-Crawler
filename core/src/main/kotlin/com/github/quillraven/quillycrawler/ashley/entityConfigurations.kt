@@ -152,9 +152,10 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<PlayerComponent>()
     with<PlayerControlComponent>()
     with<BagComponent> {
-      items[ItemType.CURSED_NECKLACE] = createItemEntity(ItemType.CURSED_NECKLACE)
-      items[ItemType.HAT] = createItemEntity(ItemType.HAT)
-      items[ItemType.ROBE] = createItemEntity(ItemType.ROBE)
+      // TODO remove debug items
+      ItemType.values().filter { it != ItemType.UNDEFINED }.forEach {
+        items[it] = createItemEntity(it)
+      }
     }
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
@@ -185,16 +186,9 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
     }
 
     when (type) {
-      ItemType.HAT -> {
-        with<StatsComponent> {
-          stats[StatsType.PHYSICAL_ARMOR] = 1f
-          stats[StatsType.INTELLIGENCE] = 1f
-        }
-      }
-      ItemType.ROBE -> {
+      ItemType.BUCKLER -> {
         with<StatsComponent> {
           stats[StatsType.PHYSICAL_ARMOR] = 2f
-          stats[StatsType.INTELLIGENCE] = 3f
         }
       }
       ItemType.CURSED_NECKLACE -> {
@@ -204,6 +198,36 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
           stats[StatsType.MAGIC_DAMAGE] = 8f
           stats[StatsType.PHYSICAL_DAMAGE] = -4f
           stats[StatsType.PHYSICAL_ARMOR] = -3f
+        }
+      }
+      ItemType.HAT -> {
+        with<StatsComponent> {
+          stats[StatsType.PHYSICAL_ARMOR] = 1f
+          stats[StatsType.INTELLIGENCE] = 1f
+        }
+      }
+      ItemType.LEATHER_BOOTS -> {
+        with<StatsComponent> {
+          stats[StatsType.PHYSICAL_ARMOR] = 1f
+          stats[StatsType.AGILITY] = 1f
+        }
+      }
+      ItemType.LEATHER_GLOVES -> {
+        with<StatsComponent> {
+          stats[StatsType.PHYSICAL_ARMOR] = 1f
+          stats[StatsType.STRENGTH] = 1f
+        }
+      }
+      ItemType.ROBE -> {
+        with<StatsComponent> {
+          stats[StatsType.PHYSICAL_ARMOR] = 2f
+          stats[StatsType.INTELLIGENCE] = 3f
+        }
+      }
+      ItemType.ROD -> {
+        with<StatsComponent> {
+          stats[StatsType.MAGIC_DAMAGE] = 3f
+          stats[StatsType.PHYSICAL_DAMAGE] = 1f
         }
       }
       ItemType.UNDEFINED -> {

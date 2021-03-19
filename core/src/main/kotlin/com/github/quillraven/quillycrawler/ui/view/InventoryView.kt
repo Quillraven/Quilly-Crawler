@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.Scaling
 import com.badlogic.gdx.utils.StringBuilder
 import com.github.quillraven.commons.input.XboxInputProcessor
+import com.github.quillraven.quillycrawler.ashley.component.GearType
 import com.github.quillraven.quillycrawler.ashley.component.StatsType
 import com.github.quillraven.quillycrawler.ui.SkinImages
 import com.github.quillraven.quillycrawler.ui.SkinLabelStyle
@@ -24,9 +25,21 @@ import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
 class InventoryView(private val viewModel: InventoryViewModel, private val bundle: I18NBundle) :
   Table(Scene2DSkin.defaultSkin), KTable,
   InputProcessor, XboxInputProcessor {
+  // item details
   private val bagItems: GdxList<String>
   private val itemImage: Image
   private val itemDescriptionLabel: Label
+
+  // gear labels
+  private val helmetLabel: Label
+  private val amuletLabel: Label
+  private val armorLabel: Label
+  private val weaponLabel: Label
+  private val shieldLabel: Label
+  private val glovesLabel: Label
+  private val bootsLabel: Label
+
+  // stats labels
   private val lifeLabel: Label
   private val manaLabel: Label
   private val strengthLabel: Label
@@ -61,7 +74,7 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
 
       cell.expand()
         .padBottom(3f)
-        .width(95f).height(115f)
+        .width(95f).height(120f)
     }
 
     // item details and stats table
@@ -78,12 +91,27 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
         wrap = true
         cell.expandX().fill()
           .padLeft(4f).padRight(4f).padTop(6f)
+          .height(23f)
           .row()
       }
 
       // gear
       table { gearTableCell ->
-        gearTableCell.expand().fill().colspan(2).row()
+        background = skin.getDrawable(SkinImages.FRAME_2.regionKey)
+        defaults().width(40f).expandX().fill().left().padTop(2f)
+
+        this@InventoryView.helmetLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+        this@InventoryView.amuletLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
+        this@InventoryView.armorLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+        this@InventoryView.shieldLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
+        this@InventoryView.bootsLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+        this@InventoryView.glovesLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
+        this@InventoryView.weaponLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+
+        gearTableCell.expand().fill().colspan(2)
+          .padTop(2f)
+          .width(176f).height(34f)
+          .row()
       }
 
       // stats
@@ -91,34 +119,28 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
         background = skin.getDrawable(SkinImages.FRAME_2.regionKey)
         defaults().width(86f).fill().left().padTop(3f)
 
-        this@InventoryView.lifeLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-        this@InventoryView.physDamageLabel = label("", SkinLabelStyle.DEFAULT.name) {
-          it.row()
-        }
+        this@InventoryView.lifeLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f).padTop(5f) }
+        this@InventoryView.physDamageLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padTop(5f).row() }
         this@InventoryView.manaLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
         this@InventoryView.magicDamageLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
         this@InventoryView.physArmorLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
         this@InventoryView.magicArmorLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
 
-        this@InventoryView.strengthLabel = label("", SkinLabelStyle.DEFAULT.name) {
-          it.colspan(2).padLeft(8f).row()
-        }
-        this@InventoryView.intelligenceLabel = label("", SkinLabelStyle.DEFAULT.name) {
-          it.colspan(2).padLeft(8f).row()
-        }
-        this@InventoryView.agilityLabel = label("", SkinLabelStyle.DEFAULT.name) {
-          it.colspan(2).padLeft(8f).padBottom(3f)
-        }
+        this@InventoryView.strengthLabel = label("", SkinLabelStyle.DEFAULT.name) { it.colspan(2).padLeft(8f).row() }
+        this@InventoryView.intelligenceLabel =
+          label("", SkinLabelStyle.DEFAULT.name) { it.colspan(2).padLeft(8f).row() }
+        this@InventoryView.agilityLabel =
+          label("", SkinLabelStyle.DEFAULT.name) { it.colspan(2).padLeft(8f).padBottom(3f) }
 
         statsTableCell.expandX().fillX()
-          .width(176f)
+          .width(176f).height(51f)
           .pad(2f)
           .colspan(2)
       }
 
       tableCell.expand()
         .padBottom(3f)
-        .width(180f).height(115f)
+        .width(180f).height(120f)
         .row()
     }
 
@@ -183,10 +205,14 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
 
     itemDescriptionLabel.setText(description)
 
-    viewModel.statsInfo(::onEquipOrUseItem)
+    viewModel.statsAndGearInfo(::onEquipOrUseItem)
   }
 
-  private fun onEquipOrUseItem(statsInfo: EnumMap<StatsType, StringBuilder>) {
+  private fun onEquipOrUseItem(
+    statsInfo: EnumMap<StatsType, StringBuilder>,
+    gearInfo: EnumMap<GearType, StringBuilder>
+  ) {
+    // stats
     lifeLabel.setText(statsInfo[StatsType.LIFE])
     manaLabel.setText(statsInfo[StatsType.MANA])
     strengthLabel.setText(statsInfo[StatsType.STRENGTH])
@@ -196,6 +222,15 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
     physArmorLabel.setText(statsInfo[StatsType.PHYSICAL_ARMOR])
     magicDamageLabel.setText(statsInfo[StatsType.MAGIC_DAMAGE])
     magicArmorLabel.setText(statsInfo[StatsType.MAGIC_ARMOR])
+
+    // gear
+    helmetLabel.setText(gearInfo[GearType.HELMET])
+    amuletLabel.setText(gearInfo[GearType.AMULET])
+    armorLabel.setText(gearInfo[GearType.ARMOR])
+    weaponLabel.setText(gearInfo[GearType.WEAPON])
+    shieldLabel.setText(gearInfo[GearType.SHIELD])
+    bootsLabel.setText(gearInfo[GearType.BOOTS])
+    glovesLabel.setText(gearInfo[GearType.GLOVES])
   }
 
   override fun keyDown(keycode: Int): Boolean {

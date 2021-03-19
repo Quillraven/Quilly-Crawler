@@ -12,7 +12,11 @@ enum class ItemType(val gearType: GearType) {
   UNDEFINED(GearType.UNDEFINED),
   HAT(GearType.HELMET),
   ROBE(GearType.ARMOR),
-  CURSED_NECKLACE(GearType.AMULET);
+  CURSED_NECKLACE(GearType.AMULET),
+  ROD(GearType.WEAPON),
+  LEATHER_GLOVES(GearType.GLOVES),
+  LEATHER_BOOTS(GearType.BOOTS),
+  BUCKLER(GearType.SHIELD);
 
   companion object {
     private val VALUES = values()

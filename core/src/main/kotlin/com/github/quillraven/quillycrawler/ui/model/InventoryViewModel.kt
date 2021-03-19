@@ -20,6 +20,7 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
   private val itemStrings = gdxArrayOf<String>()
   private val itemEntities = gdxArrayOf<Entity>()
   private val statsInfo = EnumMap<StatsType, StringBuilder>(StatsType::class.java)
+  private val gearInfo = EnumMap<GearType, StringBuilder>(GearType::class.java)
 
   private fun itemName(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.name"]
 
@@ -93,7 +94,40 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun statsInfo(callback: (EnumMap<StatsType, StringBuilder>) -> Unit) {
+  fun statsAndGearInfo(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>) -> Unit) {
+    updateStatsInfo()
+    updateGearInfo()
+
+    callback(statsInfo, gearInfo)
+  }
+
+  private fun updateGearInfo() {
+    with(playerEntity.gearCmp.gear) {
+      GearType.VALUES.forEach { type ->
+        if (type == GearType.UNDEFINED) {
+          return@forEach
+        }
+
+        val stringBuilder = gearInfo.getOrPut(type) { StringBuilder(20) }
+        stringBuilder.clear()
+
+        stringBuilder.append(bundle[type.name]).append(": ")
+
+        if (type in this) {
+          stringBuilder.append(itemName(this[type].itemCmp))
+        } else {
+          stringBuilder.append("-")
+        }
+
+        if (stringBuilder.length > 20) {
+          stringBuilder.setLength(19)
+          stringBuilder.append(".")
+        }
+      }
+    }
+  }
+
+  private fun updateStatsInfo() {
     val playerStatsCmp = playerEntity.statsCmp
     val selectedItem: Entity? = if (hasValidIndex()) {
       itemEntities[selectedItemIndex]
@@ -110,27 +144,7 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
       strBuilder.clear()
 
       // build basic stat information (=base stats + current gear)
-      when (type) {
-        StatsType.LIFE -> {
-          strBuilder.append(bundle["LIFE"]).append(": ")
-            .append(playerStatsCmp[StatsType.LIFE].toInt())
-            .append(" / ")
-            .append(playerStatsCmp[StatsType.MAX_LIFE].toInt())
-            .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_LIFE)
-        }
-        StatsType.MANA -> {
-          strBuilder.append(bundle["MANA"]).append(": ")
-            .append(playerStatsCmp[StatsType.MANA].toInt())
-            .append(" / ")
-            .append(playerStatsCmp[StatsType.MAX_MANA].toInt())
-            .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_MANA)
-        }
-        else -> {
-          strBuilder.append(bundle[type.name]).append(": ")
-            .append(playerStatsCmp[type].toInt())
-            .appendStatDifferenceText(playerStatsCmp, type)
-        }
-      }
+      basicStatsInfo(type, strBuilder, playerStatsCmp)
 
       // append stat manipulation of currently selected item
       if (selectedItem != null) {
@@ -139,48 +153,91 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
 
         if (itemCmp.gearType == GearType.UNDEFINED) {
           // no gear -> if it is a consumable then show how it will manipulate the stats
-          when (type) {
-            StatsType.LIFE -> {
-              if (StatsType.MAX_LIFE in itemStatsCmp.stats) {
-                strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_LIFE])
-              }
-            }
-            StatsType.MANA -> {
-              if (StatsType.MAX_MANA in itemStatsCmp.stats) {
-                strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_MANA])
-              }
-            }
-            else -> {
-              if (type in itemStatsCmp.stats) {
-                strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[type])
-              }
-            }
-          }
+          consumableInfo(type, itemStatsCmp, strBuilder)
         } else {
           // gear -> compare with current gear
-          val currentGear = playerEntity.gearCmp.gear
-          val diffValue = if (itemCmp.gearType in currentGear) {
-            when (type) {
-              StatsType.LIFE -> currentGear[itemCmp.gearType].statsCmp[StatsType.MAX_LIFE] - itemStatsCmp[StatsType.MAX_LIFE]
-              StatsType.MANA -> currentGear[itemCmp.gearType].statsCmp[StatsType.MAX_MANA] - itemStatsCmp[StatsType.MAX_MANA]
-              else -> currentGear[itemCmp.gearType].statsCmp[type] - itemStatsCmp[type]
-            }
-          } else {
-            when (type) {
-              StatsType.LIFE -> itemStatsCmp[StatsType.MAX_LIFE]
-              StatsType.MANA -> itemStatsCmp[StatsType.MAX_MANA]
-              else -> itemStatsCmp[type]
-            }
-          }
-
-          if (diffValue != 0f) {
-            strBuilder.append(" [#434cFF]<>[]").appendStatusValue(diffValue)
-          }
+          gearComparisonInfo(itemCmp, type, itemStatsCmp, strBuilder)
         }
       }
     }
+  }
 
-    callback(statsInfo)
+  private fun gearComparisonInfo(
+    itemCmp: ItemComponent,
+    type: StatsType,
+    itemStatsCmp: StatsComponent,
+    strBuilder: StringBuilder
+  ) {
+    val currentGear = playerEntity.gearCmp.gear
+    val diffValue = if (itemCmp.gearType in currentGear) {
+      when (type) {
+        StatsType.LIFE -> currentGear[itemCmp.gearType].statsCmp[StatsType.MAX_LIFE] - itemStatsCmp[StatsType.MAX_LIFE]
+        StatsType.MANA -> currentGear[itemCmp.gearType].statsCmp[StatsType.MAX_MANA] - itemStatsCmp[StatsType.MAX_MANA]
+        else -> currentGear[itemCmp.gearType].statsCmp[type] - itemStatsCmp[type]
+      }
+    } else {
+      when (type) {
+        StatsType.LIFE -> itemStatsCmp[StatsType.MAX_LIFE]
+        StatsType.MANA -> itemStatsCmp[StatsType.MAX_MANA]
+        else -> itemStatsCmp[type]
+      }
+    }
+
+    if (diffValue != 0f) {
+      strBuilder.append(" [#434cFF]<>[]").appendStatusValue(diffValue)
+    }
+  }
+
+  private fun consumableInfo(
+    type: StatsType,
+    itemStatsCmp: StatsComponent,
+    strBuilder: StringBuilder
+  ) {
+    when (type) {
+      StatsType.LIFE -> {
+        if (StatsType.MAX_LIFE in itemStatsCmp.stats) {
+          strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_LIFE])
+        }
+      }
+      StatsType.MANA -> {
+        if (StatsType.MAX_MANA in itemStatsCmp.stats) {
+          strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_MANA])
+        }
+      }
+      else -> {
+        if (type in itemStatsCmp.stats) {
+          strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[type])
+        }
+      }
+    }
+  }
+
+  private fun basicStatsInfo(
+    type: StatsType,
+    strBuilder: StringBuilder,
+    playerStatsCmp: StatsComponent
+  ) {
+    when (type) {
+      StatsType.LIFE -> {
+        strBuilder.append(bundle["LIFE"]).append(": ")
+          .append(playerStatsCmp[StatsType.LIFE].toInt())
+          .append(" / ")
+          .append(playerStatsCmp[StatsType.MAX_LIFE].toInt())
+          .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_LIFE)
+      }
+      StatsType.MANA -> {
+        strBuilder.append(bundle["MANA"]).append(": ")
+          .append(playerStatsCmp[StatsType.MANA].toInt())
+          .append(" / ")
+          .append(playerStatsCmp[StatsType.MAX_MANA].toInt())
+          .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_MANA)
+      }
+      else -> {
+        strBuilder.append(bundle[type.name]).append(": ")
+          .append(playerStatsCmp[type].toInt())
+          .appendStatDifferenceText(playerStatsCmp, type)
+      }
+    }
   }
 
   private fun addGear(itemEntity: Entity) {
@@ -194,7 +251,7 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun equipOrUseSelectedItem(callback: (EnumMap<StatsType, StringBuilder>) -> Unit) {
+  fun equipOrUseSelectedItem(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>) -> Unit) {
     if (hasValidIndex()) {
       itemEntities[selectedItemIndex].itemCmp.also { itemCmp ->
         if (itemCmp.gearType != GearType.UNDEFINED) {
@@ -205,7 +262,7 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
       }
     }
 
-    statsInfo(callback)
+    statsAndGearInfo(callback)
   }
 
   fun returnToGame() {
