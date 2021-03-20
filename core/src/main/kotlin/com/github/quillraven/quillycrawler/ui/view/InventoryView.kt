@@ -59,7 +59,6 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
 
     // header
     textButton(bundle["InventoryView.title"], SkinTextButtonStyle.TITLE.name) { cell ->
-      this.labelCell.padTop(4f)
       cell.expand()
         .top().padTop(8f)
         .height(25f).width(95f)
@@ -93,7 +92,7 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
         setAlignment(Align.left)
         wrap = true
         cell.expandX().fill()
-          .padLeft(4f).padRight(4f).padTop(6f)
+          .padLeft(4f).padRight(4f).padTop(2f)
           .height(23f)
           .row()
       }
@@ -101,7 +100,7 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
       // gear
       table { gearTableCell ->
         background = skin.getDrawable(SkinImages.FRAME_2.regionKey)
-        defaults().width(40f).expandX().fill().left().padTop(2f)
+        defaults().width(40f).expandX().fill().left()
 
         this@InventoryView.helmetLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
         this@InventoryView.amuletLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
@@ -120,10 +119,10 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
       // stats
       table { statsTableCell ->
         background = skin.getDrawable(SkinImages.FRAME_2.regionKey)
-        defaults().width(86f).fill().left().padTop(3f)
+        defaults().width(86f).fill().left()
 
-        this@InventoryView.lifeLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f).padTop(5f) }
-        this@InventoryView.physDamageLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padTop(5f).row() }
+        this@InventoryView.lifeLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+        this@InventoryView.physDamageLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
         this@InventoryView.manaLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
         this@InventoryView.magicDamageLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
         this@InventoryView.physArmorLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
@@ -155,21 +154,15 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
       image(skin.getDrawable(SkinImages.GAME_PAD_UP.regionKey))
       image(skin.getDrawable(SkinImages.KEY_BOARD_DOWN.regionKey))
       image(skin.getDrawable(SkinImages.KEY_BOARD_UP.regionKey))
-      label(this@InventoryView.bundle["InventoryView.navigateInfo1"], SkinLabelStyle.DEFAULT.name) {
-        it.padTop(4f)
-      }
+      label(this@InventoryView.bundle["InventoryView.navigateInfo1"], SkinLabelStyle.DEFAULT.name)
 
       image(skin.getDrawable(SkinImages.GAME_PAD_A.regionKey)) { it.padLeft(20f) }
       image(skin.getDrawable(SkinImages.KEY_BOARD_SPACE.regionKey))
-      label(this@InventoryView.bundle["InventoryView.navigateInfo2"], SkinLabelStyle.DEFAULT.name) {
-        it.padTop(4f)
-      }
+      label(this@InventoryView.bundle["InventoryView.navigateInfo2"], SkinLabelStyle.DEFAULT.name)
 
       image(skin.getDrawable(SkinImages.GAME_PAD_B.regionKey)) { it.padLeft(20f) }
       image(skin.getDrawable(SkinImages.KEY_BOARD_ESCAPE.regionKey))
-      label(this@InventoryView.bundle["InventoryView.navigateInfo3"], SkinLabelStyle.DEFAULT.name) {
-        it.padTop(4f)
-      }
+      label(this@InventoryView.bundle["InventoryView.navigateInfo3"], SkinLabelStyle.DEFAULT.name)
 
       cell.expand().left()
         .colspan(2)

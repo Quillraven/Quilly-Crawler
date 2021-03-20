@@ -30,8 +30,8 @@ enum class SkinImages(val regionKey: String) {
 }
 
 enum class SkinFontStyle(val fntFilePath: String, val regionKey: String, val scale: Float) {
-  TITLE("fonts/dungeonFont.fnt", "dungeonFont", 0.5f),
-  DEFAULT("fonts/dungeonFont.fnt", "dungeonFont", 0.25f),
+  TITLE("fonts/immortal.fnt", "immortal", 0.4f),
+  DEFAULT("fonts/immortal.fnt", "immortal", 0.15f),
 }
 
 enum class SkinTextButtonStyle {
@@ -87,7 +87,8 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
       fontColorSelected = Color.BLACK
       fontColorUnselected = Color.WHITE
       selection = skin.getDrawable(SkinImages.BUTTON_2.regionKey).apply {
-        topHeight = 4f
+        topHeight = 1f
+        bottomHeight = 1f
         leftWidth = 3f
       }
     }

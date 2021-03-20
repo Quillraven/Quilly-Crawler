@@ -106,9 +106,9 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
 
   private fun StringBuilder.appendStatusValue(value: Float) {
     if (value > 0f) {
-      append(" [#54CC43]+").append(value.toInt()).append("[]")
+      append("[#54CC43]+").append(value.toInt()).append("[]")
     } else {
-      append(" [#FF4542]").append(value.toInt()).append("[]")
+      append("[#FF4542]").append(value.toInt()).append("[]")
     }
   }
 
@@ -145,8 +145,8 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
           stringBuilder.append("-")
         }
 
-        if (stringBuilder.length > 20) {
-          stringBuilder.setLength(19)
+        if (stringBuilder.length > 21) {
+          stringBuilder.setLength(20)
           stringBuilder.append(".")
         }
       }
@@ -214,7 +214,7 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
 
     if (diffValue != 0f) {
-      strBuilder.append(" [#434cFF]<>[]").appendStatusValue(diffValue)
+      strBuilder.append(" [#434cFF]=>[]").appendStatusValue(diffValue)
     }
   }
 
@@ -226,17 +226,17 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     when (type) {
       StatsType.LIFE -> {
         if (StatsType.MAX_LIFE in itemStatsCmp.stats) {
-          strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_LIFE])
+          strBuilder.append(" [#434cFF]=>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_LIFE])
         }
       }
       StatsType.MANA -> {
         if (StatsType.MAX_MANA in itemStatsCmp.stats) {
-          strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_MANA])
+          strBuilder.append(" [#434cFF]=>[]").appendStatusValue(itemStatsCmp[StatsType.MAX_MANA])
         }
       }
       else -> {
         if (type in itemStatsCmp.stats) {
-          strBuilder.append(" [#434cFF]<>[]").appendStatusValue(itemStatsCmp[type])
+          strBuilder.append(" [#434cFF]=>[]").appendStatusValue(itemStatsCmp[type])
         }
       }
     }
