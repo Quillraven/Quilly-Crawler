@@ -7,7 +7,7 @@ import com.github.quillraven.quillycrawler.QuillyCrawler
 fun main() {
   Lwjgl3Application(QuillyCrawler(), Lwjgl3ApplicationConfiguration().apply {
     setTitle("Quilly Crawler")
-    setWindowedMode(16 * 50, 9 * 50)
+    setWindowedMode(1200, 675)
     setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png")
   })
 }

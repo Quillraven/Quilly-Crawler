@@ -37,7 +37,7 @@ import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 
 /**
- * Implementation of [MapService] for Tiled map editor support. It uses an [engine] to create [entities][Entity]
+ * Implementation of [MapService] for Tiled map editor support. It uses an [Engine] to create [entities][Entity]
  * out of map [objects][MapObject]. It uses an [OrthogonalTiledMapRenderer] for rendering. The renderer will be
  * added to the [assetStorage] to dispose it once the [assetStorage] gets disposed. Also, a [TmxMapLoader]
  * will be set for the [assetStorage].
@@ -52,18 +52,17 @@ import kotlin.system.measureTimeMillis
  * for the collision objects.
  *
  * Additionally, any entity created by this service gets a [TiledComponent] to mark it as a tiled map entity. Whenever
- * [setMap] is called then all entities with a [TiledComponent] get removed from the [engine].
+ * [setMap] is called then all entities with a [TiledComponent] get removed from the [Engine].
  */
 class TiledMapService(
-  private val engine: Engine,
   private val assetStorage: AssetStorage,
   batch: Batch,
   private val unitScale: Float,
-  private val configureEntity: EngineEntity.(MapObject, World?) -> Boolean,
-  private val world: World? = null
+  private val world: World? = null,
+  private val configureEntity: EngineEntity.(MapObject, World?) -> Boolean
 ) : MapService {
   private val mapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
-  private val mapEntities = engine.getEntitiesFor(allOf(TiledComponent::class).get())
+  private val tiledEntitiesFamily = allOf(TiledComponent::class).get()
   private var currentMapFilePath = ""
   private var currentMap: TiledMap = EMPTY_MAP
   private val backgroundLayers = gdxArrayOf<TiledMapTileLayer>()
@@ -90,6 +89,8 @@ class TiledMapService(
     }
 
     KtxAsync.launch {
+      val mapEntities = engine.getEntitiesFor(tiledEntitiesFamily)
+
       if (currentMap != EMPTY_MAP) {
         // unload current map and remove map entities
         assetStorage.unload<TiledMap>(currentMapFilePath)
@@ -112,7 +113,7 @@ class TiledMapService(
 
       // and create map entities like collision entities and game object entities
       updateRenderLayers()
-      parseObjectLayers()
+      parseObjectLayers(engine)
 
       currentMapFilePath = mapFilePath
       mapRenderer.map = currentMap
@@ -141,10 +142,10 @@ class TiledMapService(
    *
    * Any entity created by this function has a [TiledComponent] with the id of the object in Tiled.
    */
-  private fun parseObjectLayers() {
+  private fun parseObjectLayers(engine: Engine) {
     currentMap.forEachLayer<MapLayer> { layer ->
       if (layer.property(COLLISION_LAYER_PROPERTY, false)) {
-        createCollisionBody(layer)
+        createCollisionBody(engine, layer)
       } else {
         var engineEntity = EngineEntity(engine, engine.createEntity())
         var newEntityRequired = false
@@ -182,7 +183,7 @@ class TiledMapService(
    * Creates an [Entity] with a [Box2DComponent] out of the given [layer]. Any shape of the [layer] will be
    * added to the [body][Box2DComponent.body] of the entity.
    */
-  private fun createCollisionBody(layer: MapLayer) {
+  private fun createCollisionBody(engine: Engine, layer: MapLayer) {
     val objects = layer.objects
     if (world == null || objects.isEmpty()) {
       LOG.debug {

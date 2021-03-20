@@ -26,6 +26,7 @@ class RenderComponent : Component, Pool.Poolable {
 
   override fun reset() {
     sprite.texture = null
+    sprite.setColor(1f, 1f, 1f, 1f)
   }
 
   companion object {

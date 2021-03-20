@@ -17,6 +17,7 @@ class RemoveComponent : Component, Pool.Poolable {
 /**
  * Adds a [RemoveComponent] to the [Entity] by using the [engine's][Engine]
  * [createComponent][Engine.createComponent] method.
+ * The entity then gets removed by the [RemoveSystem].
  */
 fun Entity.removeFromEngine(engine: Engine) {
   this.add(engine.createComponent(RemoveComponent::class.java))

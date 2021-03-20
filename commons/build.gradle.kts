@@ -5,7 +5,6 @@ dependencies {
   api("com.badlogicgames.gdx:gdx-ai:${project.property("aiVersion")}")
   api("com.badlogicgames.gdx-controllers:gdx-controllers-core:${project.property("gdxControllersVersion")}")
   api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${project.property("coroutines")}")
-  implementation(kotlin("reflect"))
   api("io.github.libktx:ktx-app:${project.property("ktxVersion")}")
   api("io.github.libktx:ktx-ashley:${project.property("ktxVersion")}")
   api("io.github.libktx:ktx-box2d:${project.property("ktxVersion")}")

@@ -28,6 +28,8 @@ import ktx.collections.gdxArrayOf
  *
  * Use [animationCmp] to easily access the [AnimationComponent] of an [Entity]. Only use it if you are sure that
  * the component is not null. Otherwise, it will throw a [GdxRuntimeException].
+ *
+ * Use [isAnimationFinished] to check if an animation is at the last frome if played in NORMAL mode.
  */
 class AnimationComponent : Component, Pool.Poolable {
   var atlasFilePath = ""
@@ -66,6 +68,11 @@ class AnimationComponent : Component, Pool.Poolable {
     stateTime = 0f
     dirty = true
   }
+
+  /**
+   * refer to [Animation.isAnimationFinished]
+   */
+  fun isAnimationFinished() = gdxAnimation.isAnimationFinished(stateTime)
 
   companion object {
     val MAPPER = mapperFor<AnimationComponent>()

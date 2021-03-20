@@ -28,7 +28,7 @@ class MapSystem(
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val playerCmp = entity.playerCmp
     playerCmp.dungeonLevel++
-    LOG.debug { "Moving to dungeon level $playerCmp.dungeonLevel" }
+    LOG.debug { "Moving to dungeon level ${playerCmp.dungeonLevel}" }
 
     val nextMapFilePath = nextMap(playerCmp.dungeonLevel)
     if (nextMapFilePath.isNotBlank()) {

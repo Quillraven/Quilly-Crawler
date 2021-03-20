@@ -9,16 +9,18 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.RemoveComponent
+import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
+import com.github.quillraven.quillycrawler.ashley.component.SetScreenComponent
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
-import ktx.ashley.allOf
-import ktx.ashley.exclude
-import ktx.ashley.get
+import com.github.quillraven.quillycrawler.screen.InventoryScreen
+import ktx.ashley.*
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.reflect.KClass
 
 class PlayerControlSystem : InputProcessor, XboxInputProcessor,
   IteratingSystem(allOf(PlayerControlComponent::class).exclude(RemoveComponent::class).get()) {
@@ -27,6 +29,7 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
   private var stopMovement = true
   private var moveDirectionDeg = 0f
   private var actionPressed = false
+  private var nextScreen: KClass<out AbstractScreen> = AbstractScreen::class
 
   override fun addedToEngine(engine: Engine?) {
     super.addedToEngine(engine)
@@ -53,103 +56,78 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
 
   override fun keyDown(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.D -> {
-        updateMovementValues(1f, valueLeftY)
-        return true
+      Input.Keys.RIGHT -> updateMovementValues(1f, valueLeftY)
+      Input.Keys.LEFT -> updateMovementValues(-1f, valueLeftY)
+      Input.Keys.UP -> updateMovementValues(valueLeftX, -1f)
+      Input.Keys.DOWN -> updateMovementValues(valueLeftX, 1f)
+      Input.Keys.SPACE -> actionPressed = true
+      Input.Keys.I -> {
+        updateMovementValues(0f, 0f)
+        nextScreen = InventoryScreen::class
       }
-      Input.Keys.A -> {
-        updateMovementValues(-1f, valueLeftY)
-        return true
-      }
-      Input.Keys.W -> {
-        updateMovementValues(valueLeftX, -1f)
-        return true
-      }
-      Input.Keys.S -> {
-        updateMovementValues(valueLeftX, 1f)
-        return true
-      }
-      Input.Keys.SPACE -> {
-        actionPressed = true
-        return true
-      }
+      else -> return false
     }
-    return false
+
+    return true
   }
 
   override fun keyUp(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.D -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+      Input.Keys.RIGHT -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
           updateMovementValues(-1f, valueLeftY)
         } else {
           updateMovementValues(0f, valueLeftY)
         }
-        return true
       }
-      Input.Keys.A -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+      Input.Keys.LEFT -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
           updateMovementValues(1f, valueLeftY)
         } else {
           updateMovementValues(0f, valueLeftY)
         }
-        return true
       }
-      Input.Keys.W -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+      Input.Keys.UP -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
           updateMovementValues(valueLeftX, 1f)
         } else {
           updateMovementValues(valueLeftX, 0f)
         }
-        return true
       }
-      Input.Keys.S -> {
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+      Input.Keys.DOWN -> {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
           updateMovementValues(valueLeftX, -1f)
         } else {
           updateMovementValues(valueLeftX, 0f)
         }
-
-        return true
       }
-      Input.Keys.SPACE -> {
-        actionPressed = false
-        return true
-      }
+      Input.Keys.SPACE -> actionPressed = false
+      else -> return false
     }
-    return false
+
+    return true
   }
 
-  override fun keyTyped(character: Char): Boolean {
-    return false
-  }
+  override fun keyTyped(character: Char) = false
 
-  override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-    return false
-  }
+  override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
 
-  override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-    return false
-  }
+  override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
 
-  override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
-    return false
-  }
+  override fun touchDragged(screenX: Int, screenY: Int, pointer: Int) = false
 
-  override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
-    return false
-  }
+  override fun mouseMoved(screenX: Int, screenY: Int) = false
 
-  override fun scrolled(amountX: Float, amountY: Float): Boolean {
-    return false
-  }
+  override fun scrolled(amountX: Float, amountY: Float) = false
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
-    if (buttonCode == XboxInputProcessor.BUTTON_A) {
-      actionPressed = true
-      return true
+    when (buttonCode) {
+      XboxInputProcessor.BUTTON_A -> actionPressed = true
+      XboxInputProcessor.BUTTON_Y -> nextScreen = InventoryScreen::class
+      else -> return false
     }
-    return false
+
+    return true
   }
 
   override fun buttonUp(controller: Controller?, buttonCode: Int): Boolean {
@@ -185,6 +163,11 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
   override fun processEntity(entity: Entity, deltaTime: Float) {
     updateMovement(entity)
     processAction(entity)
+
+    if (nextScreen != AbstractScreen::class) {
+      engine.configureEntity(entity) { with<SetScreenComponent> { screenType = nextScreen } }
+      nextScreen = AbstractScreen::class
+    }
   }
 
   private fun updateMovement(entity: Entity) {

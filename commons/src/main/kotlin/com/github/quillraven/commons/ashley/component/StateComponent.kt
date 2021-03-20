@@ -4,7 +4,9 @@ import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine
 import com.badlogic.gdx.ai.fsm.State
+import com.badlogic.gdx.ai.msg.MessageDispatcher
 import com.badlogic.gdx.ai.msg.Telegram
+import com.badlogic.gdx.ai.msg.Telegraph
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
 import com.github.quillraven.commons.ashley.system.StateSystem
@@ -43,11 +45,22 @@ interface EntityState : State<Entity> {
 class StateComponent : Component, Pool.Poolable {
   var state = EntityState.EMPTY_STATE
   var stateTime = 0f
-    internal set
 
   // Keep stateMachine internal to avoid calling changeState at any time during a frame.
   // That way we can guarantee that AI is always processed within the StateSystem.
   internal val stateMachine = DefaultStateMachine<Entity, State<Entity>>()
+
+  /**
+   * Calls [dispatchMessage] of the [messageDispatcher] with the [stateMachine] of the [StateComponent] as a receiver.
+   */
+  fun dispatchMessage(
+    messageDispatcher: MessageDispatcher,
+    msg: Int,
+    extraInfo: Any? = null,
+    sender: Telegraph? = null
+  ) {
+    messageDispatcher.dispatchMessage(sender, stateMachine, msg, extraInfo)
+  }
 
   override fun reset() {
     stateTime = 0f
