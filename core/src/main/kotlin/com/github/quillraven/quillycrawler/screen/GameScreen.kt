@@ -35,6 +35,7 @@ class GameScreen(
     addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
     addSystem(LootSystem())
     addSystem(GearSystem())
+    addSystem(ConsumeSystem())
     addSystem(MoveSystem())
     addSystem(Box2DSystem(world, 1 / 60f))
     addSystem(CameraLockSystem(gameViewport.camera))

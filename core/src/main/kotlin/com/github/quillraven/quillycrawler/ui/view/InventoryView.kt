@@ -18,6 +18,7 @@ import com.github.quillraven.quillycrawler.ui.SkinLabelStyle
 import com.github.quillraven.quillycrawler.ui.SkinListStyle
 import com.github.quillraven.quillycrawler.ui.SkinTextButtonStyle
 import com.github.quillraven.quillycrawler.ui.model.InventoryViewModel
+import ktx.collections.GdxArray
 import ktx.scene2d.*
 import java.util.*
 import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
@@ -210,8 +211,23 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
 
   private fun onEquipOrUseItem(
     statsInfo: EnumMap<StatsType, StringBuilder>,
-    gearInfo: EnumMap<GearType, StringBuilder>
+    gearInfo: EnumMap<GearType, StringBuilder>,
+    newIndex: Int,
+    newItems: GdxArray<String>,
+    regionKey: String,
+    description: String
   ) {
+    // update bag and item details in case the item got removed by consuming it
+    bagItems.run {
+      clear()
+      setItems(newItems)
+      selectedIndex = newIndex
+    }
+
+    itemImage.drawable = skin.getDrawable(regionKey)
+    itemImage.isVisible = regionKey != SkinImages.UNDEFINED.regionKey
+    itemDescriptionLabel.setText(description)
+
     // stats
     lifeLabel.setText(statsInfo[StatsType.LIFE])
     manaLabel.setText(statsInfo[StatsType.MANA])

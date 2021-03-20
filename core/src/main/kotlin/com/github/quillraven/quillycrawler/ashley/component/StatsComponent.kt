@@ -25,6 +25,10 @@ class StatsComponent : Component, Pool.Poolable {
 
   operator fun get(type: StatsType): Float = stats.getOrDefault(type, 0f)
 
+  operator fun set(type: StatsType, value: Float) {
+    stats[type] = value
+  }
+
   override fun reset() {
     stats.clear()
   }

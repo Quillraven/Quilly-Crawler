@@ -8,6 +8,7 @@ import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.screen.GameScreen
 import com.github.quillraven.quillycrawler.ui.SkinImages
 import ktx.ashley.configureEntity
+import ktx.ashley.contains
 import ktx.ashley.get
 import ktx.ashley.with
 import ktx.collections.GdxArray
@@ -94,11 +95,16 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun statsAndGearInfo(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>) -> Unit) {
+  fun statsAndGearInfo(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>, Int, GdxArray<String>, String, String) -> Unit) {
     updateStatsInfo()
     updateGearInfo()
 
-    callback(statsInfo, gearInfo)
+    if (hasValidIndex()) {
+      val itemCmp = itemEntities[selectedItemIndex].itemCmp
+      callback(statsInfo, gearInfo, selectedItemIndex, itemStrings, itemRegionKey(itemCmp), itemDescription(itemCmp))
+    } else {
+      callback(statsInfo, gearInfo, selectedItemIndex, itemStrings, SkinImages.UNDEFINED.regionKey, "")
+    }
   }
 
   private fun updateGearInfo() {
@@ -251,14 +257,40 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun equipOrUseSelectedItem(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>) -> Unit) {
+  fun equipOrUseSelectedItem(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>, Int, GdxArray<String>, String, String) -> Unit) {
     if (hasValidIndex()) {
-      itemEntities[selectedItemIndex].itemCmp.also { itemCmp ->
+      val selectedItem = itemEntities[selectedItemIndex]
+      selectedItem.itemCmp.also { itemCmp ->
         if (itemCmp.gearType != GearType.UNDEFINED) {
-          addGear(itemEntities[selectedItemIndex])
-        }
+          // gear item -> equip it
+          addGear(selectedItem)
+        } else if (ConsumableComponent.MAPPER in selectedItem) {
+          // consumable item -> consume it
+          engine.configureEntity(playerEntity) {
+            with<ConsumeComponent> {
+              itemsToConsume.add(selectedItem)
+            }
+          }
+          engine.update(0f)
 
-        // TODO use item if it is a consumable
+          // update items if consumable got removed
+          if (selectedItem.components.size() == 0) {
+            val idxOf = itemEntities.indexOf(selectedItem)
+            itemStrings.removeIndex(idxOf)
+            itemEntities.removeIndex(idxOf)
+
+            selectedItemIndex = if (itemStrings.isEmpty) {
+              // no more items left
+              -1
+            } else if (selectedItemIndex < itemStrings.size) {
+              // first item or item in the middle of the bag got removed -> select new item at the same index
+              selectedItemIndex
+            } else {
+              // last item got removed -> select last item again
+              itemStrings.size - 1
+            }
+          }
+        }
       }
     }
 

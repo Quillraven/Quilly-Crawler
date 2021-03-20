@@ -23,6 +23,7 @@ import ktx.collections.set
 import ktx.log.error
 import ktx.tiled.x
 import ktx.tiled.y
+import kotlin.collections.set
 
 private val playerFamily = allOf(PlayerComponent::class).exclude(RemoveComponent::class).get()
 
@@ -153,16 +154,17 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<PlayerControlComponent>()
     with<BagComponent> {
       // TODO remove debug items
-      ItemType.values().filter { it != ItemType.UNDEFINED }.forEach {
-        items[it] = createItemEntity(it)
-      }
+//      ItemType.values().filter { it != ItemType.UNDEFINED }.forEach {
+//        items[it] = createItemEntity(it)
+//      }
+      items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION)
     }
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
     with<CameraLockComponent>()
     with<GearComponent>()
     with<StatsComponent> {
-      stats[StatsType.LIFE] = 30f
+      stats[StatsType.LIFE] = 10f
       stats[StatsType.MAX_LIFE] = 30f
       stats[StatsType.MANA] = 10f
       stats[StatsType.MAX_MANA] = 10f
@@ -204,6 +206,12 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
         with<StatsComponent> {
           stats[StatsType.PHYSICAL_ARMOR] = 1f
           stats[StatsType.INTELLIGENCE] = 1f
+        }
+      }
+      ItemType.HEALTH_POTION -> {
+        with<ConsumableComponent>()
+        with<StatsComponent> {
+          stats[StatsType.LIFE] = 50f
         }
       }
       ItemType.LEATHER_BOOTS -> {

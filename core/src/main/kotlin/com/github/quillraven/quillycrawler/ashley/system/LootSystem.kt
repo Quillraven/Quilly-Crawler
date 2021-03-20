@@ -78,7 +78,7 @@ class LootSystem : EntityListener, IteratingSystem(
   }
 
   private fun createItemForBag(bagCmp: BagComponent) {
-    val type = ItemType.random()
+    val type = ItemType.randomGearItem()
 
     if (type in bagCmp.items) {
       bagCmp.items[type].itemCmp.amount++

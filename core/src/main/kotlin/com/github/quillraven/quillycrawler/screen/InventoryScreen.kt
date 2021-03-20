@@ -2,12 +2,15 @@ package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.github.quillraven.commons.ashley.system.RemoveSystem
 import com.github.quillraven.commons.game.AbstractGame
 import com.github.quillraven.commons.game.AbstractScreen
+import com.github.quillraven.quillycrawler.ashley.system.ConsumeSystem
 import com.github.quillraven.quillycrawler.ashley.system.GearSystem
 import com.github.quillraven.quillycrawler.ashley.system.SetScreenSystem
 import com.github.quillraven.quillycrawler.assets.I18NAssets
@@ -25,7 +28,7 @@ class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEnti
 
   override fun show() {
     engine.systems.forEach { system ->
-      if (system !is GearSystem && system !is SetScreenSystem) {
+      if (isInventoryRelevantSystem(system)) {
         system.setProcessing(false)
       }
     }
@@ -37,11 +40,14 @@ class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEnti
     stage.clear()
 
     engine.systems.forEach { system ->
-      if (system !is GearSystem && system !is SetScreenSystem) {
+      if (isInventoryRelevantSystem(system)) {
         system.setProcessing(true)
       }
     }
   }
+
+  private fun isInventoryRelevantSystem(system: EntitySystem?) =
+    system !is GearSystem && system !is SetScreenSystem && system !is ConsumeSystem && system !is RemoveSystem
 
   override fun render(delta: Float) {
     // TODO remove debug

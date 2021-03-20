@@ -6,22 +6,22 @@ import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
 import ktx.ashley.get
 import ktx.ashley.mapperFor
-import kotlin.random.Random
 
-enum class ItemType(val gearType: GearType) {
-  UNDEFINED(GearType.UNDEFINED),
+enum class ItemType(val gearType: GearType = GearType.UNDEFINED) {
+  UNDEFINED,
   HAT(GearType.HELMET),
   ROBE(GearType.ARMOR),
   CURSED_NECKLACE(GearType.AMULET),
   ROD(GearType.WEAPON),
   LEATHER_GLOVES(GearType.GLOVES),
   LEATHER_BOOTS(GearType.BOOTS),
-  BUCKLER(GearType.SHIELD);
+  BUCKLER(GearType.SHIELD),
+  HEALTH_POTION;
 
   companion object {
-    private val VALUES = values()
+    private val GEAR_ITEM_TYPES = values().filter { it.gearType != GearType.UNDEFINED }
 
-    fun random() = VALUES[Random.nextInt(1, VALUES.size)]
+    fun randomGearItem() = GEAR_ITEM_TYPES.random()
   }
 }
 
