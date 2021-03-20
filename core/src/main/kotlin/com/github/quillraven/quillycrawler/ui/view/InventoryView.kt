@@ -17,6 +17,7 @@ import com.github.quillraven.quillycrawler.ui.SkinImages
 import com.github.quillraven.quillycrawler.ui.SkinLabelStyle
 import com.github.quillraven.quillycrawler.ui.SkinListStyle
 import com.github.quillraven.quillycrawler.ui.SkinTextButtonStyle
+import com.github.quillraven.quillycrawler.ui.model.InventoryListener
 import com.github.quillraven.quillycrawler.ui.model.InventoryViewModel
 import ktx.collections.GdxArray
 import ktx.scene2d.*
@@ -25,7 +26,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
 
 class InventoryView(private val viewModel: InventoryViewModel, private val bundle: I18NBundle) :
   Table(Scene2DSkin.defaultSkin), KTable,
-  InputProcessor, XboxInputProcessor {
+  InputProcessor, XboxInputProcessor,
+  InventoryListener {
   // item details
   private val bagItems: GdxList<String>
   private val itemImage: Image
@@ -182,53 +184,31 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
       // active screen changes away from InventoryScreen
       removeXboxControllerListener()
       Gdx.input.inputProcessor = null
+      viewModel.removeInventoryListener(this)
     } else {
       // InventoryScreen becomes active screen
       addXboxControllerListener()
       Gdx.input.inputProcessor = this
+      viewModel.addInventoryListener(this)
 
       bagItems.run {
         clearItems()
-        viewModel.load { items, firstItemIndex, regionKey, description ->
-          setItems(items)
-          onSelectionChange(firstItemIndex, regionKey, description)
-        }
+        viewModel.load()
       }
     }
     super.setStage(stage)
   }
 
-  private fun onSelectionChange(newIndex: Int, regionKey: String, description: String) {
+  override fun onSelectionChange(newIndex: Int, regionKey: String, description: String) {
     bagItems.selectedIndex = newIndex
 
     itemImage.drawable = skin.getDrawable(regionKey)
     itemImage.isVisible = regionKey != SkinImages.UNDEFINED.regionKey
 
     itemDescriptionLabel.setText(description)
-
-    viewModel.statsAndGearInfo(::onEquipOrUseItem)
   }
 
-  private fun onEquipOrUseItem(
-    statsInfo: EnumMap<StatsType, StringBuilder>,
-    gearInfo: EnumMap<GearType, StringBuilder>,
-    newIndex: Int,
-    newItems: GdxArray<String>,
-    regionKey: String,
-    description: String
-  ) {
-    // update bag and item details in case the item got removed by consuming it
-    bagItems.run {
-      clear()
-      setItems(newItems)
-      selectedIndex = newIndex
-    }
-
-    itemImage.drawable = skin.getDrawable(regionKey)
-    itemImage.isVisible = regionKey != SkinImages.UNDEFINED.regionKey
-    itemDescriptionLabel.setText(description)
-
-    // stats
+  override fun onStatsUpdated(statsInfo: EnumMap<StatsType, StringBuilder>) {
     lifeLabel.setText(statsInfo[StatsType.LIFE])
     manaLabel.setText(statsInfo[StatsType.MANA])
     strengthLabel.setText(statsInfo[StatsType.STRENGTH])
@@ -238,8 +218,9 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
     physArmorLabel.setText(statsInfo[StatsType.PHYSICAL_ARMOR])
     magicDamageLabel.setText(statsInfo[StatsType.MAGIC_DAMAGE])
     magicArmorLabel.setText(statsInfo[StatsType.MAGIC_ARMOR])
+  }
 
-    // gear
+  override fun onGearUpdated(gearInfo: EnumMap<GearType, StringBuilder>) {
     helmetLabel.setText(gearInfo[GearType.HELMET])
     amuletLabel.setText(gearInfo[GearType.AMULET])
     armorLabel.setText(gearInfo[GearType.ARMOR])
@@ -249,11 +230,19 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
     glovesLabel.setText(gearInfo[GearType.GLOVES])
   }
 
+  override fun onBagUpdated(items: GdxArray<String>, selectionIndex: Int) {
+    bagItems.run {
+      clear()
+      setItems(items)
+      selectedIndex = selectionIndex
+    }
+  }
+
   override fun keyDown(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.DOWN -> viewModel.moveItemSelectionIndex(1, ::onSelectionChange)
-      Input.Keys.UP -> viewModel.moveItemSelectionIndex(-1, ::onSelectionChange)
-      Input.Keys.SPACE -> viewModel.equipOrUseSelectedItem(::onEquipOrUseItem)
+      Input.Keys.DOWN -> viewModel.moveItemSelectionIndex(1)
+      Input.Keys.UP -> viewModel.moveItemSelectionIndex(-1)
+      Input.Keys.SPACE -> viewModel.equipOrUseSelectedItem()
       Input.Keys.ESCAPE -> viewModel.returnToGame()
       else -> return false
     }
@@ -277,9 +266,9 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
     when (buttonCode) {
-      XboxInputProcessor.BUTTON_DOWN -> viewModel.moveItemSelectionIndex(1, ::onSelectionChange)
-      XboxInputProcessor.BUTTON_UP -> viewModel.moveItemSelectionIndex(-1, ::onSelectionChange)
-      XboxInputProcessor.BUTTON_A -> viewModel.equipOrUseSelectedItem(::onEquipOrUseItem)
+      XboxInputProcessor.BUTTON_DOWN -> viewModel.moveItemSelectionIndex(1)
+      XboxInputProcessor.BUTTON_UP -> viewModel.moveItemSelectionIndex(-1)
+      XboxInputProcessor.BUTTON_A -> viewModel.equipOrUseSelectedItem()
       XboxInputProcessor.BUTTON_B -> viewModel.returnToGame()
       else -> return false
     }

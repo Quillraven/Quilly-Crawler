@@ -154,9 +154,9 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<PlayerControlComponent>()
     with<BagComponent> {
       // TODO remove debug items
-//      ItemType.values().filter { it != ItemType.UNDEFINED }.forEach {
-//        items[it] = createItemEntity(it)
-//      }
+      ItemType.values().filter { it != ItemType.UNDEFINED }.forEach {
+        items[it] = createItemEntity(it)
+      }
       items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION)
     }
     with<InteractComponent>()

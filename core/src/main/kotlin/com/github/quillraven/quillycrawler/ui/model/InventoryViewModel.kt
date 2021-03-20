@@ -12,9 +12,20 @@ import ktx.ashley.contains
 import ktx.ashley.get
 import ktx.ashley.with
 import ktx.collections.GdxArray
+import ktx.collections.GdxSet
 import ktx.collections.contains
 import ktx.collections.gdxArrayOf
 import java.util.*
+
+interface InventoryListener {
+  fun onSelectionChange(newIndex: Int, regionKey: String, description: String) = Unit
+
+  fun onStatsUpdated(statsInfo: EnumMap<StatsType, StringBuilder>) = Unit
+
+  fun onGearUpdated(gearInfo: EnumMap<GearType, StringBuilder>) = Unit
+
+  fun onBagUpdated(items: GdxArray<String>, selectionIndex: Int) = Unit
+}
 
 data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var playerEntity: Entity) {
   private var selectedItemIndex = -1
@@ -22,6 +33,25 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
   private val itemEntities = gdxArrayOf<Entity>()
   private val statsInfo = EnumMap<StatsType, StringBuilder>(StatsType::class.java)
   private val gearInfo = EnumMap<GearType, StringBuilder>(GearType::class.java)
+  private val listeners = GdxSet<InventoryListener>()
+
+  fun addInventoryListener(listener: InventoryListener) = listeners.add(listener)
+
+  fun removeInventoryListener(listener: InventoryListener) {
+    listeners.remove(listener)
+  }
+
+  private fun GdxSet<InventoryListener>.dispatchBagUpdate() {
+    this.forEach {
+      it.onBagUpdated(itemStrings, selectedItemIndex)
+      if (hasValidIndex()) {
+        val itemCmp = itemEntities[selectedItemIndex].itemCmp
+        it.onSelectionChange(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp))
+      } else {
+        it.onSelectionChange(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "")
+      }
+    }
+  }
 
   private fun itemName(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.name"]
 
@@ -31,7 +61,7 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
 
   private fun hasValidIndex() = selectedItemIndex >= 0 && selectedItemIndex < itemEntities.size
 
-  fun load(callback: (GdxArray<String>, Int, String, String) -> Unit) {
+  fun load() {
     itemStrings.clear()
     itemEntities.clear()
     with(playerEntity.bagCmp) {
@@ -45,15 +75,11 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
       selectedItemIndex = if (items.isEmpty) -1 else 0
     }
 
-    if (hasValidIndex()) {
-      val itemCmp = itemEntities[selectedItemIndex].itemCmp
-      callback(itemStrings, selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp))
-    } else {
-      callback(itemStrings, selectedItemIndex, SkinImages.UNDEFINED.regionKey, "")
-    }
+    listeners.dispatchBagUpdate()
+    statsAndGearInfo()
   }
 
-  fun moveItemSelectionIndex(indicesToMove: Int, callback: (Int, String, String) -> Unit) {
+  fun moveItemSelectionIndex(indicesToMove: Int) {
     with(playerEntity.bagCmp) {
       if (items.isEmpty) {
         // entity has no items -> do nothing
@@ -71,10 +97,11 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
 
     if (hasValidIndex()) {
       val itemCmp = itemEntities[selectedItemIndex].itemCmp
-      callback(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp))
+      listeners.forEach { it.onSelectionChange(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp)) }
     } else {
-      callback(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "")
+      listeners.forEach { it.onSelectionChange(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "") }
     }
+    statsAndGearInfo()
   }
 
   private fun StringBuilder.appendStatusValue(value: Float) {
@@ -95,16 +122,9 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun statsAndGearInfo(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>, Int, GdxArray<String>, String, String) -> Unit) {
+  private fun statsAndGearInfo() {
     updateStatsInfo()
     updateGearInfo()
-
-    if (hasValidIndex()) {
-      val itemCmp = itemEntities[selectedItemIndex].itemCmp
-      callback(statsInfo, gearInfo, selectedItemIndex, itemStrings, itemRegionKey(itemCmp), itemDescription(itemCmp))
-    } else {
-      callback(statsInfo, gearInfo, selectedItemIndex, itemStrings, SkinImages.UNDEFINED.regionKey, "")
-    }
   }
 
   private fun updateGearInfo() {
@@ -131,6 +151,8 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
         }
       }
     }
+
+    listeners.forEach { it.onGearUpdated(gearInfo) }
   }
 
   private fun updateStatsInfo() {
@@ -166,6 +188,8 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
         }
       }
     }
+
+    listeners.forEach { it.onStatsUpdated(statsInfo) }
   }
 
   private fun gearComparisonInfo(
@@ -257,44 +281,46 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     }
   }
 
-  fun equipOrUseSelectedItem(callback: (EnumMap<StatsType, StringBuilder>, EnumMap<GearType, StringBuilder>, Int, GdxArray<String>, String, String) -> Unit) {
-    if (hasValidIndex()) {
-      val selectedItem = itemEntities[selectedItemIndex]
-      selectedItem.itemCmp.also { itemCmp ->
-        if (itemCmp.gearType != GearType.UNDEFINED) {
-          // gear item -> equip it
-          addGear(selectedItem)
-        } else if (ConsumableComponent.MAPPER in selectedItem) {
-          // consumable item -> consume it
-          engine.configureEntity(playerEntity) {
-            with<ConsumeComponent> {
-              itemsToConsume.add(selectedItem)
-            }
-          }
-          engine.update(0f)
+  fun equipOrUseSelectedItem() {
+    if (!hasValidIndex()) {
+      return
+    }
 
-          // update items if consumable got removed
-          if (selectedItem.components.size() == 0) {
-            val idxOf = itemEntities.indexOf(selectedItem)
-            itemStrings.removeIndex(idxOf)
-            itemEntities.removeIndex(idxOf)
-
-            selectedItemIndex = if (itemStrings.isEmpty) {
-              // no more items left
-              -1
-            } else if (selectedItemIndex < itemStrings.size) {
-              // first item or item in the middle of the bag got removed -> select new item at the same index
-              selectedItemIndex
-            } else {
-              // last item got removed -> select last item again
-              itemStrings.size - 1
-            }
+    val selectedItem = itemEntities[selectedItemIndex]
+    selectedItem.itemCmp.also { itemCmp ->
+      if (itemCmp.gearType != GearType.UNDEFINED) {
+        // gear item -> equip it
+        addGear(selectedItem)
+      } else if (ConsumableComponent.MAPPER in selectedItem) {
+        // consumable item -> consume it
+        engine.configureEntity(playerEntity) {
+          with<ConsumeComponent> {
+            itemsToConsume.add(selectedItem)
           }
+        }
+        engine.update(0f)
+
+        // update items if consumable got removed
+        if (selectedItem.components.size() == 0) {
+          val idxOf = itemEntities.indexOf(selectedItem)
+          itemStrings.removeIndex(idxOf)
+          itemEntities.removeIndex(idxOf)
+
+          selectedItemIndex = when {
+            // no more items left
+            itemStrings.isEmpty -> -1
+            // first item or item in the middle of the bag got removed -> select new item at the same index
+            selectedItemIndex < itemStrings.size -> selectedItemIndex
+            // last item got removed -> select last item again
+            else -> itemStrings.size - 1
+          }
+
+          listeners.dispatchBagUpdate()
         }
       }
     }
 
-    statsAndGearInfo(callback)
+    statsAndGearInfo()
   }
 
   fun returnToGame() {
