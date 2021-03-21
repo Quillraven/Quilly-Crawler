@@ -251,14 +251,14 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
       StatsType.LIFE -> {
         strBuilder.append(bundle["LIFE"]).append(": ")
           .append(playerStatsCmp[StatsType.LIFE].toInt())
-          .append(" / ")
+          .append("/")
           .append(playerStatsCmp[StatsType.MAX_LIFE].toInt())
           .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_LIFE)
       }
       StatsType.MANA -> {
         strBuilder.append(bundle["MANA"]).append(": ")
           .append(playerStatsCmp[StatsType.MANA].toInt())
-          .append(" / ")
+          .append("/")
           .append(playerStatsCmp[StatsType.MAX_MANA].toInt())
           .appendStatDifferenceText(playerStatsCmp, StatsType.MAX_MANA)
       }

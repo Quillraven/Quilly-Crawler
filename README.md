@@ -24,6 +24,6 @@ TBD
 - czyzby for his quick support and adjustments in [LibKTX](https://github.com/libktx/ktx)
 - 0x72: [16x16 Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii)
 - greatdocbrown: [Gamepad Icons](https://greatdocbrown.itch.io/gamepad-ui)
-- vrtxrry: [Dungeon Font](https://vrtxrry.itch.io/dungeonfont)
+- Apostrophic Labs: [Immortal Font](https://www.1001freefonts.com/immortal.font)
 - Mounir Tohami: [Pixel Art GUI](https://mounirtohami.itch.io/pixel-art-gui-elements?download)
 - Alex's Assets: [16x16 RPG Icon Pack](https://alexs-assets.itch.io/16x16-rpg-item-pack)
