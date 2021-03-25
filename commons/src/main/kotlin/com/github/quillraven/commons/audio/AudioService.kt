@@ -19,5 +19,5 @@ interface AudioService {
 
   fun stopMusic()
 
-  fun update(deltaTime: Float)
+  fun update()
 }

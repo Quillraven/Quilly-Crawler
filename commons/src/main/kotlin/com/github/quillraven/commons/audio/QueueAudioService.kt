@@ -11,10 +11,15 @@ import ktx.collections.getOrPut
 import ktx.collections.iterate
 import ktx.collections.set
 import ktx.log.debug
+import ktx.log.error
 import ktx.log.info
 import ktx.log.logger
 import kotlin.math.max
 
+/**
+ * A request for a [Sound] that is created within the [QueueAudioService.playSound] method.
+ * It contains the [filePath] and the [volume] of the request.
+ */
 private class SoundRequest : Pool.Poolable {
   var filePath: String = ""
   var volume = 1f
@@ -94,6 +99,12 @@ class QueueAudioService(
       }
     }
 
+    // verify music file path
+    if (!assetStorage.fileResolver.resolve(musicFilePath).exists()) {
+      LOG.error { "Music file '$musicFilePath' does not exist!" }
+      return
+    }
+
     // load and play new music
     LOG.debug { "Play music '$musicFilePath'" }
     currentMusicFilePath = musicFilePath
@@ -133,7 +144,7 @@ class QueueAudioService(
    * If the cache reaches the [maxCachedSounds] size then the [Sound] instances of the cache get unloaded
    * from the [assetStorage] and the cache gets cleared.
    */
-  override fun update(deltaTime: Float) {
+  override fun update() {
     if (!soundRequests.isEmpty) {
       soundRequests.iterate { _, request, iterator ->
         val sound = soundCache.getOrPut(request.filePath) {
@@ -147,6 +158,14 @@ class QueueAudioService(
               }
               cacheIterator.remove()
             }
+          }
+
+          // verify sound file path
+          if (!assetStorage.fileResolver.resolve(request.filePath).exists()) {
+            LOG.error { "Sound file '${request.filePath}' does not exist!" }
+            SOUND_REQUEST_POOL.free(request)
+            iterator.remove()
+            return@iterate
           }
 
           // load sound
@@ -164,7 +183,7 @@ class QueueAudioService(
 
   companion object {
     private val LOG = logger<QueueAudioService>()
-    private val SOUND_REQUEST_POOL = object : Pool<SoundRequest>() {
+    private val SOUND_REQUEST_POOL = object : Pool<SoundRequest>(16) {
       override fun newObject() = SoundRequest()
     }
   }

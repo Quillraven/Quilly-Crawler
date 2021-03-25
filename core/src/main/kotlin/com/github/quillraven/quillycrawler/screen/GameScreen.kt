@@ -75,8 +75,12 @@ class GameScreen(
             LOG.debug { "Playing sound $this" }
           }
         }
-        game.audioService.update(delta)
+        game.audioService.update()
       }
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
+      game.audioService.playSound("wrongpath")
+      game.audioService.update()
+      game.audioService.playMusic("wrongpath")
     }
 
     engine.update(delta)

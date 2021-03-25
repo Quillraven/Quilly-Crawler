@@ -38,7 +38,7 @@ class QuillyCrawler : AbstractGame() {
 
   override fun render() {
     super.render()
-    audioService.update(Gdx.graphics.deltaTime)
+    audioService.update()
   }
 
   companion object {
