@@ -27,3 +27,5 @@ TBD
 - Apostrophic Labs: [Immortal Font](https://www.1001freefonts.com/immortal.font)
 - Mounir Tohami: [Pixel Art GUI](https://mounirtohami.itch.io/pixel-art-gui-elements?download)
 - Alex's Assets: [16x16 RPG Icon Pack](https://alexs-assets.itch.io/16x16-rpg-item-pack)
+- Tim Beek: [Royalty Free Music Pack](https://timbeek.itch.io/royalty-free-music-pack)
+- OmegaPixelArt: [Gameboy Sfx Pack #1](https://omegaosg.itch.io/gameboy-sfx-pack)
