@@ -9,8 +9,10 @@ import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.StateComponent
 import com.github.quillraven.commons.ashley.component.transformCmp
+import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.assets.SoundAssets
 import ktx.ashley.*
 import ktx.collections.GdxSet
 import ktx.collections.isNotEmpty
@@ -18,7 +20,8 @@ import ktx.log.error
 import ktx.log.logger
 
 class InteractSystem(
-  private val messageManager: MessageManager
+  private val messageManager: MessageManager,
+  private val audioService: AudioService
 ) : EntityListener,
   IteratingSystem(allOf(PlayerComponent::class, InteractComponent::class).exclude(RemoveComponent::class).get()) {
   private val actionableFamily = allOf(ActionableComponent::class).get()
@@ -79,11 +82,13 @@ class InteractSystem(
     when (entity.actionableCmp.type) {
       ActionType.EXIT -> {
         player.add(engine.createComponent(GoToNextLevelComponent::class.java))
+        audioService.playSound(SoundAssets.DROP.descriptor.fileName)
       }
       ActionType.CHEST -> {
         engine.configureEntity(player) {
           with<LootComponent> { lootType = entity.lootCmp.lootType }
         }
+        audioService.playSound(SoundAssets.CHEST_OPEN.descriptor.fileName)
       }
       else -> {
         LOG.error { "Undefined ActionType '${entity.actionableCmp.type}'" }

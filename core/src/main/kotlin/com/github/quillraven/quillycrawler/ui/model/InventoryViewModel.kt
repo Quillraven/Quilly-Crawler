@@ -4,7 +4,9 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.StringBuilder
+import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.screen.GameScreen
 import com.github.quillraven.quillycrawler.ui.SkinImages
 import ktx.ashley.configureEntity
@@ -27,7 +29,12 @@ interface InventoryListener {
   fun onBagUpdated(items: GdxArray<String>, selectionIndex: Int) = Unit
 }
 
-data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var playerEntity: Entity) {
+data class InventoryViewModel(
+  val bundle: I18NBundle,
+  val engine: Engine,
+  var playerEntity: Entity,
+  val audioService: AudioService
+) {
   private var selectedItemIndex = -1
   private val itemStrings = gdxArrayOf<String>()
   private val itemEntities = gdxArrayOf<Entity>()
@@ -80,6 +87,8 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
   }
 
   fun moveItemSelectionIndex(indicesToMove: Int) {
+    audioService.playSound(SoundAssets.MENU_SELECT.descriptor.fileName)
+
     with(playerEntity.bagCmp) {
       if (items.isEmpty) {
         // entity has no items -> do nothing
@@ -285,6 +294,8 @@ data class InventoryViewModel(val bundle: I18NBundle, val engine: Engine, var pl
     if (!hasValidIndex()) {
       return
     }
+
+    audioService.playSound(SoundAssets.MENU_SELECT_2.descriptor.fileName)
 
     val selectedItem = itemEntities[selectedItemIndex]
     selectedItem.itemCmp.also { itemCmp ->

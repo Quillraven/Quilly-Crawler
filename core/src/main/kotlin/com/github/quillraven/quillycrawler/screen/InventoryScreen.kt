@@ -8,8 +8,8 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.github.quillraven.commons.ashley.system.RemoveSystem
-import com.github.quillraven.commons.game.AbstractGame
 import com.github.quillraven.commons.game.AbstractScreen
+import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.system.ConsumeSystem
 import com.github.quillraven.quillycrawler.ashley.system.GearSystem
 import com.github.quillraven.quillycrawler.ashley.system.SetScreenSystem
@@ -17,8 +17,9 @@ import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.ui.model.InventoryViewModel
 import com.github.quillraven.quillycrawler.ui.view.InventoryView
 
-class InventoryScreen(game: AbstractGame, private val engine: Engine, playerEntity: Entity) : AbstractScreen(game) {
-  val viewModel = InventoryViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, playerEntity)
+class InventoryScreen(game: QuillyCrawler, private val engine: Engine, playerEntity: Entity) : AbstractScreen(game) {
+  val viewModel =
+    InventoryViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, playerEntity, game.audioService)
   private val view = InventoryView(viewModel, assetStorage[I18NAssets.DEFAULT.descriptor])
   private val stage = Stage(FitViewport(320f, 180f), batch)
 
