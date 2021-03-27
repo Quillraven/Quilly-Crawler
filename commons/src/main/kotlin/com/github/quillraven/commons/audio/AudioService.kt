@@ -21,3 +21,20 @@ interface AudioService {
 
   fun update()
 }
+
+/**
+ * Empty implementation of [AudioService]. Can be used as default value to avoid null services.
+ */
+object DefaultAudioService : AudioService {
+  override fun playSound(soundFilePath: String, volume: Float) = Unit
+
+  override fun playMusic(musicFilePath: String, volume: Float, loop: Boolean) = Unit
+
+  override fun pauseMusic() = Unit
+
+  override fun resumeMusic() = Unit
+
+  override fun stopMusic() = Unit
+
+  override fun update() = Unit
+}
