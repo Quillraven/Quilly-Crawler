@@ -1,7 +1,7 @@
 # Quilly Crawler
 
 [![Build Master](https://img.shields.io/github/workflow/status/quillraven/quilly-crawler/Build/master?event=push&label=Build%20master)](https://github.com/Quillraven/Quilly-Crawler/actions)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.4.30-red.svg)](http://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.4.31-red.svg)](http://kotlinlang.org/)
 [![LibGDX](https://img.shields.io/badge/LibGDX-1.9.14-green.svg)](https://github.com/libgdx/libgdx)
 [![LibKTX](https://img.shields.io/badge/LibKTX-1.9.14--SNAPSHOT-blue.svg)](https://github.com/libktx/ktx)
 
@@ -29,3 +29,5 @@ TBD
 - Alex's Assets: [16x16 RPG Icon Pack](https://alexs-assets.itch.io/16x16-rpg-item-pack)
 - Tim Beek: [Royalty Free Music Pack](https://timbeek.itch.io/royalty-free-music-pack)
 - OmegaPixelArt: [Gameboy Sfx Pack #1](https://omegaosg.itch.io/gameboy-sfx-pack)
+- SubspaceAudio: [512 Sound Effects (8-Bit Style)](https://opengameart.org/content/512-sound-effects-8-bit-style)
+- Little Robot Sound Factory: [Fantasy Sound Effects Library](https://opengameart.org/content/fantasy-sound-effects-library)
