@@ -13,6 +13,7 @@ import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.SoundAssets
+import com.github.quillraven.quillycrawler.assets.play
 import ktx.ashley.*
 import ktx.collections.GdxSet
 import ktx.collections.isNotEmpty
@@ -82,13 +83,13 @@ class InteractSystem(
     when (entity.actionableCmp.type) {
       ActionType.EXIT -> {
         player.add(engine.createComponent(GoToNextLevelComponent::class.java))
-        audioService.playSound(SoundAssets.DROP.descriptor.fileName)
+        audioService.play(SoundAssets.DROP)
       }
       ActionType.CHEST -> {
         engine.configureEntity(player) {
           with<LootComponent> { lootType = entity.lootCmp.lootType }
         }
-        audioService.playSound(SoundAssets.CHEST_OPEN.descriptor.fileName)
+        audioService.play(SoundAssets.CHEST_OPEN)
       }
       else -> {
         LOG.error { "Undefined ActionType '${entity.actionableCmp.type}'" }

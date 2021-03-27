@@ -5,6 +5,7 @@ import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.I18NBundle
+import com.github.quillraven.commons.audio.AudioService
 
 enum class TextureAtlasAssets(
   filePath: String,
@@ -29,6 +30,8 @@ enum class MusicAssets(
   TRY_AND_SOLVE_THIS("audio/music/Try and Solve This.ogg")
 }
 
+fun AudioService.play(asset: MusicAssets) = this.playMusic(asset.descriptor.fileName)
+
 enum class SoundAssets(
   filePath: String,
   val descriptor: AssetDescriptor<Sound> = AssetDescriptor(filePath, Sound::class.java)
@@ -36,5 +39,7 @@ enum class SoundAssets(
   CHEST_OPEN("audio/sounds/chest_open.mp3"),
   DROP("audio/sounds/drop.mp3"),
   MENU_SELECT("audio/sounds/menu_select.mp3"),
-  MENU_SELECT_2("audio/sounds/menu_select_2.mp3"),
+  MENU_SELECT_2("audio/sounds/menu_select_2.mp3")
 }
+
+fun AudioService.play(asset: SoundAssets) = this.playSound(asset.descriptor.fileName)

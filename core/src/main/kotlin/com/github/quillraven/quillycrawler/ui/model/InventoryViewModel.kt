@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.StringBuilder
 import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.SoundAssets
+import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.screen.GameScreen
 import com.github.quillraven.quillycrawler.ui.SkinImages
 import ktx.ashley.configureEntity
@@ -87,7 +88,7 @@ data class InventoryViewModel(
   }
 
   fun moveItemSelectionIndex(indicesToMove: Int) {
-    audioService.playSound(SoundAssets.MENU_SELECT.descriptor.fileName)
+    audioService.play(SoundAssets.MENU_SELECT)
 
     with(playerEntity.bagCmp) {
       if (items.isEmpty) {
@@ -295,7 +296,7 @@ data class InventoryViewModel(
       return
     }
 
-    audioService.playSound(SoundAssets.MENU_SELECT_2.descriptor.fileName)
+    audioService.play(SoundAssets.MENU_SELECT_2)
 
     val selectedItem = itemEntities[selectedItemIndex]
     selectedItem.itemCmp.also { itemCmp ->

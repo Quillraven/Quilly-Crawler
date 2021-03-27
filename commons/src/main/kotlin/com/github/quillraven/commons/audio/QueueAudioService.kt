@@ -4,21 +4,19 @@ import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
-import kotlinx.coroutines.launch
 import ktx.assets.async.AssetStorage
-import ktx.async.KtxAsync
-import ktx.collections.getOrPut
 import ktx.collections.iterate
 import ktx.collections.set
 import ktx.log.debug
 import ktx.log.error
-import ktx.log.info
 import ktx.log.logger
 import kotlin.math.max
 
 /**
  * A request for a [Sound] that is created within the [QueueAudioService.playSound] method.
  * It contains the [filePath] and the [volume] of the request.
+ * Requests are getting processed each time the [QueueAudioService.update] method is called which should be
+ * done per frame.
  */
 private class SoundRequest : Pool.Poolable {
   var filePath: String = ""
@@ -34,35 +32,39 @@ private class SoundRequest : Pool.Poolable {
  * Implementation of [AudioService] to play one [Music] track at a time and to queue [Sound] playback
  * to avoid multiple [Sound] instances of the same sound within a single frame.
  *
- * Requires an [assetStorage] to load and unload the [Sound] and [Music] resources.
+ * Requires an [assetStorage] to access the [Sound] and [Music] resources.
  *
  * Use [maxSimultaneousSounds] to define the maximum number of sounds that can play concurrently within one frame.
- *
- * Use [maxCachedSounds] to define the size of the sound cache. [Sound] instances are cached internally for
- * faster access of future calls. If the [maxCachedSounds] is reached then the cache gets cleared.
  */
 class QueueAudioService(
   private val assetStorage: AssetStorage,
   private val maxSimultaneousSounds: Int = 16,
-  private val maxCachedSounds: Int = 50
 ) : AudioService {
 
   private val soundRequests = ObjectMap<String, SoundRequest>(maxSimultaneousSounds)
-  private val soundCache = ObjectMap<String, Sound>(maxCachedSounds)
   private var currentMusicFilePath: String = ""
   private var currentMusic: Music? = null
 
   /**
    * Adds a [SoundRequest] to the request queue for the [soundFilePath] and [volume].
    * If the [maxSimultaneousSounds] is reached for the current frame then this request is ignored.
+   * If the [Sound] is not loaded yet by the [assetStorage] then the request is also ignored.
    * Making a call to [update] will play all pending requests.
    */
   override fun playSound(soundFilePath: String, volume: Float) {
-    if (soundRequests.size >= maxSimultaneousSounds) {
-      LOG.info { "Reached maximum of '$maxSimultaneousSounds' simultaneous sounds. Request is ignored" }
+    // verify sound is loaded
+    if (!assetStorage.isLoaded<Sound>(soundFilePath)) {
+      LOG.error { "Sound '$soundFilePath' is not loaded. Request is ignored!" }
       return
     }
 
+    // verify that we did not reach the maximum amount of simultaneous sounds
+    if (soundRequests.size >= maxSimultaneousSounds) {
+      LOG.debug { "Reached maximum of '$maxSimultaneousSounds' simultaneous sounds. Request is ignored" }
+      return
+    }
+
+    // add or update request
     val request = soundRequests[soundFilePath]
     if (request != null) {
       // sound already queued -> set volume to maximum of both requests
@@ -77,38 +79,31 @@ class QueueAudioService(
   }
 
   /**
-   * Loads and plays a new [Music] instance for [musicFilePath] with the given [volume].
+   * Plays [Music] from [musicFilePath] with the given [volume].
    * If [loop] is true then the music will start again when finished.
-   *
-   * If there is already a music playing then it gets stopped and unloaded from the [assetStorage].
+   * If there is already a music playing then it gets stopped.
+   * If the [Music] is not loaded yet by the [assetStorage] then the call is ignored.
    */
   override fun playMusic(musicFilePath: String, volume: Float, loop: Boolean) {
+    // verify that music is loaded
+    if (!assetStorage.isLoaded<Music>(musicFilePath)) {
+      LOG.error { "Music '$musicFilePath' is not loaded. Request is ignored!" }
+      return
+    }
+
     if (currentMusicFilePath == musicFilePath) {
       // trying to play the same music again -> ignore it
       LOG.debug { "Music '$musicFilePath' is already playing" }
       return
     }
 
-    val oldMusic = currentMusic
-    if (oldMusic != null) {
-      // stop and unload current music
-      LOG.debug { "Stop music '$currentMusicFilePath'" }
-      oldMusic.stop()
-      KtxAsync.launch {
-        assetStorage.unload<Music>(currentMusicFilePath)
-      }
-    }
+    // stop previous music if there is any
+    currentMusic?.stop()
 
-    // verify music file path
-    if (!assetStorage.fileResolver.resolve(musicFilePath).exists()) {
-      LOG.error { "Music file '$musicFilePath' does not exist!" }
-      return
-    }
-
-    // load and play new music
+    // play new music
     LOG.debug { "Play music '$musicFilePath'" }
     currentMusicFilePath = musicFilePath
-    currentMusic = assetStorage.loadSync<Music>(musicFilePath).apply {
+    currentMusic = assetStorage.get<Music>(musicFilePath).apply {
       this.isLooping = loop
       this.volume = volume.coerceIn(0f, 1f)
       play()
@@ -137,44 +132,15 @@ class QueueAudioService(
   }
 
   /**
-   * Processes all queued [sound requests][SoundRequest] of [playSound] and clears the queue.
-   * Will load the [Sound] via the [assetStorage] if needed and adds the [Sound] to an internal
-   * cache for faster access in the future.
-   *
-   * If the cache reaches the [maxCachedSounds] size then the [Sound] instances of the cache get unloaded
-   * from the [assetStorage] and the cache gets cleared.
+   * Processes all queued [sound requests][SoundRequest] of [playSound] and clears the queue. This method
+   * should be called each frame.
    */
   override fun update() {
     if (!soundRequests.isEmpty) {
       soundRequests.iterate { _, request, iterator ->
-        val sound = soundCache.getOrPut(request.filePath) {
-          // sound not loaded yet -> load it
-          if (soundCache.size >= maxCachedSounds) {
-            // maximum cache size reached -> unload sounds and clear cache
-            LOG.info { "Clearing sound cache of size '$maxCachedSounds'" }
-            soundCache.iterate { soundFilePath, _, cacheIterator ->
-              KtxAsync.launch {
-                assetStorage.unload<Sound>(soundFilePath)
-              }
-              cacheIterator.remove()
-            }
-          }
-
-          // verify sound file path
-          if (!assetStorage.fileResolver.resolve(request.filePath).exists()) {
-            LOG.error { "Sound file '${request.filePath}' does not exist!" }
-            SOUND_REQUEST_POOL.free(request)
-            iterator.remove()
-            return@iterate
-          }
-
-          // load sound
-          assetStorage.loadSync(request.filePath)
-        }
-
         // play sound and remove request
         LOG.debug { "Play sound '${request.filePath}'" }
-        sound.play(request.volume)
+        assetStorage.get<Sound>(request.filePath).play(request.volume)
         SOUND_REQUEST_POOL.free(request)
         iterator.remove()
       }

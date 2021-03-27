@@ -11,6 +11,7 @@ import com.github.quillraven.quillycrawler.ashley.component.GoToNextLevelCompone
 import com.github.quillraven.quillycrawler.ashley.component.PlayerComponent
 import com.github.quillraven.quillycrawler.ashley.component.playerCmp
 import com.github.quillraven.quillycrawler.assets.MusicAssets
+import com.github.quillraven.quillycrawler.assets.play
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.log.debug
@@ -27,6 +28,7 @@ class MapSystem(
     super.addedToEngine(engine)
     mapService.setMap(engine, "maps/tutorial.tmx")
     audioService.playMusic(MusicAssets.TRY_AND_SOLVE_THIS.descriptor.fileName)
+    audioService.play(MusicAssets.TRY_AND_SOLVE_THIS)
   }
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
@@ -36,7 +38,7 @@ class MapSystem(
 
     // TODO remove debug stuff -> when shall we change the music? every 5th level for a boss fight?
     if (playerCmp.dungeonLevel == 2) {
-      audioService.playMusic(MusicAssets.TAKE_COVER.descriptor.fileName)
+      audioService.play(MusicAssets.TAKE_COVER)
     }
 
     val nextMapFilePath = nextMap(playerCmp.dungeonLevel)

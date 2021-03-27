@@ -1,8 +1,6 @@
 package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.PooledEngine
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -16,8 +14,6 @@ import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
-import com.github.quillraven.quillycrawler.assets.MusicAssets
-import com.github.quillraven.quillycrawler.assets.SoundAssets
 import ktx.ashley.EngineEntity
 import ktx.log.debug
 import ktx.log.logger
@@ -59,30 +55,6 @@ class GameScreen(
   }
 
   override fun render(delta: Float) {
-    // TODO remove debug sound stuff
-    if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-      for (i in 0..5) {
-        with(MusicAssets.values().random().descriptor.fileName) {
-          game.audioService.playMusic(this)
-          LOG.debug { "Playing music $this" }
-        }
-      }
-
-      for (x in 0..2) {
-        for (i in 0..50) {
-          with(SoundAssets.values().random().descriptor.fileName) {
-            game.audioService.playSound(this)
-            LOG.debug { "Playing sound $this" }
-          }
-        }
-        game.audioService.update()
-      }
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
-      game.audioService.playSound("wrongpath")
-      game.audioService.update()
-      game.audioService.playMusic("wrongpath")
-    }
-
     engine.update(delta)
   }
 
