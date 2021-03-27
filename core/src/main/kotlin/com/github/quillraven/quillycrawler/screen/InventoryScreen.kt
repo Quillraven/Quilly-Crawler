@@ -3,8 +3,6 @@ package com.github.quillraven.quillycrawler.screen
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.github.quillraven.commons.ashley.system.RemoveSystem
@@ -19,7 +17,7 @@ import com.github.quillraven.quillycrawler.ui.view.InventoryView
 
 class InventoryScreen(game: QuillyCrawler, private val engine: Engine, playerEntity: Entity) : AbstractScreen(game) {
   val viewModel =
-    InventoryViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, playerEntity, game.audioService)
+    InventoryViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, playerEntity, audioService)
   private val view = InventoryView(viewModel, assetStorage[I18NAssets.DEFAULT.descriptor])
   private val stage = Stage(FitViewport(320f, 180f), batch)
 
@@ -51,12 +49,6 @@ class InventoryScreen(game: QuillyCrawler, private val engine: Engine, playerEnt
     system !is GearSystem && system !is SetScreenSystem && system !is ConsumeSystem && system !is RemoveSystem
 
   override fun render(delta: Float) {
-    // TODO remove debug
-    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-      stage.clear()
-      stage.addActor(InventoryView(viewModel, assetStorage[I18NAssets.DEFAULT.descriptor]))
-    }
-
     with(stage) {
       act(delta)
       viewport.apply()

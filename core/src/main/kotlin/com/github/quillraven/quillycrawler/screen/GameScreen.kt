@@ -28,10 +28,17 @@ class GameScreen(
   }
   private val box2DDebugRenderer = Box2DDebugRenderer()
   private val mapService: MapService =
-    TiledMapService(assetStorage, batch, QuillyCrawler.UNIT_SCALE, world, EngineEntity::configureTiledMapEntity)
+    TiledMapService(
+      assetStorage,
+      batch,
+      QuillyCrawler.UNIT_SCALE,
+      world,
+      audioService,
+      EngineEntity::configureTiledMapEntity
+    )
   private val engine = PooledEngine().apply {
     addSystem(PlayerControlSystem())
-    addSystem(InteractSystem(messageManager, game.audioService))
+    addSystem(InteractSystem(messageManager, audioService))
     addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
     addSystem(LootSystem())
     addSystem(GearSystem())
@@ -45,7 +52,7 @@ class GameScreen(
     if (game.isDevMode()) {
       addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
     }
-    addSystem(MapSystem(mapService, game.audioService))
+    addSystem(MapSystem(mapService))
     addSystem(RemoveSystem())
     addSystem(SetScreenSystem(game))
   }
