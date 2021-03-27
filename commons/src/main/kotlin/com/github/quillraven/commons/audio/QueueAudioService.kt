@@ -5,6 +5,7 @@ import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
 import ktx.assets.async.AssetStorage
+import ktx.collections.GdxSet
 import ktx.collections.iterate
 import ktx.collections.set
 import ktx.log.debug
@@ -21,10 +22,12 @@ import kotlin.math.max
 private class SoundRequest : Pool.Poolable {
   var filePath: String = ""
   var volume = 1f
+  var loop = false
 
   override fun reset() {
     filePath = ""
     volume = 1f
+    loop = false
   }
 }
 
@@ -39,19 +42,22 @@ private class SoundRequest : Pool.Poolable {
 class QueueAudioService(
   private val assetStorage: AssetStorage,
   private val maxSimultaneousSounds: Int = 16,
+  override var musicVolume: Float = 1f,
+  override var soundVolume: Float = 1f
 ) : AudioService {
-
   private val soundRequests = ObjectMap<String, SoundRequest>(maxSimultaneousSounds)
   private var currentMusicFilePath: String = ""
   private var currentMusic: Music? = null
+  private val playedSounds = GdxSet<String>(maxSimultaneousSounds)
 
   /**
    * Adds a [SoundRequest] to the request queue for the [soundFilePath] and [volume].
+   * If [loop] is true then the sound will start again when finished.
    * If the [maxSimultaneousSounds] is reached for the current frame then this request is ignored.
    * If the [Sound] is not loaded yet by the [assetStorage] then the request is also ignored.
    * Making a call to [update] will play all pending requests.
    */
-  override fun playSound(soundFilePath: String, volume: Float) {
+  override fun playSound(soundFilePath: String, volume: Float, loop: Boolean) {
     // verify sound is loaded
     if (!assetStorage.isLoaded<Sound>(soundFilePath)) {
       LOG.error { "Sound '$soundFilePath' is not loaded. Request is ignored!" }
@@ -65,15 +71,17 @@ class QueueAudioService(
     }
 
     // add or update request
+    playedSounds.add(soundFilePath)
     val request = soundRequests[soundFilePath]
     if (request != null) {
       // sound already queued -> set volume to maximum of both requests
-      request.volume = max(request.volume, volume).coerceIn(0f, 1f)
+      request.volume = max(request.volume, volume)
     } else {
       // sound not queued yet
       soundRequests[soundFilePath] = SOUND_REQUEST_POOL.obtain().apply {
         this.volume = volume
         this.filePath = soundFilePath
+        this.loop = loop
       }
     }
   }
@@ -105,23 +113,29 @@ class QueueAudioService(
     currentMusicFilePath = musicFilePath
     currentMusic = assetStorage.get<Music>(musicFilePath).apply {
       this.isLooping = loop
-      this.volume = volume.coerceIn(0f, 1f)
+      this.volume = (volume * musicVolume).coerceIn(0f, 1f)
       play()
     }
   }
 
   /**
-   * Pause the current active [Music].
+   * Pauses the current active [Music] and all previously started [Sound] instances.
    */
-  override fun pauseMusic() {
+  override fun pause() {
     currentMusic?.pause()
+    playedSounds.forEach {
+      assetStorage.get<Sound>(it).pause()
+    }
   }
 
   /**
-   * Resume the current active [Music].
+   * Resumes the current active [Music] and all previously paused [Sound] instances.
    */
-  override fun resumeMusic() {
+  override fun resume() {
     currentMusic?.play()
+    playedSounds.forEach {
+      assetStorage.get<Sound>(it).resume()
+    }
   }
 
   /**
@@ -129,6 +143,19 @@ class QueueAudioService(
    */
   override fun stopMusic() {
     currentMusic?.stop()
+  }
+
+  /**
+   * Stops all [Sound] instances of the given [soundFilePath].
+   */
+  override fun stopSounds(soundFilePath: String) {
+    // verify sound is loaded
+    if (!assetStorage.isLoaded<Sound>(soundFilePath)) {
+      LOG.error { "Sound '$soundFilePath' is not loaded and cannot be stopped!" }
+      return
+    }
+
+    assetStorage.get<Sound>(soundFilePath).stop()
   }
 
   /**
@@ -140,7 +167,11 @@ class QueueAudioService(
       soundRequests.iterate { _, request, iterator ->
         // play sound and remove request
         LOG.debug { "Play sound '${request.filePath}'" }
-        assetStorage.get<Sound>(request.filePath).play(request.volume)
+        if (request.loop) {
+          assetStorage.get<Sound>(request.filePath).loop((request.volume * soundVolume).coerceIn(0f, 1f))
+        } else {
+          assetStorage.get<Sound>(request.filePath).play((request.volume * soundVolume).coerceIn(0f, 1f))
+        }
         SOUND_REQUEST_POOL.free(request)
         iterator.remove()
       }

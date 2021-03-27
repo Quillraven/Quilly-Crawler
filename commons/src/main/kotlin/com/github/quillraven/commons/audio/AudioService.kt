@@ -9,15 +9,20 @@ import com.badlogic.gdx.audio.Sound
  * Refer to [QueueAudioService] for an example implementation
  */
 interface AudioService {
-  fun playSound(soundFilePath: String, volume: Float = 1f)
+  var musicVolume: Float
+  var soundVolume: Float
+
+  fun playSound(soundFilePath: String, volume: Float = 1f, loop: Boolean = false)
 
   fun playMusic(musicFilePath: String, volume: Float = 1f, loop: Boolean = true)
 
-  fun pauseMusic()
+  fun pause()
 
-  fun resumeMusic()
+  fun resume()
 
   fun stopMusic()
+
+  fun stopSounds(soundFilePath: String)
 
   fun update()
 }
@@ -26,15 +31,20 @@ interface AudioService {
  * Empty implementation of [AudioService]. Can be used as default value to avoid null services.
  */
 object DefaultAudioService : AudioService {
-  override fun playSound(soundFilePath: String, volume: Float) = Unit
+  override var musicVolume = 1f
+  override var soundVolume = 1f
+
+  override fun playSound(soundFilePath: String, volume: Float, loop: Boolean) = Unit
 
   override fun playMusic(musicFilePath: String, volume: Float, loop: Boolean) = Unit
 
-  override fun pauseMusic() = Unit
+  override fun pause() = Unit
 
-  override fun resumeMusic() = Unit
+  override fun resume() = Unit
 
   override fun stopMusic() = Unit
+
+  override fun stopSounds(soundFilePath: String) = Unit
 
   override fun update() = Unit
 }
