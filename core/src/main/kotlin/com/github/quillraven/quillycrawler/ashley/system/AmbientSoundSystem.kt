@@ -19,7 +19,7 @@ class AmbientSoundSystem(
 
   override fun addedToEngine(engine: Engine) {
     super.addedToEngine(engine)
-    audioService.play(SoundAssets.AMBIENCE_CAVE, true)
+    audioService.play(SoundAssets.AMBIENCE_CAVE, loop = true)
   }
 
   override fun removedFromEngine(engine: Engine) {
@@ -30,7 +30,7 @@ class AmbientSoundSystem(
   override fun setProcessing(processing: Boolean) {
     super.setProcessing(processing)
     if (processing) {
-      audioService.play(SoundAssets.AMBIENCE_CAVE, true)
+      audioService.play(SoundAssets.AMBIENCE_CAVE, loop = true)
     } else if (!processing) {
       audioService.stop(SoundAssets.AMBIENCE_CAVE)
     }
@@ -40,7 +40,7 @@ class AmbientSoundSystem(
     nextSfx -= deltaTime
     if (nextSfx <= 0f) {
       nextSfx = timeForNextSfx()
-      audioService.play(sfxArray.random())
+      audioService.play(sfxArray.random(), 0.5f)
     }
   }
 }

@@ -45,8 +45,8 @@ enum class SoundAssets(
   GOBLIN_03("audio/sounds/Goblin_03.mp3"),
 }
 
-fun AudioService.play(asset: SoundAssets, loop: Boolean = false) =
-  this.playSound(asset.descriptor.fileName, loop = loop)
+fun AudioService.play(asset: SoundAssets, volume: Float = 1f, loop: Boolean = false) =
+  this.playSound(asset.descriptor.fileName, volume, loop)
 
 fun AudioService.stop(asset: SoundAssets) =
   this.stopSounds(asset.descriptor.fileName)
