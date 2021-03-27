@@ -30,8 +30,6 @@ enum class MusicAssets(
   TRY_AND_SOLVE_THIS("audio/music/Try and Solve This.ogg")
 }
 
-fun AudioService.play(asset: MusicAssets) = this.playMusic(asset.descriptor.fileName)
-
 enum class SoundAssets(
   filePath: String,
   val descriptor: AssetDescriptor<Sound> = AssetDescriptor(filePath, Sound::class.java)
@@ -39,7 +37,16 @@ enum class SoundAssets(
   CHEST_OPEN("audio/sounds/chest_open.mp3"),
   DROP("audio/sounds/drop.mp3"),
   MENU_SELECT("audio/sounds/menu_select.mp3"),
-  MENU_SELECT_2("audio/sounds/menu_select_2.mp3")
+  MENU_SELECT_2("audio/sounds/menu_select_2.mp3"),
+  POWER_UP_12("audio/sounds/power_up_12.wav"),
+  AMBIENCE_CAVE("audio/sounds/ambience_cave.mp3"),
+  DRAGON_GROWL_00("audio/sounds/Dragon_Growl_00.mp3"),
+  DRAGON_GROWL_01("audio/sounds/Dragon_Growl_01.mp3"),
+  GOBLIN_03("audio/sounds/Goblin_03.mp3"),
 }
 
-fun AudioService.play(asset: SoundAssets) = this.playSound(asset.descriptor.fileName)
+fun AudioService.play(asset: SoundAssets, loop: Boolean = false) =
+  this.playSound(asset.descriptor.fileName, loop = loop)
+
+fun AudioService.stop(asset: SoundAssets) =
+  this.stopSounds(asset.descriptor.fileName)

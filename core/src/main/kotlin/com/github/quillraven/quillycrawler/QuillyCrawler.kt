@@ -21,21 +21,6 @@ class QuillyCrawler : AbstractGame() {
     setScreen<StartUpScreen>()
   }
 
-  override fun pause() {
-    audioService.pauseMusic()
-    super.pause()
-  }
-
-  override fun resume() {
-    audioService.resumeMusic()
-    super.resume()
-  }
-
-  override fun render() {
-    super.render()
-    audioService.update()
-  }
-
   companion object {
     const val UNIT_SCALE = 1 / 16f // 16 pixels is one in game world unit
   }

@@ -83,7 +83,7 @@ class InteractSystem(
     when (entity.actionableCmp.type) {
       ActionType.EXIT -> {
         player.add(engine.createComponent(GoToNextLevelComponent::class.java))
-        audioService.play(SoundAssets.DROP)
+        audioService.play(SoundAssets.POWER_UP_12)
       }
       ActionType.CHEST -> {
         engine.configureEntity(player) {

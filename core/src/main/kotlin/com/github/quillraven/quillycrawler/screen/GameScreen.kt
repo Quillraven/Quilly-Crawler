@@ -53,6 +53,7 @@ class GameScreen(
       addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
     }
     addSystem(MapSystem(mapService))
+    addSystem(AmbientSoundSystem(audioService))
     addSystem(RemoveSystem())
     addSystem(SetScreenSystem(game))
   }
