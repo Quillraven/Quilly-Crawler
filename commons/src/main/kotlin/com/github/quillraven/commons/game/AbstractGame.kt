@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.github.quillraven.commons.audio.AudioService
 import ktx.app.KtxGame
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
@@ -27,6 +28,7 @@ abstract class AbstractGame : KtxGame<AbstractScreen>() {
     KtxAsync.initiate()
     AssetStorage()
   }
+  abstract val audioService: AudioService
 
   override fun dispose() {
     super.dispose()

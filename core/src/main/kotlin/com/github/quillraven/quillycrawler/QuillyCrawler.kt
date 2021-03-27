@@ -8,7 +8,7 @@ import com.github.quillraven.commons.game.AbstractGame
 import com.github.quillraven.quillycrawler.screen.StartUpScreen
 
 class QuillyCrawler : AbstractGame() {
-  val audioService: AudioService = QueueAudioService(assetStorage)
+  override val audioService: AudioService = QueueAudioService(assetStorage)
 
   fun isDevMode() = "true" == System.getProperty("devMode", "false")
 
