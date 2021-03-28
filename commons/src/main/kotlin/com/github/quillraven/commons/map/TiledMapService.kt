@@ -21,8 +21,11 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.audio.AudioService
+import com.github.quillraven.commons.audio.DefaultAudioService
 import com.github.quillraven.commons.map.MapService.Companion.LOG
 import com.github.quillraven.commons.map.TiledMapService.Companion.COLLISION_LAYER_PROPERTY
+import com.github.quillraven.commons.map.TiledMapService.Companion.MUSIC_FILE_PATH_PROPERTY
 import com.github.quillraven.commons.map.TiledMapService.Companion.Z_PROPERTY
 import kotlinx.coroutines.launch
 import ktx.ashley.*
@@ -53,12 +56,16 @@ import kotlin.system.measureTimeMillis
  *
  * Additionally, any entity created by this service gets a [TiledComponent] to mark it as a tiled map entity. Whenever
  * [setMap] is called then all entities with a [TiledComponent] get removed from the [Engine].
+ *
+ * If a [TiledMap] contains a [MUSIC_FILE_PATH_PROPERTY] then the [AudioService.playMusic] method of the given
+ * [audioService] is called.
  */
 class TiledMapService(
   private val assetStorage: AssetStorage,
   batch: Batch,
   private val unitScale: Float,
   private val world: World? = null,
+  private val audioService: AudioService = DefaultAudioService,
   private val configureEntity: EngineEntity.(MapObject, World?) -> Boolean
 ) : MapService {
   private val mapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
@@ -82,6 +89,8 @@ class TiledMapService(
    * Updates the foreground and background layers for rendering and calls [configureEntity] for every [MapObject]
    * of an object layer in Tiled. If a [world] is defined then also an entity with a [Box2DComponent] is created
    * that represents the collision shapes if there are layers with a [COLLISION_LAYER_PROPERTY] set to true.
+   *
+   * Plays music if the [MUSIC_FILE_PATH_PROPERTY] is specified.
    */
   override fun setMap(engine: Engine, mapFilePath: String) {
     if (!assetStorage.fileResolver.resolve(mapFilePath).exists()) {
@@ -114,6 +123,7 @@ class TiledMapService(
       // and create map entities like collision entities and game object entities
       updateRenderLayers()
       parseObjectLayers(engine)
+      updateMusic()
 
       currentMapFilePath = mapFilePath
       mapRenderer.map = currentMap
@@ -254,6 +264,21 @@ class TiledMapService(
   }
 
   /**
+   * Reads the [MUSIC_FILE_PATH_PROPERTY] of the map and calls the [AudioService.playMusic] method
+   * of the [audioService] if it is defined.
+   */
+  private fun updateMusic() {
+    val musicFilePath = currentMap.property(MUSIC_FILE_PATH_PROPERTY, "")
+    if (musicFilePath.isNotBlank()) {
+      if (assetStorage.fileResolver.resolve(musicFilePath).exists()) {
+        audioService.playMusic(musicFilePath)
+      } else {
+        LOG.error { "Music file path '$musicFilePath' does not exist!" }
+      }
+    }
+  }
+
+  /**
    * Sets the view bounds of the [mapRenderer] by the given [camera].
    * Also, makes a call to [AnimatedTiledMapTile.updateAnimationBaseTime] to update map animations.
    */
@@ -286,6 +311,7 @@ class TiledMapService(
   companion object {
     const val Z_PROPERTY = "z"
     const val COLLISION_LAYER_PROPERTY = "collisionLayer"
+    const val MUSIC_FILE_PATH_PROPERTY = "musicFilePath"
     private val EMPTY_MAP: TiledMap = TiledMap()
     private val TMP_RECTANGLE_VERTICES = FloatArray(8)
   }

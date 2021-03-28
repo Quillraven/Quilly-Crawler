@@ -29,7 +29,7 @@ interface MapService {
 /**
  * Empty implementation of [MapService]. Can be used as default value to avoid null services.
  */
-class DefaultMapService : MapService {
+object DefaultMapService : MapService {
   override fun setMap(engine: Engine, mapFilePath: String) = Unit
 
   override fun setViewBounds(camera: OrthographicCamera) = Unit

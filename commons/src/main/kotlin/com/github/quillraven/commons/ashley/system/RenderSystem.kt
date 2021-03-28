@@ -36,7 +36,7 @@ class RenderSystem(
   private val batch: Batch,
   private val viewport: Viewport,
   private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
-  private val mapService: MapService = DefaultMapService()
+  private val mapService: MapService = DefaultMapService
 ) : SortedIteratingSystem(
   allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
   compareBy { it[TransformComponent.MAPPER] }

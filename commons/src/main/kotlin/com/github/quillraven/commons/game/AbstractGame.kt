@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.github.quillraven.commons.audio.AudioService
 import ktx.app.KtxGame
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
@@ -15,6 +16,9 @@ import ktx.log.logger
 /**
  * Abstract implementation of [KtxGame] using a [SpriteBatch] as a [batch] and an [assetStorage] for
  * loading and unloading assets.
+ *
+ * When the game's [pause] method is called then [render] will do nothing until [resume] is called. This happens
+ * e.g. when the window gets minimized. Will also call the [audioService] pause, resume and update method accordingly.
  *
  * Prints debug information of the [batch] and the [assetStorage] when its [dispose] method is called and the
  * log level is set to [Application.LOG_DEBUG].
@@ -27,6 +31,8 @@ abstract class AbstractGame : KtxGame<AbstractScreen>() {
     KtxAsync.initiate()
     AssetStorage()
   }
+  abstract val audioService: AudioService
+  private var isPaused = false
 
   override fun dispose() {
     super.dispose()
@@ -44,6 +50,27 @@ abstract class AbstractGame : KtxGame<AbstractScreen>() {
 
     LOG.debug { assetStorage.takeSnapshot().prettyPrint() }
     assetStorage.dispose()
+  }
+
+  override fun pause() {
+    isPaused = true
+    audioService.pause()
+    super.pause()
+  }
+
+  override fun resume() {
+    isPaused = false
+    audioService.resume()
+    super.resume()
+  }
+
+  override fun render() {
+    if (isPaused) {
+      return
+    }
+
+    super.render()
+    audioService.update()
   }
 
   companion object {
