@@ -38,13 +38,24 @@ private class SoundRequest : Pool.Poolable {
  * Requires an [assetStorage] to access the [Sound] and [Music] resources.
  *
  * Use [maxSimultaneousSounds] to define the maximum number of sounds that can play concurrently within one frame.
+ *
+ * Use [musicVolume] and [soundVolume] to set the volume of [Music] and [Sound] instances. The range is between 0 and 1.
  */
 class QueueAudioService(
   private val assetStorage: AssetStorage,
-  private val maxSimultaneousSounds: Int = 16,
-  override var musicVolume: Float = 1f,
-  override var soundVolume: Float = 1f
+  private val maxSimultaneousSounds: Int = 16
 ) : AudioService {
+  // cap volume between 0f and 1f
+  override var musicVolume: Float = 1f
+    set(value) {
+      field = value.coerceIn(0f, 1f)
+      currentMusic?.volume = field
+    }
+  override var soundVolume: Float = 1f
+    set(value) {
+      field = value.coerceIn(0f, 1f)
+    }
+
   private val soundRequests = ObjectMap<String, SoundRequest>(maxSimultaneousSounds)
   private var currentMusicFilePath: String = ""
   private var currentMusic: Music? = null
