@@ -10,9 +10,11 @@ import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
+import com.github.quillraven.commons.shader.DefaultShaderService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
+import com.github.quillraven.quillycrawler.ashley.shader.DefaultPostProcessRenderer
 import com.github.quillraven.quillycrawler.ashley.system.*
 import ktx.ashley.EngineEntity
 import ktx.log.debug
@@ -48,9 +50,17 @@ class GameScreen(
     addSystem(CameraLockSystem(gameViewport.camera))
     addSystem(CollisionSystem(world))
     addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
-    addSystem(RenderSystem(batch, gameViewport, mapService = mapService))
+    addSystem(
+      RenderSystem(
+        batch,
+        gameViewport,
+        mapService = mapService,
+        postProcessRenderer = DefaultPostProcessRenderer(DefaultShaderService(assetStorage), this)
+      )
+    )
     if (game.isDevMode()) {
-      addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
+      // TODO add debug box2d environment option
+      // addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
     }
     addSystem(MapSystem(mapService))
     addSystem(AmbientSoundSystem(audioService))

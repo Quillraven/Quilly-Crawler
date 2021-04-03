@@ -10,6 +10,7 @@ import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.map.DefaultMapService
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
+import com.github.quillraven.commons.shader.PostProcessRenderer
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
@@ -36,7 +37,9 @@ class RenderSystem(
   private val batch: Batch,
   private val viewport: Viewport,
   private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
-  private val mapService: MapService = DefaultMapService
+  private val mapService: MapService = DefaultMapService,
+  // TODO add comments/document PostProcessRenderer
+  private val postProcessRenderer: PostProcessRenderer = object : PostProcessRenderer {}
 ) : SortedIteratingSystem(
   allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
   compareBy { it[TransformComponent.MAPPER] }
@@ -57,6 +60,8 @@ class RenderSystem(
       super.update(deltaTime)
       mapService.renderForeground()
     }
+
+    postProcessRenderer.postProcess(batch, entities, mapService)
   }
 
   /**
