@@ -2,9 +2,11 @@ package com.github.quillraven.commons.shader
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.utils.ImmutableArray
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.GdxRuntimeException
+import com.github.quillraven.commons.ashley.component.renderCmp
 import kotlinx.coroutines.launch
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
@@ -55,7 +57,17 @@ abstract class AbstractShaderService(
     }
   }
 
+  fun renderEntityOutline(outlineColor: Color, entity: Entity) {
+    with(entity.renderCmp.sprite) {
+      TMP_COLOR.set(color)
+      color = outlineColor
+      draw(batch)
+      color = TMP_COLOR
+    }
+  }
+
   companion object {
     private val LOG = logger<AbstractShaderService>()
+    private val TMP_COLOR = Color()
   }
 }

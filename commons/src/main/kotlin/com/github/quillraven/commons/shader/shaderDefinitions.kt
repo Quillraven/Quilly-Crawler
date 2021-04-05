@@ -19,8 +19,6 @@ interface ShaderDefinition {
       override val vertexShader = DEFAULT_VERTEX
       override val fragmentShader = OUTLINE_FRAGMENT
     }
-
-    const val UNIFORM_OUTLINE_COLOR = "u_outlineColor"
   }
 }
 
@@ -77,7 +75,6 @@ varying vec4 v_color;
 varying vec2 v_texCoords;
 
 uniform sampler2D u_texture;
-uniform vec4 u_outlineColor;
 
 void main()
 {
@@ -98,9 +95,9 @@ void main()
   // if one of the surrounding pixels is transparent then this pixel will be an outline pixel
   vec4 pixel = texture2D(u_texture, v_texCoords);
   if(8.0 * pixel.a - surroundingA > 0.0) {
-    gl_FragColor = u_outlineColor;
+    gl_FragColor = v_color;
   } else {
-   gl_FragColor = vec4(u_outlineColor.rgb, 0.0);
+   gl_FragColor = vec4(0.0);
   }
 }
 """
