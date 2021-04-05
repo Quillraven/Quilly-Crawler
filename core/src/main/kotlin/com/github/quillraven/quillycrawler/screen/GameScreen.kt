@@ -58,9 +58,8 @@ class GameScreen(
         shaderService = DefaultShaderService(assetStorage, batch, this)
       )
     )
-    if (game.isDevMode()) {
-      // TODO add debug box2d environment option
-      // addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
+    if (game.b2dDebug()) {
+      addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
     }
     addSystem(MapSystem(mapService))
     addSystem(AmbientSoundSystem(audioService))
