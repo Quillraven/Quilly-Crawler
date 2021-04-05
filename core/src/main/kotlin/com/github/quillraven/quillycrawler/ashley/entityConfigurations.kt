@@ -152,13 +152,7 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<StateComponent> { state = PlayerState.IDLE }
     with<PlayerComponent>()
     with<PlayerControlComponent>()
-    with<BagComponent> {
-      // TODO remove debug items
-      ItemType.values().filter { it != ItemType.UNDEFINED }.forEach {
-        items[it] = createItemEntity(it)
-      }
-      items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION)
-    }
+    with<BagComponent>()
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
     with<CameraLockComponent>()
