@@ -5,6 +5,7 @@ import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.map.DefaultMapService
@@ -33,13 +34,15 @@ import ktx.log.logger
  * Use [mapService] to define a specific [MapService] that should be used for 2d-map rendering like [TiledMapService].
  * [MapService.renderBackground] is called before any entity is rendered.
  * [MapService.renderForeground] is called afterwards.
+ *
+ * Use [shaderService] in case you want to have custom render behavior using [ShaderProgram].
+ * [ShaderService.postRenderEntities] is called after entities are rendered and before [MapService.renderForeground].
  */
 class RenderSystem(
   private val batch: Batch,
   private val viewport: Viewport,
   private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
   private val mapService: MapService = DefaultMapService,
-  // TODO add comments/document PostProcessRenderer
   private val shaderService: ShaderService = EmptyShaderService(batch)
 ) : SortedIteratingSystem(
   allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
@@ -47,24 +50,32 @@ class RenderSystem(
 ) {
   /**
    * Sorts the entities, applies the viewport to the batch and renders each entity.
+   *
    * If a [mapService] is defined then its renderBackground and renderForeground functions
    * are called accordingly.
+   *
+   * Calls [ShaderService.postRenderEntities] after entities are rendered using the [ShaderService.activeShader].
    */
   override fun update(deltaTime: Float) {
+    // always sort entities in case their y-/z-coordinate was modified
     forceSort()
 
+    // apply render boundaries
     viewport.apply()
     mapService.setViewBounds(camera)
 
+    // apply active shader - per default it is the normal shader from the batch
     if (shaderService.activeShader != batch.shader) {
       batch.shader = shaderService.activeShader
     }
 
+    // render map background and entities
     batch.use(camera) {
       mapService.renderBackground()
       super.update(deltaTime)
     }
 
+    // optional post process effects for entities and map foreground
     batch.use(camera) {
       shaderService.postRenderEntities(entities)
       mapService.renderForeground()
