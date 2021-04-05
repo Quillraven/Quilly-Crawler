@@ -10,12 +10,11 @@ import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
-import com.github.quillraven.commons.shader.DefaultShaderService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
-import com.github.quillraven.quillycrawler.ashley.shader.DefaultPostProcessRenderer
 import com.github.quillraven.quillycrawler.ashley.system.*
+import com.github.quillraven.quillycrawler.shader.DefaultShaderService
 import ktx.ashley.EngineEntity
 import ktx.log.debug
 import ktx.log.logger
@@ -50,12 +49,13 @@ class GameScreen(
     addSystem(CameraLockSystem(gameViewport.camera))
     addSystem(CollisionSystem(world))
     addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
+    addSystem(OutlineColorSystem())
     addSystem(
       RenderSystem(
         batch,
         gameViewport,
         mapService = mapService,
-        postProcessRenderer = DefaultPostProcessRenderer(DefaultShaderService(assetStorage), this)
+        shaderService = DefaultShaderService(assetStorage, batch, this)
       )
     )
     if (game.isDevMode()) {

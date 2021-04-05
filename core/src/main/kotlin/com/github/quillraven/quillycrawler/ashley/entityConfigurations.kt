@@ -23,7 +23,6 @@ import ktx.collections.set
 import ktx.log.error
 import ktx.tiled.x
 import ktx.tiled.y
-import kotlin.collections.set
 
 private val playerFamily = allOf(PlayerComponent::class).exclude(RemoveComponent::class).get()
 
@@ -125,8 +124,9 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
     }
     "BIG_DEMON" -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon")
-      with<TransformComponent> { position.set(x, y, position.z) }
+      withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = BigDemonState.RUN }
+      with<ActionableComponent> { type = ActionType.ENEMY }
     }
     "EXIT" -> {
       withBox2DComponents(world, BodyType.StaticBody, x, y, onlySensor = true)
