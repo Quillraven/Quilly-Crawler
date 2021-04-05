@@ -77,7 +77,6 @@ varying vec4 v_color;
 varying vec2 v_texCoords;
 
 uniform sampler2D u_texture;
-uniform vec4 u_regionBoundary;
 uniform vec4 u_outlineColor;
 
 void main()
