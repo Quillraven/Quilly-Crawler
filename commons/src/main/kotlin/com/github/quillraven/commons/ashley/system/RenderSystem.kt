@@ -70,16 +70,14 @@ class RenderSystem(
     }
 
     // render map background and entities
+    shaderService.preRender(viewport)
     batch.use(camera) {
       mapService.renderBackground()
       super.update(deltaTime)
-    }
-
-    // optional post process effects for entities and map foreground
-    batch.use(camera) {
       shaderService.postRenderEntities(entities)
       mapService.renderForeground()
     }
+    shaderService.postRender(viewport)
   }
 
   /**
@@ -114,7 +112,7 @@ class RenderSystem(
       }
 
       // render entity
-      draw(batch)
+      draw(batch, batch.color.a)
     }
   }
 

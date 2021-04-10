@@ -8,16 +8,16 @@ interface ShaderDefinition {
   val fragmentShader: String
 
   companion object {
-    val DEFAULT_SHADER = object : ShaderDefinition {
-      override val id = "commonsDefaultShader"
-      override val vertexShader = DEFAULT_VERTEX
-      override val fragmentShader = DEFAULT_FRAGMENT
-    }
-
     val OUTLINE_SHADER = object : ShaderDefinition {
       override val id = "commonsOutlineShader"
       override val vertexShader = DEFAULT_VERTEX
       override val fragmentShader = OUTLINE_FRAGMENT
+    }
+
+    val BLUR_SHADER = object : ShaderDefinition {
+      override val id = "commonsBlurShader"
+      override val vertexShader = DEFAULT_VERTEX
+      override val fragmentShader = BLUR_FRAGMENT
     }
   }
 }
@@ -39,26 +39,6 @@ void main()
   v_color.a = v_color.a * (255.0 / 254.0);
   v_texCoords = a_texCoord0;
   gl_Position =  u_projTrans * a_position;
-}
-"""
-
-@Language("GLSL")
-const val DEFAULT_FRAGMENT = """
-#ifdef GL_ES
-#define LOWP lowp
-precision mediump float;
-#else
-#define LOWP
-#endif
-
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
-
-uniform sampler2D u_texture;
-
-void main()
-{
-  gl_FragColor = v_color * texture2D(u_texture, v_texCoords);
 }
 """
 
@@ -99,5 +79,43 @@ void main()
   } else {
    gl_FragColor = vec4(0.0);
   }
+}
+"""
+
+@Language("GLSL")
+const val BLUR_FRAGMENT = """
+#ifdef GL_ES
+#define LOWP lowp
+precision mediump float;
+#else
+#define LOWP
+#endif
+
+varying vec2 v_texCoords;
+
+uniform sampler2D u_texture;
+uniform vec2 u_direction;
+uniform float u_radius;
+
+void main() {
+  vec4 sum = vec4(0.0);
+
+  // Number of pixels off the central pixel to sample from
+  float blur = u_radius / textureSize(u_texture, 0).xy;
+
+  // Apply blur using 9 samples and predefined gaussian weights
+  sum += texture2D(u_texture, v_texCoords - 4.0 * blur * u_direction) * 0.006;
+  sum += texture2D(u_texture, v_texCoords - 3.0 * blur * u_direction) * 0.044;
+  sum += texture2D(u_texture, v_texCoords - 2.0 * blur * u_direction) * 0.121;
+  sum += texture2D(u_texture, v_texCoords - 1.0 * blur * u_direction) * 0.194;
+
+  sum += texture2D(u_texture, v_texCoords) * 0.27;
+
+  sum += texture2D(u_texture, v_texCoords + 1.0 * blur * u_direction) * 0.194;
+  sum += texture2D(u_texture, v_texCoords + 2.0 * blur * u_direction) * 0.121;
+  sum += texture2D(u_texture, v_texCoords + 3.0 * blur * u_direction) * 0.044;
+  sum += texture2D(u_texture, v_texCoords + 4.0 * blur * u_direction) * 0.006;
+
+  gl_FragColor = sum;
 }
 """

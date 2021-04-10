@@ -6,7 +6,10 @@ import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.github.quillraven.commons.shader.AbstractShaderService
 import com.github.quillraven.commons.shader.ShaderDefinition
-import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
+import com.github.quillraven.quillycrawler.ashley.component.PlayerComponent
+import com.github.quillraven.quillycrawler.ashley.component.actionableCmp
+import com.github.quillraven.quillycrawler.ashley.component.interactCmp
 import ktx.ashley.allOf
 import ktx.assets.async.AssetStorage
 
