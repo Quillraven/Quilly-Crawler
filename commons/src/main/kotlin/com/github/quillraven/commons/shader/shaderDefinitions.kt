@@ -1,19 +1,38 @@
 package com.github.quillraven.commons.shader
 
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.github.quillraven.commons.shader.ShaderDefinition.Companion.BLUR_SHADER
+import com.github.quillraven.commons.shader.ShaderDefinition.Companion.OUTLINE_SHADER
 import org.intellij.lang.annotations.Language
 
+/**
+ * Interface to define a [ShaderProgram]. It is used by the [ShaderService.shader] function.
+ * [id] must be a unique id to identify the definition.
+ * [vertexShader] and [fragmentShader] are the glsl shader programs as string.
+ *
+ * Contains following common shaders:
+ * - [OUTLINE_SHADER]
+ * - [BLUR_SHADER]
+ */
 interface ShaderDefinition {
   val id: String
   val vertexShader: String
   val fragmentShader: String
 
   companion object {
+    /**
+     * Shader to only render outlines of a texture
+     */
     val OUTLINE_SHADER = object : ShaderDefinition {
       override val id = "commonsOutlineShader"
       override val vertexShader = DEFAULT_VERTEX
       override val fragmentShader = OUTLINE_FRAGMENT
     }
 
+    /**
+     * Shader to apply gaussian blur to a texture. Should be used in two passes.
+     * Once for a horizontal blur and once for a vertical blur using the 'u_direction' uniform.
+     */
     val BLUR_SHADER = object : ShaderDefinition {
       override val id = "commonsBlurShader"
       override val vertexShader = DEFAULT_VERTEX
@@ -101,7 +120,7 @@ void main() {
   vec4 sum = vec4(0.0);
 
   // Number of pixels off the central pixel to sample from
-  float blur = u_radius / textureSize(u_texture, 0).xy;
+  vec2 blur = u_radius / textureSize(u_texture, 0).xy;
 
   // Apply blur using 9 samples and predefined gaussian weights
   sum += texture2D(u_texture, v_texCoords - 4.0 * blur * u_direction) * 0.006;

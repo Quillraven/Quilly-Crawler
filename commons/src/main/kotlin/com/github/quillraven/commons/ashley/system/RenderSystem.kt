@@ -11,7 +11,7 @@ import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.map.DefaultMapService
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
-import com.github.quillraven.commons.shader.EmptyShaderService
+import com.github.quillraven.commons.shader.DefaultShaderService
 import com.github.quillraven.commons.shader.ShaderService
 import ktx.ashley.allOf
 import ktx.ashley.exclude
@@ -37,13 +37,15 @@ import ktx.log.logger
  *
  * Use [shaderService] in case you want to have custom render behavior using [ShaderProgram].
  * [ShaderService.postRenderEntities] is called after entities are rendered and before [MapService.renderForeground].
+ * [ShaderService.preRender] is called at the beginning of [update] and before the [viewport] is applied.
+ * [ShaderService.postRender] is called at the end of [update] after all rendering is done.
  */
 class RenderSystem(
   private val batch: Batch,
   private val viewport: Viewport,
   private val camera: OrthographicCamera = viewport.camera as OrthographicCamera,
   private val mapService: MapService = DefaultMapService,
-  private val shaderService: ShaderService = EmptyShaderService(batch)
+  private val shaderService: ShaderService = DefaultShaderService(batch)
 ) : SortedIteratingSystem(
   allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
   compareBy { it[TransformComponent.MAPPER] }
@@ -55,8 +57,12 @@ class RenderSystem(
    * are called accordingly.
    *
    * Calls [ShaderService.postRenderEntities] after entities are rendered using the [ShaderService.activeShader].
+   * Calls [ShaderService.preRender] before the [viewport] is applied.
+   * Calls [ShaderService.postRender] after all rendering is done.
    */
   override fun update(deltaTime: Float) {
+    shaderService.preRender()
+
     // always sort entities in case their y-/z-coordinate was modified
     forceSort()
 
@@ -70,14 +76,14 @@ class RenderSystem(
     }
 
     // render map background and entities
-    shaderService.preRender(viewport)
     batch.use(camera) {
       mapService.renderBackground()
       super.update(deltaTime)
       shaderService.postRenderEntities(entities)
       mapService.renderForeground()
     }
-    shaderService.postRender(viewport)
+
+    shaderService.postRender()
   }
 
   /**

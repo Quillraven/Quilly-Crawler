@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.github.quillraven.commons.ashley.component.renderCmp
 import com.github.quillraven.commons.shader.AbstractShaderService
 import com.github.quillraven.commons.shader.ShaderDefinition
 import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
@@ -36,7 +37,7 @@ class DefaultShaderService(
         batch.shader = outlineShader
       }
 
-      entitiesInRange.forEach { renderEntityOutline(it.actionableCmp.outlineColor, it) }
+      entitiesInRange.forEach { renderOutline(it.actionableCmp.outlineColor, it.renderCmp.sprite) }
     }
 
     if (batch.shader != activeShader) {
