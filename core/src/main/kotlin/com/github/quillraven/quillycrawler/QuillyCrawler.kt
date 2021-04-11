@@ -2,20 +2,30 @@ package com.github.quillraven.quillycrawler
 
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.utils.ObjectMap
+import com.badlogic.gdx.utils.PropertiesUtils
 import com.github.quillraven.commons.audio.AudioService
+import com.github.quillraven.commons.audio.DefaultAudioService
 import com.github.quillraven.commons.audio.QueueAudioService
 import com.github.quillraven.commons.game.AbstractGame
 import com.github.quillraven.quillycrawler.screen.StartUpScreen
 
 class QuillyCrawler : AbstractGame() {
-  override val audioService: AudioService = QueueAudioService(assetStorage)
+  override val audioService: AudioService by lazy {
+    if (gameProperties.get("sound", "true").toBoolean()) {
+      QueueAudioService(assetStorage)
+    } else {
+      DefaultAudioService
+    }
+  }
+  private val gameProperties = ObjectMap<String, String>()
 
-  fun isDevMode() = "true" == System.getProperty("devMode", "false")
+  fun b2dDebug(): Boolean = gameProperties.get("b2d-debug", "false").toBoolean()
 
   override fun create() {
-    if (isDevMode()) {
-      Gdx.app.logLevel = Application.LOG_DEBUG
-    }
+    PropertiesUtils.load(gameProperties, assetStorage.fileResolver.resolve("game.properties").reader())
+
+    Gdx.app.logLevel = gameProperties.get("log-level", "${Application.LOG_ERROR}").toInt()
 
     addScreen(StartUpScreen(this))
     setScreen<StartUpScreen>()

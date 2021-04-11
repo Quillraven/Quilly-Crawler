@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.maps.MapLayer
 import com.badlogic.gdx.maps.MapObject
-import com.badlogic.gdx.maps.objects.*
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
@@ -31,7 +30,9 @@ import kotlinx.coroutines.launch
 import ktx.ashley.*
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
-import ktx.box2d.*
+import ktx.box2d.body
+import ktx.box2d.chain
+import ktx.box2d.loop
 import ktx.collections.gdxArrayOf
 import ktx.log.debug
 import ktx.log.error

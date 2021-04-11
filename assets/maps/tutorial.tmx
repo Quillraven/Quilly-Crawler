@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="15">
+<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="15">
  <properties>
   <property name="musicFilePath" value="audio/music/Try and Solve This.ogg"/>
  </properties>
@@ -49,13 +49,13 @@
    <point/>
   </object>
   <object id="7" name="EXIT" x="144.535" y="17.1513" width="13.4304" height="11.6974"/>
-  <object id="8" name="CHEST_COMMON" x="225.25" y="171.75">
+  <object id="8" name="CHEST_COMMON" x="188.5" y="173.75">
    <point/>
   </object>
   <object id="9" name="CHEST_RARE" x="239.75" y="245.25">
    <point/>
   </object>
-  <object id="10" name="CHEST_COMMON" x="224.75" y="191">
+  <object id="10" name="CHEST_COMMON" x="181.75" y="156">
    <point/>
   </object>
   <object id="11" name="CHEST_RARE" x="225.5" y="225">

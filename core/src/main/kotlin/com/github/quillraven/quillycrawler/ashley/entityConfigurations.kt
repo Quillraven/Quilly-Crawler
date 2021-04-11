@@ -23,7 +23,6 @@ import ktx.collections.set
 import ktx.log.error
 import ktx.tiled.x
 import ktx.tiled.y
-import kotlin.collections.set
 
 private val playerFamily = allOf(PlayerComponent::class).exclude(RemoveComponent::class).get()
 
@@ -125,8 +124,9 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
     }
     "BIG_DEMON" -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon")
-      with<TransformComponent> { position.set(x, y, position.z) }
+      withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = BigDemonState.RUN }
+      with<ActionableComponent> { type = ActionType.ENEMY }
     }
     "EXIT" -> {
       withBox2DComponents(world, BodyType.StaticBody, x, y, onlySensor = true)
@@ -152,13 +152,7 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<StateComponent> { state = PlayerState.IDLE }
     with<PlayerComponent>()
     with<PlayerControlComponent>()
-    with<BagComponent> {
-      // TODO remove debug items
-      ItemType.values().filter { it != ItemType.UNDEFINED }.forEach {
-        items[it] = createItemEntity(it)
-      }
-      items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION)
-    }
+    with<BagComponent>()
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
     with<CameraLockComponent>()
