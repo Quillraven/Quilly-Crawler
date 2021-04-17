@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.quillycrawler.ashley.component.GoToNextLevelComponent
@@ -20,6 +21,8 @@ class MapSystem(
 ) : IteratingSystem(
   allOf(PlayerComponent::class, GoToNextLevelComponent::class).exclude(RemoveComponent::class).get()
 ) {
+  private var currentMapFolder: FileHandle = FileHandle("")
+
   override fun addedToEngine(engine: Engine) {
     super.addedToEngine(engine)
     mapService.setMap(engine, "maps/tutorial.tmx")
@@ -46,12 +49,17 @@ class MapSystem(
     val mapFolder = Gdx.files.internal(folderPath)
     if (!mapFolder.exists()) {
       LOG.debug { "Map folder '$folderPath' does not exist" }
-      return ""
+      if (currentMapFolder.path().isBlank()) {
+        return ""
+      }
+    } else {
+      LOG.debug { "Switch map folder to '${mapFolder.path()}'" }
+      currentMapFolder = mapFolder
     }
 
-    val mapFiles = mapFolder.list(".tmx")
+    val mapFiles = currentMapFolder.list(".tmx")
     if (mapFiles.isEmpty()) {
-      LOG.error { "Map folder '$folderPath' has no .tmx files" }
+      LOG.error { "Map folder '${currentMapFolder.path()}' has no .tmx files" }
       return ""
     }
 
