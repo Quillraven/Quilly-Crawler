@@ -10,6 +10,7 @@ import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.commons.audio.DefaultAudioService
 import com.github.quillraven.commons.audio.QueueAudioService
 import com.github.quillraven.commons.game.AbstractGame
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import com.github.quillraven.quillycrawler.screen.StartUpScreen
 
 class QuillyCrawler : AbstractGame() {
@@ -22,6 +23,7 @@ class QuillyCrawler : AbstractGame() {
     }
   }
   private val gameProperties = ObjectMap<String, String>()
+  val gameEventDispatcher = GameEventDispatcher()
 
   fun b2dDebug(): Boolean = gameProperties.get("b2d-debug", "false").toBoolean()
 

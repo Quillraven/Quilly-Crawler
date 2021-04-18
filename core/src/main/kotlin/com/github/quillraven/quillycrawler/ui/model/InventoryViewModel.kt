@@ -45,9 +45,7 @@ data class InventoryViewModel(
 
   fun addInventoryListener(listener: InventoryListener) = listeners.add(listener)
 
-  fun removeInventoryListener(listener: InventoryListener) {
-    listeners.remove(listener)
-  }
+  fun removeInventoryListener(listener: InventoryListener) = listeners.remove(listener)
 
   private fun GdxSet<InventoryListener>.dispatchBagUpdate() {
     this.forEach {

@@ -3,6 +3,7 @@ package com.github.quillraven.commons.game
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -64,11 +65,17 @@ abstract class AbstractGame : KtxGame<AbstractScreen>() {
     }
 
     super.render()
+    // some actors are changing the batch's color which has an impact
+    // on the render call above in the next frame. To avoid this behavior
+    // we temporarily store the batch's color and restore it afterwards.
+    TMP_BATCH_COLOR.set(batch.color)
     with(stage) {
       act(Gdx.graphics.deltaTime)
       uiViewport.apply()
       draw()
     }
+    batch.color.set(TMP_BATCH_COLOR)
+
     audioService.update()
   }
 
@@ -93,5 +100,6 @@ abstract class AbstractGame : KtxGame<AbstractScreen>() {
 
   companion object {
     val LOG = logger<AbstractGame>()
+    private val TMP_BATCH_COLOR = Color()
   }
 }

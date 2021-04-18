@@ -39,7 +39,7 @@ enum class SkinTextButtonStyle {
 }
 
 enum class SkinLabelStyle {
-  DEFAULT
+  DEFAULT, DUNGEON_LEVEL
 }
 
 enum class SkinListStyle {
@@ -70,6 +70,13 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
     skin.label(SkinLabelStyle.DEFAULT.name) {
       font = skin[SkinFontStyle.DEFAULT.name]
     }
+    skin.label(SkinLabelStyle.DUNGEON_LEVEL.name) {
+      font = skin[SkinFontStyle.TITLE.name]
+      background = skin.newDrawable(SkinImages.FRAME_3.regionKey).apply {
+        leftWidth = 10f
+        rightWidth = 10f
+      }
+    }
 
     // buttons
     skin.textButton(SkinTextButtonStyle.TITLE.name) {
@@ -86,7 +93,7 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
       font = skin[SkinFontStyle.DEFAULT.name]
       fontColorSelected = Color.BLACK
       fontColorUnselected = Color.WHITE
-      selection = skin.getDrawable(SkinImages.BUTTON_2.regionKey).apply {
+      selection = skin.newDrawable(SkinImages.BUTTON_2.regionKey).apply {
         topHeight = 1f
         bottomHeight = 1f
         leftWidth = 3f

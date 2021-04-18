@@ -1,8 +1,6 @@
 package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.PooledEngine
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
@@ -17,7 +15,12 @@ import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
+import com.github.quillraven.quillycrawler.assets.I18NAssets
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.event.GameEventType
 import com.github.quillraven.quillycrawler.shader.DefaultShaderService
+import com.github.quillraven.quillycrawler.ui.model.GameViewModel
+import com.github.quillraven.quillycrawler.ui.view.GameView
 import kotlinx.coroutines.launch
 import ktx.ashley.EngineEntity
 import ktx.async.KtxAsync
@@ -26,7 +29,8 @@ import ktx.log.logger
 
 class GameScreen(
   private val game: QuillyCrawler,
-  private val messageManager: MessageManager = MessageManager.getInstance()
+  private val messageManager: MessageManager = MessageManager.getInstance(),
+  private val gameEventDispatcher: GameEventDispatcher = game.gameEventDispatcher
 ) : AbstractScreen(game) {
   private val gameViewport = FitViewport(16f, 9f)
   private val world = World(Vector2.Zero, true).apply {
@@ -43,6 +47,8 @@ class GameScreen(
     )
   private val engine = PooledEngine()
   private val shaderService: ShaderService = DefaultShaderService(assetStorage, batch, engine)
+  private val viewModel = GameViewModel(assetStorage[I18NAssets.DEFAULT.descriptor])
+  private val view = GameView(viewModel)
 
   init {
     engine.run {
@@ -73,11 +79,22 @@ class GameScreen(
           assetStorage.add("b2dDebugRenderer", box2DDebugRenderer)
         }
       }
-      addSystem(MapSystem(mapService))
+      addSystem(MapSystem(mapService, gameEventDispatcher))
       addSystem(AmbientSoundSystem(audioService))
       addSystem(RemoveSystem())
       addSystem(SetScreenSystem(game))
     }
+  }
+
+  override fun show() {
+    super.show()
+    gameEventDispatcher.addListener(GameEventType.MAP_CHANGE, viewModel)
+    stage.addActor(view)
+  }
+
+  override fun hide() {
+    super.hide()
+    gameEventDispatcher.removeListener(viewModel)
   }
 
   override fun resize(width: Int, height: Int) {
