@@ -25,6 +25,8 @@ dependencies {
 
 tasks {
   jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     dependsOn(configurations.runtimeClasspath)
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 
