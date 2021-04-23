@@ -16,11 +16,11 @@ sourceSets {
 }
 
 dependencies {
-  implementation(project(":core"))
-  implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${project.property("gdxVersion")}")
-  implementation("com.badlogicgames.gdx:gdx-platform:${project.property("gdxVersion")}:natives-desktop")
-  implementation("com.badlogicgames.gdx:gdx-box2d-platform:${project.property("gdxVersion")}:natives-desktop")
-  implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:${project.property("gdxControllersVersion")}")
+  implementation(projects.core)
+  implementation(libs.gdx.backend)
+  implementation("com.badlogicgames.gdx:gdx-platform:${libs.versions.gdxVersion.get()}:natives-desktop")
+  implementation("com.badlogicgames.gdx:gdx-box2d-platform:${libs.versions.gdxVersion.get()}:natives-desktop")
+  implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:${libs.versions.gdxControllersVersion.get()}")
 }
 
 tasks {

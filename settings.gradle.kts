@@ -9,3 +9,6 @@ dependencyResolutionManagement {
 }
 
 include("commons", "core", "lwjgl3")
+
+enableFeaturePreview("VERSION_CATALOGS")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
