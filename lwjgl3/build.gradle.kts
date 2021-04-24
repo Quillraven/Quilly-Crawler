@@ -20,7 +20,7 @@ dependencies {
   implementation(libs.gdx.backend)
   implementation("com.badlogicgames.gdx:gdx-platform:${libs.versions.gdxVersion.get()}:natives-desktop")
   implementation("com.badlogicgames.gdx:gdx-box2d-platform:${libs.versions.gdxVersion.get()}:natives-desktop")
-  implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:${libs.versions.gdxControllersVersion.get()}")
+  implementation(libs.gdx.desktop.controllers)
 }
 
 tasks {
