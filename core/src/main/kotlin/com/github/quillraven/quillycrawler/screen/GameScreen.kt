@@ -5,7 +5,6 @@ import com.badlogic.gdx.ai.msg.MessageManager
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
-import com.badlogic.gdx.utils.viewport.FitViewport
 import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.commons.map.MapService
@@ -32,7 +31,7 @@ class GameScreen(
   private val messageManager: MessageManager = MessageManager.getInstance(),
   private val gameEventDispatcher: GameEventDispatcher = game.gameEventDispatcher
 ) : AbstractScreen(game) {
-  private val gameViewport = FitViewport(16f, 9f)
+
   private val world = World(Vector2.Zero, true).apply {
     autoClearForces = false
   }
@@ -55,26 +54,27 @@ class GameScreen(
       addSystem(PlayerControlSystem())
       addSystem(InteractSystem(messageManager, audioService))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
+      addSystem(CombatSystem())
       addSystem(LootSystem())
       addSystem(GearSystem())
       addSystem(ConsumeSystem())
       addSystem(MoveSystem())
       addSystem(Box2DSystem(world, 1 / 60f))
-      addSystem(CameraLockSystem(gameViewport.camera))
+      addSystem(CameraLockSystem(game.gameViewport.camera))
       addSystem(CollisionSystem(world))
       addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
       addSystem(OutlineColorSystem())
       addSystem(
         RenderSystem(
           batch,
-          gameViewport,
+          game.gameViewport,
           mapService = mapService,
           shaderService = shaderService
         )
       )
       if (game.b2dDebug()) {
         val box2DDebugRenderer = Box2DDebugRenderer()
-        addSystem(Box2DDebugRenderSystem(world, gameViewport, box2DDebugRenderer))
+        addSystem(Box2DDebugRenderSystem(world, game.gameViewport, box2DDebugRenderer))
         KtxAsync.launch {
           assetStorage.add("b2dDebugRenderer", box2DDebugRenderer)
         }
@@ -95,10 +95,6 @@ class GameScreen(
   override fun hide() {
     super.hide()
     gameEventDispatcher.removeListener(viewModel)
-  }
-
-  override fun resize(width: Int, height: Int) {
-    gameViewport.update(width, height, true)
   }
 
   override fun render(delta: Float) {

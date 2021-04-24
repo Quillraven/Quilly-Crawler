@@ -15,6 +15,7 @@ import com.github.quillraven.quillycrawler.screen.StartUpScreen
 
 class QuillyCrawler : AbstractGame() {
   override val uiViewport: Viewport = FitViewport(320f, 180f)
+  val gameViewport = FitViewport(16f, 9f)
   override val audioService: AudioService by lazy {
     if (gameProperties.get("sound", "true").toBoolean()) {
       QueueAudioService(assetStorage)
@@ -26,6 +27,11 @@ class QuillyCrawler : AbstractGame() {
   val gameEventDispatcher = GameEventDispatcher()
 
   fun b2dDebug(): Boolean = gameProperties.get("b2d-debug", "false").toBoolean()
+
+  override fun resize(width: Int, height: Int) {
+    super.resize(width, height)
+    gameViewport.update(width, height, true)
+  }
 
   override fun create() {
     PropertiesUtils.load(gameProperties, assetStorage.fileResolver.resolve("game.properties").reader())

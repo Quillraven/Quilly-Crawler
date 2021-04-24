@@ -66,10 +66,17 @@ private fun EngineEntity.withBox2DComponents(
   }
 }
 
-private fun EngineEntity.withAnimationComponents(atlas: TextureAtlasAssets, regionKey: String) {
+fun EngineEntity.withAnimationComponents(
+  atlas: TextureAtlasAssets,
+  regionKey: String,
+  stateKey: String = "",
+  animationSpeed: Float = 1f
+) {
   with<AnimationComponent> {
     this.atlasFilePath = atlas.descriptor.fileName
     this.regionKey = regionKey
+    this.stateKey = stateKey
+    this.animationSpeed = animationSpeed
   }
   with<RenderComponent>()
 }

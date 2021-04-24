@@ -12,6 +12,7 @@ import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.assets.play
+import com.github.quillraven.quillycrawler.screen.CombatScreen
 import ktx.ashley.*
 import ktx.collections.isNotEmpty
 import ktx.log.error
@@ -50,6 +51,7 @@ class InteractSystem(
       interactCmp.closestEntityOrNull(entity)?.let { closestEntity ->
         closestEntity[StateComponent.MAPPER]?.dispatchMessage(messageManager, MessageType.PLAYER_INTERACT.ordinal)
         doEntityAction(entity, closestEntity)
+        interactCmp.lastInteractEntity = closestEntity
       }
     }
 
@@ -67,6 +69,12 @@ class InteractSystem(
           with<LootComponent> { lootType = entity.lootCmp.lootType }
         }
         audioService.play(SoundAssets.CHEST_OPEN)
+      }
+      ActionType.ENEMY -> {
+        engine.configureEntity(player) {
+          with<SetScreenComponent> { screenType = CombatScreen::class }
+
+        }
       }
       else -> {
         LOG.error { "Undefined ActionType '${entity.actionableCmp.type}'" }
