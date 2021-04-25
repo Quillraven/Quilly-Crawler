@@ -80,6 +80,7 @@ class CombatScreen(
         )
       }
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon", "idle", 0f)
+      with<CombatComponent> { treeFilePath = "ai/genericCombat.tree" }
     }
   }
 
