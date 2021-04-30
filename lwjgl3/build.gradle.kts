@@ -16,15 +16,29 @@ sourceSets {
 }
 
 dependencies {
-  implementation(project(":core"))
-  implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:${project.property("gdxVersion")}")
-  implementation("com.badlogicgames.gdx:gdx-platform:${project.property("gdxVersion")}:natives-desktop")
-  implementation("com.badlogicgames.gdx:gdx-box2d-platform:${project.property("gdxVersion")}:natives-desktop")
-  implementation("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:${project.property("gdxControllersVersion")}")
+  implementation(projects.core)
+  implementation(libs.gdx.backend)
+  implementation(libs.gdx.desktop.platform) {
+    artifact {
+      name = libs.gdx.desktop.platform.get().module.name
+      classifier = "natives-desktop"
+      type = "jar"
+    }
+  }
+  implementation(libs.gdx.desktop.box2d) {
+    artifact {
+      name = libs.gdx.desktop.box2d.get().module.name
+      classifier = "natives-desktop"
+      type = "jar"
+    }
+  }
+  implementation(libs.gdx.desktop.controllers)
 }
 
 tasks {
   jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     dependsOn(configurations.runtimeClasspath)
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 
