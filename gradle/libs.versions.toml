@@ -1,0 +1,35 @@
+[versions]
+ashleyVersion = "1.7.4"
+aiVersion = "1.8.2"
+box2dlightsVersion = "1.5"
+gdxControllersVersion = "2.2.0"
+gdxVersion = "1.10.0"
+ktxVersion = "1.10.0-b1"
+coroutines = "1.4.3"
+
+[libraries]
+gdx-backend = { module = "com.badlogicgames.gdx:gdx-backend-lwjgl3", version.ref = "gdxVersion" }
+gdx-box2d-lights = { module = "com.badlogicgames.box2dlights:box2dlights", version.ref = "box2dlightsVersion" }
+gdx-gdx = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdxVersion" }
+gdx-desktop-platform = { module = "com.badlogicgames.gdx:gdx-platform", version.ref = "gdxVersion" }
+gdx-desktop-box2d = { module = "com.badlogicgames.gdx:gdx-box2d-platform", version.ref = "gdxVersion" }
+gdx-desktop-controllers = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-desktop", version.ref = "gdxControllersVersion" }
+gdx-box2d-core = { module = "com.badlogicgames.gdx:gdx-box2d", version.ref = "gdxVersion" }
+gdx-ashley = { module = "com.badlogicgames.ashley:ashley", version.ref = "ashleyVersion" }
+gdx-ai = { module = "com.badlogicgames.gdx:gdx-ai", version.ref = "aiVersion" }
+gdx-controllers-core = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-core", version.ref = "gdxControllersVersion" }
+coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+ktx-actors = { module = "io.github.libktx:ktx-actors", version.ref = "ktxVersion" }
+ktx-app = { module = "io.github.libktx:ktx-app", version.ref = "ktxVersion" }
+ktx-ashley = { module = "io.github.libktx:ktx-ashley", version.ref = "ktxVersion" }
+ktx-assets-async = { module = "io.github.libktx:ktx-assets-async", version.ref = "ktxVersion" }
+ktx-box2d = { module = "io.github.libktx:ktx-box2d", version.ref = "ktxVersion" }
+ktx-collections = { module = "io.github.libktx:ktx-collections", version.ref = "ktxVersion" }
+ktx-graphics = { module = "io.github.libktx:ktx-graphics", version.ref = "ktxVersion" }
+ktx-log = { module = "io.github.libktx:ktx-log", version.ref = "ktxVersion" }
+ktx-scene2d = { module = "io.github.libktx:ktx-scene2d", version.ref = "ktxVersion" }
+ktx-style = { module = "io.github.libktx:ktx-style", version.ref = "ktxVersion" }
+ktx-tiled = { module = "io.github.libktx:ktx-tiled", version.ref = "ktxVersion" }
+
+[bundles]
+ktx-scene2d = ["ktx-actors", "ktx-scene2d", "ktx-style"]
