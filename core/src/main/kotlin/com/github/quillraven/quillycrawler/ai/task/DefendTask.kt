@@ -15,6 +15,7 @@ class DefendTask : LeafTask<CombatBlackboard>() {
 
   override fun start() {
     defendTime = 2f
+    LOG.debug { "DEFENDING" }
   }
 
   override fun execute(): Status {
@@ -22,7 +23,6 @@ class DefendTask : LeafTask<CombatBlackboard>() {
     if (defendTime <= 0f) {
       return Status.SUCCEEDED
     } else {
-      LOG.debug { "DEFENDING" }
       return Status.RUNNING
     }
   }

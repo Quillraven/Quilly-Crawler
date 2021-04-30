@@ -1,7 +1,10 @@
+import ability:"com.github.quillraven.quillycrawler.ai.task.AbilityTask"
 import attack:"com.github.quillraven.quillycrawler.ai.task.AttackTask"
 import defend:"com.github.quillraven.quillycrawler.ai.task.DefendTask"
+import hasAttackAbility?:"com.github.quillraven.quillycrawler.ai.task.HasAttackAbility"
 
 root
   selector
+    (hasAttackAbility?) (random success:0.5) ability
     (random success:0.8) attack
     defend
