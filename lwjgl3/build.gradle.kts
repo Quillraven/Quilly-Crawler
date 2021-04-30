@@ -18,8 +18,20 @@ sourceSets {
 dependencies {
   implementation(projects.core)
   implementation(libs.gdx.backend)
-  implementation("com.badlogicgames.gdx:gdx-platform:${libs.versions.gdxVersion.get()}:natives-desktop")
-  implementation("com.badlogicgames.gdx:gdx-box2d-platform:${libs.versions.gdxVersion.get()}:natives-desktop")
+  implementation(libs.gdx.desktop.platform) {
+    artifact {
+      name = libs.gdx.desktop.platform.get().module.name
+      classifier = "natives-desktop"
+      type = "jar"
+    }
+  }
+  implementation(libs.gdx.desktop.box2d) {
+    artifact {
+      name = libs.gdx.desktop.box2d.get().module.name
+      classifier = "natives-desktop"
+      type = "jar"
+    }
+  }
   implementation(libs.gdx.desktop.controllers)
 }
 

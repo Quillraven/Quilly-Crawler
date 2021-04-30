@@ -11,6 +11,8 @@ coroutines = "1.4.3"
 gdx-backend = { module = "com.badlogicgames.gdx:gdx-backend-lwjgl3", version.ref = "gdxVersion" }
 gdx-box2d-lights = { module = "com.badlogicgames.box2dlights:box2dlights", version.ref = "box2dlightsVersion" }
 gdx-gdx = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdxVersion" }
+gdx-desktop-platform = { module = "com.badlogicgames.gdx:gdx-platform", version.ref = "gdxVersion" }
+gdx-desktop-box2d = { module = "com.badlogicgames.gdx:gdx-box2d-platform", version.ref = "gdxVersion" }
 gdx-desktop-controllers = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-desktop", version.ref = "gdxControllersVersion" }
 gdx-box2d-core = { module = "com.badlogicgames.gdx:gdx-box2d", version.ref = "gdxVersion" }
 gdx-ashley = { module = "com.badlogicgames.ashley:ashley", version.ref = "ashleyVersion" }
