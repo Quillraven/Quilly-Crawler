@@ -16,6 +16,8 @@ interface AudioService {
 
   fun playMusic(musicFilePath: String, volume: Float = 1f, loop: Boolean = true)
 
+  fun playPreviousMusic(volume: Float = 1f, loop: Boolean = true)
+
   fun pause()
 
   fun resume()
@@ -37,6 +39,8 @@ object DefaultAudioService : AudioService {
   override fun playSound(soundFilePath: String, volume: Float, loop: Boolean) = Unit
 
   override fun playMusic(musicFilePath: String, volume: Float, loop: Boolean) = Unit
+
+  override fun playPreviousMusic(volume: Float, loop: Boolean) = Unit
 
   override fun pause() = Unit
 

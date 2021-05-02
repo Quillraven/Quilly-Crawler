@@ -8,11 +8,24 @@ import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
 import ktx.ashley.get
 import ktx.ashley.mapperFor
+import ktx.collections.GdxArray
 
 class CombatAIComponent : Component, Pool.Poolable {
   var treeFilePath = ""
   lateinit var behaviorTree: BehaviorTree<Entity>
   lateinit var allTargets: ImmutableArray<Entity>
+
+  fun randomPlayerEntity(): Entity {
+    TMP_ARRAY.clear()
+
+    allTargets.forEach {
+      if (it[PlayerComponent.MAPPER] != null) {
+        TMP_ARRAY.add(it)
+      }
+    }
+
+    return TMP_ARRAY.random()
+  }
 
   override fun reset() {
     treeFilePath = ""
@@ -20,6 +33,7 @@ class CombatAIComponent : Component, Pool.Poolable {
 
   companion object {
     val MAPPER = mapperFor<CombatAIComponent>()
+    val TMP_ARRAY = GdxArray<Entity>()
   }
 }
 

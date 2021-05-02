@@ -27,7 +27,8 @@ enum class MusicAssets(
   val descriptor: AssetDescriptor<Music> = AssetDescriptor(filePath, Music::class.java)
 ) {
   TAKE_COVER("audio/music/Take Cover.ogg"),
-  TRY_AND_SOLVE_THIS("audio/music/Try and Solve This.ogg")
+  TRY_AND_SOLVE_THIS("audio/music/Try and Solve This.ogg"),
+  QUANTUM_LOOP("audio/music/Quantum Loop.ogg"),
 }
 
 enum class SoundAssets(
@@ -43,6 +44,8 @@ enum class SoundAssets(
   DRAGON_GROWL_00("audio/sounds/Dragon_Growl_00.mp3"),
   DRAGON_GROWL_01("audio/sounds/Dragon_Growl_01.mp3"),
   GOBLIN_03("audio/sounds/Goblin_03.mp3"),
+  PUNCH_01("audio/sounds/sfx_punch_01.wav"),
+  DEFEND_01("audio/sounds/sfx_defend_01.wav"),
 }
 
 fun AudioService.play(asset: SoundAssets, volume: Float = 1f, loop: Boolean = false) =

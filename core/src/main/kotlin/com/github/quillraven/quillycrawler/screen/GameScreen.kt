@@ -22,6 +22,7 @@ import com.github.quillraven.quillycrawler.ui.model.GameViewModel
 import com.github.quillraven.quillycrawler.ui.view.GameView
 import kotlinx.coroutines.launch
 import ktx.ashley.EngineEntity
+import ktx.ashley.getSystem
 import ktx.async.KtxAsync
 import ktx.log.debug
 import ktx.log.logger
@@ -89,11 +90,13 @@ class GameScreen(
     super.show()
     gameEventDispatcher.addListener(GameEventType.MAP_CHANGE, viewModel)
     stage.addActor(view)
+    engine.getSystem<AmbientSoundSystem>().setProcessing(true)
   }
 
   override fun hide() {
     super.hide()
     gameEventDispatcher.removeListener(viewModel)
+    engine.getSystem<AmbientSoundSystem>().setProcessing(false)
   }
 
   override fun render(delta: Float) {

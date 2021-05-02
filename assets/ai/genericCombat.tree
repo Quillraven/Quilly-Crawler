@@ -1,10 +1,13 @@
 import ability:"com.github.quillraven.quillycrawler.ai.task.AbilityTask"
 import attack:"com.github.quillraven.quillycrawler.ai.task.AttackTask"
 import defend:"com.github.quillraven.quillycrawler.ai.task.DefendTask"
+import die:"com.github.quillraven.quillycrawler.ai.task.DieTask"
 import hasAttackAbility?:"com.github.quillraven.quillycrawler.ai.task.HasAttackAbility"
+import isDead?:"com.github.quillraven.quillycrawler.ai.task.IsDead"
 
 root
   selector
+    (isDead?) die
     (hasAttackAbility?) (random success:0.5) ability
     (random success:0.8) attack
     defend

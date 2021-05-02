@@ -8,14 +8,18 @@ import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.combat.CombatOrder
 import com.github.quillraven.quillycrawler.combat.CombatOrderEffectUndefined
+import com.github.quillraven.quillycrawler.event.CombatVictoryEvent
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
+import ktx.log.debug
 import ktx.log.error
 import ktx.log.logger
 
 class CombatSystem(
   audioService: AudioService,
+  private val gameEventDispatcher: GameEventDispatcher,
   private val bTreeManager: BehaviorTreeLibraryManager = BehaviorTreeLibraryManager.getInstance()
 ) : SortedIteratingSystem(
   allOf(CombatComponent::class, StatsComponent::class).exclude(RemoveComponent::class).get(),
@@ -24,7 +28,8 @@ class CombatSystem(
   compareBy { -it.statsCmp[StatsType.AGILITY] }
 ) {
   private var executeOrders = false
-  private val currentOrder = CombatOrder(audioService)
+  private var allOrdersExecuted = false
+  private val currentOrder by lazy { CombatOrder(engine, audioService) }
 
   init {
     //TODO find out why pooling isn't working. Only works the first time. When opening combatscreen a second time
@@ -61,14 +66,22 @@ class CombatSystem(
   }
 
   override fun update(deltaTime: Float) {
+    if (isPlayerVictorious()) {
+      gameEventDispatcher.dispatchEvent(CombatVictoryEvent())
+      return
+    }
+
     // check if every entity defined its next combat order
-    executeOrders = true
+    var allEntitiesHaveEffect = true
     for (entity in entities) {
       if (entity.combatCmp.effect == CombatOrderEffectUndefined) {
-        executeOrders = false
+        allEntitiesHaveEffect = false
         break
+      } else if (allOrdersExecuted) {
+        allOrdersExecuted = false
       }
     }
+    executeOrders = allEntitiesHaveEffect || (executeOrders && !allOrdersExecuted)
 
     //TODO implement combat order logic with update call; as long as update doesn't return true the order is not done
     // make a generic CombatOrder class that provides generic functions for dealing damage, healing, playing a sound, etc.
@@ -82,11 +95,14 @@ class CombatSystem(
     // in case of a temporary buff the buff entity removes itself from the engine e.g. after 3 event notifications
 
     if (executeOrders) {
+      allOrdersExecuted = false
+
       // every entity has an order -> execute one by one
-      for (entity in entities) {
+      for (i in 0 until entities.size()) {
+        val entity = entities[i]
         val combatCmp = entity.combatCmp
         if (combatCmp.effect == CombatOrderEffectUndefined) {
-          // entity already executed order -> ignore it
+          // entity already executed order
           continue
         }
 
@@ -95,16 +111,25 @@ class CombatSystem(
           currentOrder.reset()
           currentOrder.source = entity
           currentOrder.effect = combatCmp.effect
+          currentOrder.targets.addAll(combatCmp.orderTargets)
+        } else if (currentOrder.source != entity) {
+          // entity does not match current order source -> ignore it
+          LOG.error { "This should never happen. Quilly, you failed miserably!" }
+          continue
         }
 
         if (currentOrder.update(deltaTime)) {
           // order finished -> remove effect to prepare entity for next round
+          LOG.debug { "ORDER FINISHED for $entity" }
           currentOrder.effect = CombatOrderEffectUndefined
           combatCmp.effect = CombatOrderEffectUndefined
-        } else {
-          // current order not finished yet -> wait for it to be finished before going to next order
-          break
+          combatCmp.orderTargets.clear()
+          allOrdersExecuted = i == entities.size() - 1
         }
+
+        // current order not finished yet -> wait for it to be finished before going to next order
+        // OR current order was finished -> execute remaining systems in engine before going to next order
+        break
       }
     } else {
       // sort entities in case their agility changed during combat
@@ -112,6 +137,18 @@ class CombatSystem(
       // update AI orders
       super.update(deltaTime)
     }
+  }
+
+  private fun isPlayerVictorious(): Boolean {
+    var allEnemiesDead = true
+
+    entities.forEach {
+      if (it[PlayerComponent.MAPPER] == null) {
+        allEnemiesDead = false
+      }
+    }
+
+    return allEnemiesDead
   }
 
   override fun processEntity(entity: Entity, deltaTime: Float) {

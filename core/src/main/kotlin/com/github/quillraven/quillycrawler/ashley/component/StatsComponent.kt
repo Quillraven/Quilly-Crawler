@@ -58,6 +58,8 @@ class StatsComponent : Component, Pool.Poolable {
   }
 }
 
+fun Entity.totalStatValue(type:StatsType): Float = this.statsCmp.totalStatValue(this,type)
+
 val Entity.statsCmp: StatsComponent
   get() = this[StatsComponent.MAPPER]
     ?: throw GdxRuntimeException("StatsComponent for entity '$this' is null")

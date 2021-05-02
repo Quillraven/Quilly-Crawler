@@ -2,15 +2,18 @@ package com.github.quillraven.quillycrawler.event
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.IntMap
+import com.github.quillraven.quillycrawler.ashley.component.DamageEmitterComponent
 import ktx.collections.GdxSet
 import ktx.collections.getOrPut
 
 enum class GameEventType {
-  MAP_CHANGE
+  MAP_CHANGE, DAMAGE, COMBAT_VICTORY
 }
 
 sealed class GameEvent(val type: GameEventType)
 data class MapChangeEvent(val entity: Entity, val level: Int) : GameEvent(GameEventType.MAP_CHANGE)
+data class CombatDamageEvent(var damageEmitterComponent: DamageEmitterComponent) : GameEvent(GameEventType.DAMAGE)
+class CombatVictoryEvent : GameEvent(GameEventType.COMBAT_VICTORY)
 
 interface GameEventListener {
   fun onEvent(event: GameEvent)

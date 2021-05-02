@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.github.quillraven.commons.ashley.component.TransformComponent
+import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.system.AnimationSystem
 import com.github.quillraven.commons.ashley.system.RemoveSystem
 import com.github.quillraven.commons.ashley.system.RenderSystem
@@ -13,25 +14,27 @@ import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.ashley.system.CombatSystem
 import com.github.quillraven.quillycrawler.ashley.system.ConsumeSystem
+import com.github.quillraven.quillycrawler.ashley.system.DamageEmitterSystem
 import com.github.quillraven.quillycrawler.ashley.system.SetScreenSystem
 import com.github.quillraven.quillycrawler.ashley.withAnimationComponents
+import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.combat.CombatOrderEffectAttack
-import ktx.ashley.allOf
-import ktx.ashley.configureEntity
-import ktx.ashley.entity
-import ktx.ashley.with
+import com.github.quillraven.quillycrawler.event.*
+import ktx.ashley.*
 import ktx.collections.set
 
 class CombatScreen(
-  game: QuillyCrawler,
+  private val game: QuillyCrawler,
   var playerEntity: Entity,
-  var enemyEntity: Entity
-) : AbstractScreen(game) {
+  var enemyEntity: Entity,
+  private val gameEventDispatcher: GameEventDispatcher = game.gameEventDispatcher
+) : AbstractScreen(game), GameEventListener {
   private val gameViewport = game.gameViewport
   private val engine = PooledEngine().apply {
-    addSystem(CombatSystem(audioService))
+    addSystem(CombatSystem(audioService, gameEventDispatcher))
     addSystem(ConsumeSystem())
+    addSystem(DamageEmitterSystem(gameEventDispatcher))
     addSystem(AnimationSystem(game.assetStorage, QuillyCrawler.UNIT_SCALE))
     addSystem(RenderSystem(game.batch, gameViewport))
     addSystem(SetScreenSystem(game))
@@ -39,10 +42,18 @@ class CombatScreen(
   }
 
   override fun show() {
-    // TODO change music
     super.show()
+    gameEventDispatcher.addListener(GameEventType.COMBAT_VICTORY, this)
+    audioService.playMusic(MusicAssets.QUANTUM_LOOP.descriptor.fileName)
     createPlayerCombatEntity(playerEntity)
     createEnemyCombatEntities(enemyEntity, playerEntity.playerCmp.dungeonLevel)
+  }
+
+  override fun hide() {
+    super.hide()
+    gameEventDispatcher.removeListener(this)
+    audioService.playPreviousMusic()
+    engine.removeAllEntities()
   }
 
   private fun createPlayerCombatEntity(playerEntity: Entity) {
@@ -84,15 +95,19 @@ class CombatScreen(
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon", "idle", 0f)
       with<StatsComponent> {
         stats[StatsType.AGILITY] = 30f
+        stats[StatsType.LIFE] = 15f
+        stats[StatsType.PHYSICAL_DAMAGE] = 5f
       }
       with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
       with<CombatComponent>()
     }
   }
 
-  override fun hide() {
-    super.hide()
-    engine.removeAllEntities()
+  override fun onEvent(event: GameEvent) {
+    if (event is CombatVictoryEvent) {
+      enemyEntity.removeFromEngine(engine)
+      game.setScreen<GameScreen>()
+    }
   }
 
   override fun render(delta: Float) {
@@ -106,6 +121,11 @@ class CombatScreen(
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
         it.combatCmp.effect = CombatOrderEffectAttack
+        it.combatCmp.orderTargets.add(
+          engine.getEntitiesFor(
+            allOf(CombatComponent::class).exclude(PlayerComponent::class).get()
+          ).random()
+        )
       }
     }
 
