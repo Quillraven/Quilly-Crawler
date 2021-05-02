@@ -1,33 +1,16 @@
 package com.github.quillraven.quillycrawler.ai.task
 
-import com.badlogic.gdx.Gdx
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
-import com.github.quillraven.quillycrawler.combat.CombatBlackboard
-import ktx.log.debug
-import ktx.log.logger
-import kotlin.math.max
+import com.github.quillraven.quillycrawler.ashley.component.combatCmp
+import com.github.quillraven.quillycrawler.combat.CombatOrderEffectDefend
 
-class DefendTask : LeafTask<CombatBlackboard>() {
-  private var defendTime = 0f
-
-  override fun copyTo(task: Task<CombatBlackboard>) = task
-
-  override fun start() {
-    defendTime = 2f
-    LOG.debug { "DEFENDING" }
-  }
+class DefendTask : LeafTask<Entity>() {
+  override fun copyTo(task: Task<Entity>) = task
 
   override fun execute(): Status {
-    defendTime = max(0f, defendTime - Gdx.graphics.deltaTime)
-    if (defendTime <= 0f) {
-      return Status.SUCCEEDED
-    } else {
-      return Status.RUNNING
-    }
-  }
-
-  companion object {
-    private val LOG = logger<DefendTask>()
+    `object`.combatCmp.effect = CombatOrderEffectDefend
+    return Status.SUCCEEDED
   }
 }

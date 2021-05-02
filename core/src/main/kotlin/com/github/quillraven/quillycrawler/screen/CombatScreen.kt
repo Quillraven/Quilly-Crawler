@@ -16,6 +16,7 @@ import com.github.quillraven.quillycrawler.ashley.system.ConsumeSystem
 import com.github.quillraven.quillycrawler.ashley.system.SetScreenSystem
 import com.github.quillraven.quillycrawler.ashley.withAnimationComponents
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
+import com.github.quillraven.quillycrawler.combat.CombatOrderEffectAttack
 import ktx.ashley.allOf
 import ktx.ashley.configureEntity
 import ktx.ashley.entity
@@ -29,7 +30,7 @@ class CombatScreen(
 ) : AbstractScreen(game) {
   private val gameViewport = game.gameViewport
   private val engine = PooledEngine().apply {
-    addSystem(CombatSystem())
+    addSystem(CombatSystem(audioService))
     addSystem(ConsumeSystem())
     addSystem(AnimationSystem(game.assetStorage, QuillyCrawler.UNIT_SCALE))
     addSystem(RenderSystem(game.batch, gameViewport))
@@ -63,6 +64,7 @@ class CombatScreen(
       }
       with<GearComponent> { playerEntity.gearCmp.gear.forEach { entry -> gear[entry.key] = entry.value } }
       with<StatsComponent> { playerEntity.statsCmp.stats.forEach { entry -> stats[entry.key] = entry.value } }
+      with<CombatComponent>()
     }
   }
 
@@ -80,7 +82,11 @@ class CombatScreen(
         )
       }
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon", "idle", 0f)
-      with<CombatComponent> { treeFilePath = "ai/genericCombat.tree" }
+      with<StatsComponent> {
+        stats[StatsType.AGILITY] = 30f
+      }
+      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
+      with<CombatComponent>()
     }
   }
 
@@ -96,6 +102,10 @@ class CombatScreen(
         engine.configureEntity(entity) {
           with<SetScreenComponent> { screenType = GameScreen::class }
         }
+      }
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+      engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
+        it.combatCmp.effect = CombatOrderEffectAttack
       }
     }
 

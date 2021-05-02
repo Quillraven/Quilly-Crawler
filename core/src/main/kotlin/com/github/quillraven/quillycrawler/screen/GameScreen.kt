@@ -54,7 +54,6 @@ class GameScreen(
       addSystem(PlayerControlSystem())
       addSystem(InteractSystem(messageManager, audioService))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
-      addSystem(CombatSystem())
       addSystem(LootSystem())
       addSystem(GearSystem())
       addSystem(ConsumeSystem())

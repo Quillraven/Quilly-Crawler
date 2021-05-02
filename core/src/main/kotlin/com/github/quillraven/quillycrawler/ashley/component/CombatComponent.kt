@@ -2,22 +2,21 @@ package com.github.quillraven.quillycrawler.ashley.component
 
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.ai.btree.BehaviorTree
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
-import com.github.quillraven.quillycrawler.combat.CombatBlackboard
+import com.github.quillraven.quillycrawler.combat.CombatOrderEffect
+import com.github.quillraven.quillycrawler.combat.CombatOrderEffectUndefined
 import ktx.ashley.get
 import ktx.ashley.mapperFor
+import ktx.collections.GdxArray
 
-/**
- * Marks an entity as part of a combat. It will be part of the CombatSystem iteration.
- */
 class CombatComponent : Component, Pool.Poolable {
-  var treeFilePath = ""
-  lateinit var behaviorTree: BehaviorTree<CombatBlackboard>
+  var effect: CombatOrderEffect = CombatOrderEffectUndefined
+  val orderTargets = GdxArray<Entity>()
 
   override fun reset() {
-    treeFilePath = ""
+    orderTargets.clear()
+    effect = CombatOrderEffectUndefined
   }
 
   companion object {
