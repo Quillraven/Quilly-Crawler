@@ -44,6 +44,7 @@ class AnimationComponent : Component, Pool.Poolable {
     }
   var stateKey = ""
     set(value) {
+      stateTime = 0f
       dirty = value != field
       field = value
     }

@@ -1,7 +1,5 @@
 package com.github.quillraven.quillycrawler.combat
 
-import com.github.quillraven.commons.ashley.component.animationCmp
-
 object CombatOrderEffectDeath : CombatOrderEffect {
   override val aiType: CombatAiType = CombatAiType.UNDEFINED
 
@@ -11,11 +9,11 @@ object CombatOrderEffectDeath : CombatOrderEffect {
 
   override fun start(order: CombatOrder) {
     order.playAnimation("idle")
-    // TODO fadeout and change color to red --> create new component and system for that
+    order.fadeTo(1f, 0f, 0f, 0f, 0.75f)
   }
 
   override fun update(order: CombatOrder, deltaTime: Float): Boolean {
-    return order.source.animationCmp.isAnimationFinished()
+    return order.totalTime >= 0.75f
   }
 
   override fun end(order: CombatOrder) {

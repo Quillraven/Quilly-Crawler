@@ -31,7 +31,7 @@ class SetScreenSystem(private val game: QuillyCrawler) :
       LOG.debug { "Screen '${nextScreenType.simpleName}' does not exist yet -> create it" }
       when (nextScreenType) {
         InventoryScreen::class -> game.addScreen(InventoryScreen(game, engine, entity))
-        CombatScreen::class -> game.addScreen(CombatScreen(game, entity, entity.interactCmp.lastInteractEntity))
+        CombatScreen::class -> game.addScreen(CombatScreen(game, engine, entity, entity.interactCmp.lastInteractEntity))
         else -> {
           LOG.error { "Unsupported screen type '${nextScreenType.simpleName}'" }
           return

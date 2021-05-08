@@ -62,6 +62,7 @@ class GameScreen(
       addSystem(Box2DSystem(world, 1 / 60f))
       addSystem(CameraLockSystem(game.gameViewport.camera))
       addSystem(CollisionSystem(world))
+      addSystem(FadeSystem())
       addSystem(AnimationSystem(assetStorage, QuillyCrawler.UNIT_SCALE, 1 / 10f))
       addSystem(OutlineColorSystem())
       addSystem(

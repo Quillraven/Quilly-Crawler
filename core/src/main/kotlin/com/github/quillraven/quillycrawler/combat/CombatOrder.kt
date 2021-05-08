@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.utils.Pool
 import com.github.quillraven.commons.ashley.component.animationCmp
+import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.DamageEmitterComponent
@@ -82,6 +83,10 @@ class CombatOrder(
 
   fun killEntity() {
     source.removeFromEngine(engine)
+  }
+
+  fun fadeTo(r: Float, g: Float, b: Float, a: Float, duration: Float) {
+    source.fadeTo(engine, r, g, b, a, duration)
   }
 
   override fun reset() {

@@ -14,7 +14,6 @@ import com.github.quillraven.commons.map.TiledMapService
 import com.github.quillraven.commons.shader.DefaultShaderService
 import com.github.quillraven.commons.shader.ShaderService
 import ktx.ashley.allOf
-import ktx.ashley.exclude
 import ktx.ashley.get
 import ktx.graphics.use
 import ktx.log.error
@@ -47,7 +46,7 @@ class RenderSystem(
   private val mapService: MapService = DefaultMapService,
   private val shaderService: ShaderService = DefaultShaderService(batch)
 ) : SortedIteratingSystem(
-  allOf(TransformComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get(),
+  allOf(TransformComponent::class, RenderComponent::class).get(),
   compareBy { it[TransformComponent.MAPPER] }
 ) {
   /**

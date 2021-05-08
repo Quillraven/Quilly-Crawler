@@ -1,12 +1,15 @@
 package com.github.quillraven.quillycrawler.screen
 
+import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.github.quillraven.commons.ashley.component.TransformComponent
+import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.system.AnimationSystem
+import com.github.quillraven.commons.ashley.system.FadeSystem
 import com.github.quillraven.commons.ashley.system.RemoveSystem
 import com.github.quillraven.commons.ashley.system.RenderSystem
 import com.github.quillraven.commons.game.AbstractScreen
@@ -26,6 +29,7 @@ import ktx.collections.set
 
 class CombatScreen(
   private val game: QuillyCrawler,
+  private val gameEngine: Engine,
   var playerEntity: Entity,
   var enemyEntity: Entity,
   private val gameEventDispatcher: GameEventDispatcher = game.gameEventDispatcher
@@ -35,6 +39,7 @@ class CombatScreen(
     addSystem(CombatSystem(audioService, gameEventDispatcher))
     addSystem(ConsumeSystem())
     addSystem(DamageEmitterSystem(gameEventDispatcher))
+    addSystem(FadeSystem())
     addSystem(AnimationSystem(game.assetStorage, QuillyCrawler.UNIT_SCALE))
     addSystem(RenderSystem(game.batch, gameViewport))
     addSystem(SetScreenSystem(game))
@@ -95,7 +100,7 @@ class CombatScreen(
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon", "idle", 0f)
       with<StatsComponent> {
         stats[StatsType.AGILITY] = 30f
-        stats[StatsType.LIFE] = 15f
+        stats[StatsType.LIFE] = 5f
         stats[StatsType.PHYSICAL_DAMAGE] = 5f
       }
       with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
@@ -105,7 +110,9 @@ class CombatScreen(
 
   override fun onEvent(event: GameEvent) {
     if (event is CombatVictoryEvent) {
-      enemyEntity.removeFromEngine(engine)
+      enemyEntity.removeFromEngine(gameEngine, 1.5f)
+      enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
+      playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
       game.setScreen<GameScreen>()
     }
   }
