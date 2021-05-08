@@ -1,4 +1,6 @@
-package com.github.quillraven.quillycrawler.combat
+package com.github.quillraven.quillycrawler.combat.effect
+
+import com.github.quillraven.quillycrawler.combat.CombatOrder
 
 enum class CombatAiType {
   UNDEFINED, OFFENSIVE, DEFENSIVE, SUPPORTIVE

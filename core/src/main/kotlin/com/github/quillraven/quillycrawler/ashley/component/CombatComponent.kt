@@ -4,8 +4,8 @@ import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
-import com.github.quillraven.quillycrawler.combat.CombatOrderEffect
-import com.github.quillraven.quillycrawler.combat.CombatOrderEffectUndefined
+import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffect
+import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectUndefined
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.collections.GdxArray

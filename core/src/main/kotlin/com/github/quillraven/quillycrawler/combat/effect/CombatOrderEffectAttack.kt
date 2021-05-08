@@ -1,7 +1,10 @@
-package com.github.quillraven.quillycrawler.combat
+package com.github.quillraven.quillycrawler.combat.effect
 
 import com.github.quillraven.commons.ashley.component.animationCmp
+import com.github.quillraven.commons.ashley.component.playAnimation
 import com.github.quillraven.quillycrawler.assets.SoundAssets
+import com.github.quillraven.quillycrawler.assets.play
+import com.github.quillraven.quillycrawler.combat.CombatOrder
 
 object CombatOrderEffectAttack : CombatOrderEffect {
   override val aiType: CombatAiType = CombatAiType.OFFENSIVE
@@ -11,8 +14,8 @@ object CombatOrderEffectAttack : CombatOrderEffect {
   override val targetType: TargetType = TargetType.SINGLE_TARGET
 
   override fun start(order: CombatOrder) {
-    order.playSound(SoundAssets.PUNCH_01)
-    order.playAnimation("idle")
+    order.audioService.play(SoundAssets.PUNCH_01)
+    order.source.playAnimation("idle")
   }
 
   override fun update(order: CombatOrder, deltaTime: Float): Boolean {

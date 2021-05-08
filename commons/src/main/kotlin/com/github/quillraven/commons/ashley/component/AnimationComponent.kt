@@ -87,3 +87,18 @@ class AnimationComponent : Component, Pool.Poolable {
 val Entity.animationCmp: AnimationComponent
   get() = this[AnimationComponent.MAPPER]
     ?: throw GdxRuntimeException("AnimationComponent for entity '$this' is null")
+
+/**
+ * Sets the [AnimationComponent] data to play animation [stateKey] once with the given [animationSpeed].
+ */
+fun Entity.playAnimation(stateKey: String, animationSpeed: Float = 1f) {
+  this[AnimationComponent.MAPPER]?.let { animationCmp ->
+    animationCmp.playMode = Animation.PlayMode.NORMAL
+    if (animationCmp.stateKey == stateKey) {
+      animationCmp.stateTime = 0f
+    } else {
+      animationCmp.stateKey = stateKey
+    }
+    animationCmp.animationSpeed = animationSpeed
+  }
+}

@@ -7,9 +7,9 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.combat.CombatOrder
-import com.github.quillraven.quillycrawler.combat.CombatOrderEffectUndefined
-import com.github.quillraven.quillycrawler.event.CombatVictoryEvent
-import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectDefend
+import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectUndefined
+import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
@@ -17,24 +17,33 @@ import ktx.log.debug
 import ktx.log.error
 import ktx.log.logger
 
+private enum class CombatPhase {
+  UNDEFINED, UPDATE_AI_ORDERS, WAIT_FOR_PLAYER_ORDER, EXECUTE_ORDERS
+}
+
 class CombatSystem(
   audioService: AudioService,
   private val gameEventDispatcher: GameEventDispatcher,
   private val bTreeManager: BehaviorTreeLibraryManager = BehaviorTreeLibraryManager.getInstance()
-) : SortedIteratingSystem(
+) : GameEventListener, SortedIteratingSystem(
   allOf(CombatComponent::class, StatsComponent::class).exclude(RemoveComponent::class).get(),
   // Agility defines the order how entities are executed.
   // Higher agility means an entity executes its combat order faster.
   compareBy { -it.statsCmp[StatsType.AGILITY] }
 ) {
+  private var combatPhase = CombatPhase.UNDEFINED
   private var executeOrders = false
   private var allOrdersExecuted = false
   private val currentOrder by lazy { CombatOrder(engine, audioService) }
+  private val victoryEvent = CombatVictoryEvent()
+  private val defeatEvent = CombatDefeatEvent()
+  private val playerTurnEvent = CombatPlayerTurnEvent()
 
   init {
     //TODO find out why pooling isn't working. Only works the first time. When opening combatscreen a second time
     //it fails because the roottask of the tree is null
     // bTreeManager.library = PooledBehaviorTreeLibrary()
+    gameEventDispatcher.addListener(GameEventType.DEATH, this)
   }
 
   override fun entityAdded(entity: Entity) {
@@ -65,77 +74,97 @@ class CombatSystem(
     }
   }
 
-  override fun update(deltaTime: Float) {
-    if (isPlayerVictorious()) {
-      gameEventDispatcher.dispatchEvent(CombatVictoryEvent())
-      return
-    }
-
+  private fun checkAllOrders(): Boolean {
     // check if every entity defined its next combat order
-    var allEntitiesHaveEffect = true
+    var allEntitiesHaveOrder = true
+
     for (entity in entities) {
       if (entity.combatCmp.effect == CombatOrderEffectUndefined) {
-        allEntitiesHaveEffect = false
+        allEntitiesHaveOrder = false
         break
       } else if (allOrdersExecuted) {
+        // all orders were executed the last time this system was running but now at least one
+        // entity still has an order outstanding.
+        // This can happen e.g. if an entity dies within the DamageEmitterSystem and changes its order
+        // to the death order.
+        // Another example would be if a boss transforms to its next phase after defeating one of its phases.
         allOrdersExecuted = false
       }
     }
-    executeOrders = allEntitiesHaveEffect || (executeOrders && !allOrdersExecuted)
 
-    //TODO implement combat order logic with update call; as long as update doesn't return true the order is not done
-    // make a generic CombatOrder class that provides generic functions for dealing damage, healing, playing a sound, etc.
-    // an order is linked to an effect like attack or firebolt and calls its start,update and end function
-    // effects are objects (=singletons)
-    // damage, healing, etc. is handled via components and their system
-    // all these events need to be dispatched as well so that the UI can react on it.
-    // in addition we need buffs (=entities) that are permanent or temporary effects only during combat like
-    // increasing healing effects by 200% or reducing physical damage to 0 for the next 3 attacks. they are also part
-    // of the event pipeline and modify the event data like dealt damage or healing amount, etc.
-    // in case of a temporary buff the buff entity removes itself from the engine e.g. after 3 event notifications
+    return allEntitiesHaveOrder
+  }
+
+  private fun executeOrder(deltaTime: Float) {
+    allOrdersExecuted = false
+
+    for (i in 0 until entities.size()) {
+      val entity = entities[i]
+      val combatCmp = entity.combatCmp
+      if (combatCmp.effect == CombatOrderEffectUndefined) {
+        // entity already executed order
+        continue
+      }
+
+      if (currentOrder.effect == CombatOrderEffectUndefined) {
+        // initialize current order
+        currentOrder.reset()
+        currentOrder.source = entity
+        currentOrder.effect = combatCmp.effect
+        currentOrder.targets.addAll(combatCmp.orderTargets)
+      } else if (currentOrder.source != entity) {
+        // entity does not match current order source -> ignore it
+        // this can happen e.g. if
+        // entity 0 finished its order, entity 1 is currently in progress but entity 0 gets another order in between
+        continue
+      }
+
+      if (currentOrder.update(deltaTime)) {
+        // order finished -> remove effect to prepare entity for next round
+        LOG.debug { "ORDER FINISHED for $entity" }
+        currentOrder.effect = CombatOrderEffectUndefined
+        combatCmp.effect = CombatOrderEffectUndefined
+        combatCmp.orderTargets.clear()
+        allOrdersExecuted = i == entities.size() - 1
+      }
+
+      // current order not finished yet -> wait for it to be finished before going to next order
+      // OR current order was finished -> execute remaining systems in engine before going to next order
+      break
+    }
+  }
+
+  override fun onEvent(event: GameEvent) {
+    if (event is CombatDeathEvent) {
+      // check defeat or victory
+      if (isPlayerVictorious()) {
+        combatPhase = CombatPhase.UNDEFINED
+        gameEventDispatcher.dispatchEvent(victoryEvent)
+      } else if (isPlayerDefeated()) {
+        combatPhase = CombatPhase.UNDEFINED
+        gameEventDispatcher.dispatchEvent(defeatEvent)
+      }
+    }
+  }
+
+  override fun update(deltaTime: Float) {
+    // update phase of combat
+    // either retrieve orders for next round
+    // or, if all entities have an order, then execute them one by one
+    executeOrders = checkAllOrders() || (executeOrders && !allOrdersExecuted)
 
     if (executeOrders) {
-      allOrdersExecuted = false
-
       // every entity has an order -> execute one by one
-      for (i in 0 until entities.size()) {
-        val entity = entities[i]
-        val combatCmp = entity.combatCmp
-        if (combatCmp.effect == CombatOrderEffectUndefined) {
-          // entity already executed order
-          continue
-        }
-
-        if (currentOrder.effect == CombatOrderEffectUndefined) {
-          // initialize current order
-          currentOrder.reset()
-          currentOrder.source = entity
-          currentOrder.effect = combatCmp.effect
-          currentOrder.targets.addAll(combatCmp.orderTargets)
-        } else if (currentOrder.source != entity) {
-          // entity does not match current order source -> ignore it
-          LOG.error { "This should never happen. Quilly, you failed miserably!" }
-          continue
-        }
-
-        if (currentOrder.update(deltaTime)) {
-          // order finished -> remove effect to prepare entity for next round
-          LOG.debug { "ORDER FINISHED for $entity" }
-          currentOrder.effect = CombatOrderEffectUndefined
-          combatCmp.effect = CombatOrderEffectUndefined
-          combatCmp.orderTargets.clear()
-          allOrdersExecuted = i == entities.size() - 1
-        }
-
-        // current order not finished yet -> wait for it to be finished before going to next order
-        // OR current order was finished -> execute remaining systems in engine before going to next order
-        break
-      }
-    } else {
+      combatPhase = CombatPhase.EXECUTE_ORDERS
+      executeOrder(deltaTime)
+    } else if (combatPhase == CombatPhase.EXECUTE_ORDERS || combatPhase == CombatPhase.UNDEFINED) {
+      combatPhase = CombatPhase.UPDATE_AI_ORDERS
       // sort entities in case their agility changed during combat
       forceSort()
       // update AI orders
       super.update(deltaTime)
+      combatPhase = CombatPhase.WAIT_FOR_PLAYER_ORDER
+      gameEventDispatcher.dispatchEvent(playerTurnEvent)
     }
   }
 
@@ -143,12 +172,24 @@ class CombatSystem(
     var allEnemiesDead = true
 
     entities.forEach {
-      if (it[PlayerComponent.MAPPER] == null) {
+      if (it[PlayerComponent.MAPPER] == null && it.statsCmp[StatsType.LIFE] > 0f) {
         allEnemiesDead = false
       }
     }
 
     return allEnemiesDead
+  }
+
+  private fun isPlayerDefeated(): Boolean {
+    var allPlayersDead = true
+
+    entities.forEach {
+      if (it[PlayerComponent.MAPPER] != null && it.statsCmp[StatsType.LIFE] > 0f) {
+        allPlayersDead = false
+      }
+    }
+
+    return allPlayersDead
   }
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
@@ -163,6 +204,7 @@ class CombatSystem(
       combatAiCmp.behaviorTree.step()
       if (combatCmp.effect == CombatOrderEffectUndefined) {
         LOG.error { "Stepping behavior tree of entity $entity did not define a combat order" }
+        combatCmp.effect = CombatOrderEffectDefend
       }
     }
   }

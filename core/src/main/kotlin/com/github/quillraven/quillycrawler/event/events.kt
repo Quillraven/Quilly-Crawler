@@ -7,13 +7,23 @@ import ktx.collections.GdxSet
 import ktx.collections.getOrPut
 
 enum class GameEventType {
-  MAP_CHANGE, DAMAGE, COMBAT_VICTORY
+  MAP_CHANGE,
+  DAMAGE,
+  DEATH,
+  COMBAT_VICTORY,
+  COMBAT_DEFEAT,
+  PLAYER_TURN
 }
 
 sealed class GameEvent(val type: GameEventType)
 data class MapChangeEvent(val entity: Entity, val level: Int) : GameEvent(GameEventType.MAP_CHANGE)
 data class CombatDamageEvent(var damageEmitterComponent: DamageEmitterComponent) : GameEvent(GameEventType.DAMAGE)
 class CombatVictoryEvent : GameEvent(GameEventType.COMBAT_VICTORY)
+class CombatDefeatEvent : GameEvent(GameEventType.COMBAT_DEFEAT)
+class CombatPlayerTurnEvent : GameEvent(GameEventType.PLAYER_TURN)
+class CombatDeathEvent : GameEvent(GameEventType.DEATH) {
+  lateinit var entity: Entity
+}
 
 interface GameEventListener {
   fun onEvent(event: GameEvent)

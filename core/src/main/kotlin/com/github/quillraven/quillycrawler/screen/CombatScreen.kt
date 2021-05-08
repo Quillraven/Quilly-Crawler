@@ -15,16 +15,21 @@ import com.github.quillraven.commons.ashley.system.RenderSystem
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.ashley.system.BuffSystem
 import com.github.quillraven.quillycrawler.ashley.system.CombatSystem
 import com.github.quillraven.quillycrawler.ashley.system.ConsumeSystem
 import com.github.quillraven.quillycrawler.ashley.system.DamageEmitterSystem
-import com.github.quillraven.quillycrawler.ashley.system.SetScreenSystem
 import com.github.quillraven.quillycrawler.ashley.withAnimationComponents
 import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
-import com.github.quillraven.quillycrawler.combat.CombatOrderEffectAttack
+import com.github.quillraven.quillycrawler.assets.play
+import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectAttack
+import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectProtect
 import com.github.quillraven.quillycrawler.event.*
-import ktx.ashley.*
+import ktx.ashley.allOf
+import ktx.ashley.entity
+import ktx.ashley.exclude
+import ktx.ashley.with
 import ktx.collections.set
 
 class CombatScreen(
@@ -37,19 +42,25 @@ class CombatScreen(
   private val gameViewport = game.gameViewport
   private val engine = PooledEngine().apply {
     addSystem(CombatSystem(audioService, gameEventDispatcher))
+    addSystem(BuffSystem(gameEventDispatcher, audioService))
     addSystem(ConsumeSystem())
     addSystem(DamageEmitterSystem(gameEventDispatcher))
     addSystem(FadeSystem())
     addSystem(AnimationSystem(game.assetStorage, QuillyCrawler.UNIT_SCALE))
     addSystem(RenderSystem(game.batch, gameViewport))
-    addSystem(SetScreenSystem(game))
     addSystem(RemoveSystem())
   }
+  private var playerCombatEntity = playerEntity
+  private var combatOver = false
+  private var canGiveOrder = false
 
   override fun show() {
     super.show()
+    combatOver = false
     gameEventDispatcher.addListener(GameEventType.COMBAT_VICTORY, this)
-    audioService.playMusic(MusicAssets.QUANTUM_LOOP.descriptor.fileName)
+    gameEventDispatcher.addListener(GameEventType.COMBAT_DEFEAT, this)
+    gameEventDispatcher.addListener(GameEventType.PLAYER_TURN, this)
+    audioService.play(MusicAssets.QUANTUM_LOOP)
     createPlayerCombatEntity(playerEntity)
     createEnemyCombatEntities(enemyEntity, playerEntity.playerCmp.dungeonLevel)
   }
@@ -62,7 +73,7 @@ class CombatScreen(
   }
 
   private fun createPlayerCombatEntity(playerEntity: Entity) {
-    engine.entity {
+    playerCombatEntity = engine.entity {
       with<TransformComponent> {
         position.set(
           gameViewport.camera.position.x - gameViewport.camera.viewportWidth * 0.5f + 6f,
@@ -73,11 +84,7 @@ class CombatScreen(
       }
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "wizard-m", "idle", 0f)
       with<PlayerComponent> { dungeonLevel = playerEntity.playerCmp.dungeonLevel }
-      with<BagComponent> {
-        //TODO think about how to update the bag of the original player when an item is used in combat
-        //e.g. iterate over playerEntity bag when screen gets hidden?
-        playerEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value }
-      }
+      with<BagComponent> { playerEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value } }
       with<GearComponent> { playerEntity.gearCmp.gear.forEach { entry -> gear[entry.key] = entry.value } }
       with<StatsComponent> { playerEntity.statsCmp.stats.forEach { entry -> stats[entry.key] = entry.value } }
       with<CombatComponent>()
@@ -99,9 +106,9 @@ class CombatScreen(
       }
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon", "idle", 0f)
       with<StatsComponent> {
-        stats[StatsType.AGILITY] = 30f
-        stats[StatsType.LIFE] = 5f
-        stats[StatsType.PHYSICAL_DAMAGE] = 5f
+        stats[StatsType.AGILITY] = 1f
+        stats[StatsType.LIFE] = 150f
+        stats[StatsType.PHYSICAL_DAMAGE] = 1f
       }
       with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
       with<CombatComponent>()
@@ -109,23 +116,41 @@ class CombatScreen(
   }
 
   override fun onEvent(event: GameEvent) {
-    if (event is CombatVictoryEvent) {
-      enemyEntity.removeFromEngine(gameEngine, 1.5f)
-      enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
-      playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
-      game.setScreen<GameScreen>()
+    when (event) {
+      is CombatVictoryEvent -> {
+        combatOver = true
+        audioService.play(MusicAssets.VICTORY, loop = false)
+        enemyEntity.removeFromEngine(gameEngine, 1.5f)
+        enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
+        playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
+        updatePlayerItemsAfterCombat()
+      }
+      is CombatDefeatEvent -> {
+        combatOver = true
+        audioService.play(MusicAssets.DEFEAT, loop = false)
+        playerCombatEntity.fadeTo(engine, 1f, 0f, 0f, 0.5f, 1f)
+        updatePlayerItemsAfterCombat(true)
+      }
+      is CombatPlayerTurnEvent -> canGiveOrder = true
+      else -> Unit
+    }
+  }
+
+  private fun updatePlayerItemsAfterCombat(reduceGold: Boolean = false) {
+    with(playerEntity.bagCmp) {
+      items.clear()
+      playerCombatEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value }
+
+      if (reduceGold) {
+        gold = (gold * 0.8f).toInt()
+      }
     }
   }
 
   override fun render(delta: Float) {
     //TODO remove debug stuff
-    if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-      engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach { entity ->
-        engine.configureEntity(entity) {
-          with<SetScreenComponent> { screenType = GameScreen::class }
-        }
-      }
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+    if (canGiveOrder && Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+      canGiveOrder = false
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
         it.combatCmp.effect = CombatOrderEffectAttack
         it.combatCmp.orderTargets.add(
@@ -134,6 +159,13 @@ class CombatScreen(
           ).random()
         )
       }
+    } else if (canGiveOrder && Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+      canGiveOrder = false
+      engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
+        it.combatCmp.effect = CombatOrderEffectProtect
+      }
+    } else if (combatOver && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+      game.setScreen<GameScreen>()
     }
 
     engine.update(delta)

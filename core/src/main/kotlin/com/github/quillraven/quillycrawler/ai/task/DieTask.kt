@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.github.quillraven.quillycrawler.ashley.component.combatCmp
-import com.github.quillraven.quillycrawler.combat.CombatOrderEffectDeath
+import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectDeath
 
 class DieTask : LeafTask<Entity>() {
   override fun copyTo(task: Task<Entity>) = task

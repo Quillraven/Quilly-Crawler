@@ -15,6 +15,7 @@ import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
 import ktx.collections.getOrPut
+import java.util.*
 
 /**
  * System to set and update an [entity's][Entity] [EntityState]. It also updates
@@ -105,7 +106,7 @@ class StateSystem(
           stateTime = 0f
           stateMachine.changeState(state)
           entity[AnimationComponent.MAPPER]?.let {
-            it.stateKey = stateAnimationStringCache.getOrPut(state) { state.toString().toLowerCase() }
+            it.stateKey = stateAnimationStringCache.getOrPut(state) { state.toString().lowercase(Locale.getDefault()) }
           }
           state = EntityState.EMPTY_STATE
         }

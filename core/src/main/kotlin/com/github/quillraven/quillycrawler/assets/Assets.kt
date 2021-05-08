@@ -29,7 +29,12 @@ enum class MusicAssets(
   TAKE_COVER("audio/music/Take Cover.ogg"),
   TRY_AND_SOLVE_THIS("audio/music/Try and Solve This.ogg"),
   QUANTUM_LOOP("audio/music/Quantum Loop.ogg"),
+  DEFEAT("audio/music/Defeat.mp3"),
+  VICTORY("audio/music/Victory.mp3"),
 }
+
+fun AudioService.play(asset: MusicAssets, volume: Float = 1f, loop: Boolean = true) =
+  this.playMusic(asset.descriptor.fileName, volume, loop)
 
 enum class SoundAssets(
   filePath: String,
@@ -46,6 +51,7 @@ enum class SoundAssets(
   GOBLIN_03("audio/sounds/Goblin_03.mp3"),
   PUNCH_01("audio/sounds/sfx_punch_01.wav"),
   DEFEND_01("audio/sounds/sfx_defend_01.wav"),
+  PROTECT("audio/sounds/sfx_protect.wav"),
 }
 
 fun AudioService.play(asset: SoundAssets, volume: Float = 1f, loop: Boolean = false) =
