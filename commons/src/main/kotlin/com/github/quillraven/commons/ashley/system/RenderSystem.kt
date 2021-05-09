@@ -106,13 +106,13 @@ class RenderSystem(
       // or normal transform position
       if (box2dCmp == null) {
         setPosition(
-          transformCmp.position.x - originX * (1f - scaleX),
-          transformCmp.position.y - originY * (1f - scaleY)
+          transformCmp.position.x - originX * (1f - scaleX) + renderCmp.offset.x,
+          transformCmp.position.y - originY * (1f - scaleY) + renderCmp.offset.y
         )
       } else {
         setPosition(
-          box2dCmp.renderPosition.x - originX * (1f - scaleX),
-          box2dCmp.renderPosition.y - originY * (1f - scaleY)
+          box2dCmp.renderPosition.x - originX * (1f - scaleX) + renderCmp.offset.x,
+          box2dCmp.renderPosition.y - originY * (1f - scaleY) + renderCmp.offset.y
         )
       }
 

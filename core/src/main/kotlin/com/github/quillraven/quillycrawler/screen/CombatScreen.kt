@@ -8,10 +8,7 @@ import com.badlogic.gdx.Input
 import com.github.quillraven.commons.ashley.component.TransformComponent
 import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
-import com.github.quillraven.commons.ashley.system.AnimationSystem
-import com.github.quillraven.commons.ashley.system.FadeSystem
-import com.github.quillraven.commons.ashley.system.RemoveSystem
-import com.github.quillraven.commons.ashley.system.RenderSystem
+import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.*
@@ -47,6 +44,7 @@ class CombatScreen(
     addSystem(DamageEmitterSystem(gameEventDispatcher))
     addSystem(FadeSystem())
     addSystem(AnimationSystem(game.assetStorage, QuillyCrawler.UNIT_SCALE))
+    addSystem(ShakeSystem())
     addSystem(RenderSystem(game.batch, gameViewport))
     addSystem(RemoveSystem())
   }

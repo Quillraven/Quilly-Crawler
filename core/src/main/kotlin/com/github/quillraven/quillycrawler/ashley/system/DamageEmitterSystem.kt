@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
+import com.github.quillraven.commons.ashley.component.shake
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.combat.effect.CommandEffectDeath
 import com.github.quillraven.quillycrawler.event.CombatDamageEvent
@@ -45,6 +46,12 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
         |physicalAfter=${damageEmitterCmp.physicalDamage},
         |magicalAfter=${damageEmitterCmp.magicDamage}""".trimMargin().replace("\n", "")
       }
+
+      if (targetLife < targetStatsCmp[StatsType.LIFE]) {
+        // entity took damage -> shake it
+        damageEmitterCmp.target.shake(engine, 0.2f, 0.5f)
+      }
+
       targetStatsCmp[StatsType.LIFE] = targetLife
       if (targetLife <= 0f) {
         LOG.debug { "Entity ${damageEmitterCmp.target} died" }
