@@ -6,9 +6,9 @@ import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibraryManager
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.combat.CombatOrder
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectDefend
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectUndefined
+import com.github.quillraven.quillycrawler.combat.Command
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectDefend
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectUndefined
 import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.exclude
@@ -34,7 +34,7 @@ class CombatSystem(
   private var combatPhase = CombatPhase.UNDEFINED
   private var executeOrders = false
   private var allOrdersExecuted = false
-  private val currentOrder by lazy { CombatOrder(engine, audioService) }
+  private val currentOrder by lazy { Command(engine, audioService) }
   private val victoryEvent = CombatVictoryEvent()
   private val defeatEvent = CombatDefeatEvent()
   private val playerTurnEvent = CombatPlayerTurnEvent()
@@ -79,7 +79,7 @@ class CombatSystem(
     var allEntitiesHaveOrder = true
 
     for (entity in entities) {
-      if (entity.combatCmp.effect == CombatOrderEffectUndefined) {
+      if (entity.combatCmp.effect == CommandEffectUndefined) {
         allEntitiesHaveOrder = false
         break
       } else if (allOrdersExecuted) {
@@ -101,12 +101,12 @@ class CombatSystem(
     for (i in 0 until entities.size()) {
       val entity = entities[i]
       val combatCmp = entity.combatCmp
-      if (combatCmp.effect == CombatOrderEffectUndefined) {
+      if (combatCmp.effect == CommandEffectUndefined) {
         // entity already executed order
         continue
       }
 
-      if (currentOrder.effect == CombatOrderEffectUndefined) {
+      if (currentOrder.effect == CommandEffectUndefined) {
         // initialize current order
         currentOrder.reset()
         currentOrder.source = entity
@@ -122,8 +122,8 @@ class CombatSystem(
       if (currentOrder.update(deltaTime)) {
         // order finished -> remove effect to prepare entity for next round
         LOG.debug { "ORDER FINISHED for $entity" }
-        currentOrder.effect = CombatOrderEffectUndefined
-        combatCmp.effect = CombatOrderEffectUndefined
+        currentOrder.effect = CommandEffectUndefined
+        combatCmp.effect = CommandEffectUndefined
         combatCmp.orderTargets.clear()
         allOrdersExecuted = i == entities.size() - 1
       }
@@ -194,7 +194,7 @@ class CombatSystem(
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val combatCmp = entity.combatCmp
-    if (combatCmp.effect != CombatOrderEffectUndefined) {
+    if (combatCmp.effect != CommandEffectUndefined) {
       // effect already chosen -> do nothing
       return
     }
@@ -202,9 +202,9 @@ class CombatSystem(
     // get new AI orders for next round; player order is added via UI
     entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
       combatAiCmp.behaviorTree.step()
-      if (combatCmp.effect == CombatOrderEffectUndefined) {
+      if (combatCmp.effect == CommandEffectUndefined) {
         LOG.error { "Stepping behavior tree of entity $entity did not define a combat order" }
-        combatCmp.effect = CombatOrderEffectDefend
+        combatCmp.effect = CommandEffectDefend
       }
     }
   }

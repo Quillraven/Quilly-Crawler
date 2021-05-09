@@ -4,19 +4,19 @@ import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffect
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectUndefined
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffect
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectUndefined
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.collections.GdxArray
 
 class CombatComponent : Component, Pool.Poolable {
-  var effect: CombatOrderEffect = CombatOrderEffectUndefined
+  var effect: CommandEffect = CommandEffectUndefined
   val orderTargets = GdxArray<Entity>()
 
   override fun reset() {
     orderTargets.clear()
-    effect = CombatOrderEffectUndefined
+    effect = CommandEffectUndefined
   }
 
   companion object {

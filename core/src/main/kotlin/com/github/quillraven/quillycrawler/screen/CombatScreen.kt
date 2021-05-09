@@ -23,8 +23,8 @@ import com.github.quillraven.quillycrawler.ashley.withAnimationComponents
 import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.assets.play
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectAttack
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectProtect
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectAttack
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectProtect
 import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.entity
@@ -88,6 +88,7 @@ class CombatScreen(
       with<GearComponent> { playerEntity.gearCmp.gear.forEach { entry -> gear[entry.key] = entry.value } }
       with<StatsComponent> { playerEntity.statsCmp.stats.forEach { entry -> stats[entry.key] = entry.value } }
       with<CombatComponent>()
+      with<BuffComponent>()
     }
   }
 
@@ -112,6 +113,7 @@ class CombatScreen(
       }
       with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
       with<CombatComponent>()
+      with<BuffComponent>()
     }
   }
 
@@ -152,7 +154,7 @@ class CombatScreen(
     if (canGiveOrder && Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
       canGiveOrder = false
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        it.combatCmp.effect = CombatOrderEffectAttack
+        it.combatCmp.effect = CommandEffectAttack
         it.combatCmp.orderTargets.add(
           engine.getEntitiesFor(
             allOf(CombatComponent::class).exclude(PlayerComponent::class).get()
@@ -162,7 +164,7 @@ class CombatScreen(
     } else if (canGiveOrder && Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
       canGiveOrder = false
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        it.combatCmp.effect = CombatOrderEffectProtect
+        it.combatCmp.effect = CommandEffectProtect
       }
     } else if (combatOver && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
       game.setScreen<GameScreen>()

@@ -2,20 +2,20 @@ package com.github.quillraven.quillycrawler.combat.effect
 
 import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.assets.play
-import com.github.quillraven.quillycrawler.combat.CombatOrder
+import com.github.quillraven.quillycrawler.combat.Command
 
-object CombatOrderEffectDefend : CombatOrderEffect {
+object CommandEffectDefend : CommandEffect {
   override val aiType: CombatAiType = CombatAiType.DEFENSIVE
 
   override val manaCost: Int = 0
 
   override val targetType: TargetType = TargetType.NO_TARGET
 
-  override fun start(order: CombatOrder) {
+  override fun start(order: Command) {
     order.audioService.play(SoundAssets.DEFEND_01)
   }
 
-  override fun update(order: CombatOrder, deltaTime: Float): Boolean {
+  override fun update(order: Command, deltaTime: Float): Boolean {
     return order.totalTime >= 0.5f
   }
 }

@@ -5,23 +5,24 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.Pool
 import com.github.quillraven.commons.ashley.component.playAnimation
 import com.github.quillraven.commons.audio.AudioService
-import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.combat.buff.Buff
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffect
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectUndefined
+import com.github.quillraven.quillycrawler.ashley.component.DamageEmitterComponent
+import com.github.quillraven.quillycrawler.ashley.component.StatsType
+import com.github.quillraven.quillycrawler.ashley.component.statsCmp
+import com.github.quillraven.quillycrawler.ashley.component.totalStatValue
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffect
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectUndefined
 import ktx.ashley.entity
 import ktx.ashley.with
 import ktx.collections.GdxArray
 import ktx.log.debug
 import ktx.log.logger
-import kotlin.reflect.KClass
 
-class CombatOrder(
+class Command(
   val engine: Engine,
   val audioService: AudioService
 ) : Pool.Poolable {
   lateinit var source: Entity
-  var effect: CombatOrderEffect = CombatOrderEffectUndefined
+  var effect: CommandEffect = CommandEffectUndefined
   var targets = GdxArray<Entity>()
   var totalTime = 0f
 
@@ -46,19 +47,10 @@ class CombatOrder(
     targets.forEach { targetEntity ->
       engine.entity {
         with<DamageEmitterComponent> {
-          this.source = this@CombatOrder.source
+          this.source = this@Command.source
           this.target = targetEntity
-          this.physicalDamage = this@CombatOrder.source.totalStatValue(StatsType.PHYSICAL_DAMAGE)
+          this.physicalDamage = this@Command.source.totalStatValue(StatsType.PHYSICAL_DAMAGE)
         }
-      }
-    }
-  }
-
-  fun addBuff(buffType: KClass<out Buff>) {
-    engine.entity {
-      with<BuffComponent> {
-        this.buffType = buffType
-        this.entity = source
       }
     }
   }
@@ -70,6 +62,6 @@ class CombatOrder(
   }
 
   companion object {
-    private val LOG = logger<CombatOrder>()
+    private val LOG = logger<Command>()
   }
 }

@@ -5,14 +5,14 @@ import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.github.quillraven.quillycrawler.ashley.component.combatAICmp
 import com.github.quillraven.quillycrawler.ashley.component.combatCmp
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectAttack
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectAttack
 
 class AttackTask : LeafTask<Entity>() {
   override fun copyTo(task: Task<Entity>) = task
 
   override fun execute(): Status {
     with(`object`.combatCmp) {
-      effect = CombatOrderEffectAttack
+      effect = CommandEffectAttack
       orderTargets.add(`object`.combatAICmp.randomPlayerEntity())
     }
 

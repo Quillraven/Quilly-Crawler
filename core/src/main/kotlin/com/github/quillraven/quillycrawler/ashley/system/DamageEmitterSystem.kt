@@ -5,7 +5,7 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectDeath
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectDeath
 import com.github.quillraven.quillycrawler.event.CombatDamageEvent
 import com.github.quillraven.quillycrawler.event.CombatDeathEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
@@ -49,7 +49,7 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
       if (targetLife <= 0f) {
         LOG.debug { "Entity ${damageEmitterCmp.target} died" }
         damageEmitterCmp.target[CombatAIComponent.MAPPER]?.behaviorTree?.step()
-        if (damageEmitterCmp.target.combatCmp.effect == CombatOrderEffectDeath || damageEmitterCmp.target[PlayerComponent.MAPPER] != null) {
+        if (damageEmitterCmp.target.combatCmp.effect == CommandEffectDeath || damageEmitterCmp.target[PlayerComponent.MAPPER] != null) {
           // target really died or was a player entity
           gameEventDispatcher.dispatchEvent(deathEvent.apply { this.entity = damageEmitterCmp.target })
         }

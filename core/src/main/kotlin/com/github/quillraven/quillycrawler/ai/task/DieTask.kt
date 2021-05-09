@@ -4,13 +4,13 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.github.quillraven.quillycrawler.ashley.component.combatCmp
-import com.github.quillraven.quillycrawler.combat.effect.CombatOrderEffectDeath
+import com.github.quillraven.quillycrawler.combat.effect.CommandEffectDeath
 
 class DieTask : LeafTask<Entity>() {
   override fun copyTo(task: Task<Entity>) = task
 
   override fun execute(): Status {
-    `object`.combatCmp.effect = CombatOrderEffectDeath
+    `object`.combatCmp.effect = CommandEffectDeath
     return Status.SUCCEEDED
   }
 }
