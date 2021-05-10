@@ -1,11 +1,15 @@
 package com.github.quillraven.quillycrawler.ashley.component
 
 import com.badlogic.ashley.core.Component
+import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
+import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.ashley.mapperFor
+import ktx.ashley.with
+import ktx.collections.GdxArray
 
 class DamageEmitterComponent : Component, Pool.Poolable {
   lateinit var source: Entity
@@ -28,3 +32,17 @@ class DamageEmitterComponent : Component, Pool.Poolable {
 val Entity.damageEmitterCmp: DamageEmitterComponent
   get() = this[DamageEmitterComponent.MAPPER]
     ?: throw GdxRuntimeException("DamageEmitterComponent for entity '$this' is null")
+
+fun Entity.dealAttackDamage(engine: Engine, targets: GdxArray<Entity>) {
+  val sourceEntity = this
+
+  targets.forEach { targetEntity ->
+    engine.entity {
+      with<DamageEmitterComponent> {
+        this.source = sourceEntity
+        this.target = targetEntity
+        this.physicalDamage = sourceEntity.totalStatValue(StatsType.PHYSICAL_DAMAGE)
+      }
+    }
+  }
+}

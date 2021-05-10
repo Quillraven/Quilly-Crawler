@@ -1,6 +1,5 @@
 package com.github.quillraven.quillycrawler.ashley.system
 
-import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.utils.GdxRuntimeException
@@ -10,9 +9,9 @@ import com.badlogic.gdx.utils.reflect.ClassReflection
 import com.badlogic.gdx.utils.reflect.Constructor
 import com.badlogic.gdx.utils.reflect.ReflectionException
 import com.github.quillraven.commons.ashley.component.RemoveComponent
-import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.BuffComponent
 import com.github.quillraven.quillycrawler.ashley.component.buffCmp
+import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import com.github.quillraven.quillycrawler.event.GameEventType
@@ -28,18 +27,17 @@ import kotlin.reflect.KClass
 
 private class BuffPool<T : Buff>(
   private val constructor: Constructor,
-  private val engine: Engine,
-  private val audioService: AudioService
+  private val context: CombatContext
 ) : Pool<T>() {
   override fun newObject(): T {
     @Suppress("UNCHECKED_CAST")
-    return constructor.newInstance(engine, audioService) as T
+    return constructor.newInstance(context) as T
   }
 }
 
 class BuffSystem(
+  private val combatContext: CombatContext,
   private val gameEventDispatcher: GameEventDispatcher,
-  private val audioService: AudioService,
 ) : IteratingSystem(allOf(BuffComponent::class).exclude(RemoveComponent::class).get()) {
   private val buffPools = ObjectMap<KClass<out Buff>, BuffPool<out Buff>>()
 
@@ -60,13 +58,13 @@ class BuffSystem(
     // entity does not have buff yet -> create it
     val newBuff = buffPools.getOrPut(buffType) {
       try {
-        val constructor = ClassReflection.getConstructor(buffType.java, Engine::class.java, AudioService::class.java)
-        BuffPool(constructor, engine, audioService)
+        val constructor = ClassReflection.getConstructor(buffType.java, CombatContext::class.java)
+        BuffPool(constructor, combatContext)
       } catch (e: ReflectionException) {
-        throw GdxRuntimeException("Could not find (Engine, AudioService) constructor for buff ${buffType.simpleName}")
+        throw GdxRuntimeException("Could not find (CombatContext) constructor for buff ${buffType.simpleName}")
       }
     }.obtain()
-    newBuff.target = entity
+    newBuff.entity = entity
     gameEventDispatcher.addListener(GameEventType.DAMAGE, newBuff)
     newBuff.onAdd()
     // add new buff to entity buff map to avoid adding the same buff multiple times

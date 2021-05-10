@@ -20,13 +20,15 @@ import com.github.quillraven.quillycrawler.ashley.withAnimationComponents
 import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.assets.play
-import com.github.quillraven.quillycrawler.combat.effect.CommandEffectAttack
-import com.github.quillraven.quillycrawler.combat.effect.CommandEffectProtect
+import com.github.quillraven.quillycrawler.combat.CombatContext
+import com.github.quillraven.quillycrawler.combat.command.CommandAttack
+import com.github.quillraven.quillycrawler.combat.command.CommandProtect
 import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.exclude
 import ktx.ashley.with
+import ktx.collections.isNotEmpty
 import ktx.collections.set
 
 class CombatScreen(
@@ -38,8 +40,10 @@ class CombatScreen(
 ) : AbstractScreen(game), GameEventListener {
   private val gameViewport = game.gameViewport
   private val engine = PooledEngine().apply {
-    addSystem(CombatSystem(audioService, gameEventDispatcher))
-    addSystem(BuffSystem(gameEventDispatcher, audioService))
+    val combatContext = CombatContext(this, audioService)
+
+    addSystem(CombatSystem(combatContext, gameEventDispatcher))
+    addSystem(BuffSystem(combatContext, gameEventDispatcher))
     addSystem(ConsumeSystem())
     addSystem(DamageEmitterSystem(gameEventDispatcher))
     addSystem(FadeSystem())
@@ -50,7 +54,6 @@ class CombatScreen(
   }
   private var playerCombatEntity = playerEntity
   private var combatOver = false
-  private var canGiveOrder = false
 
   override fun show() {
     super.show()
@@ -131,7 +134,6 @@ class CombatScreen(
         playerCombatEntity.fadeTo(engine, 1f, 0f, 0f, 0.5f, 1f)
         updatePlayerItemsAfterCombat(true)
       }
-      is CombatPlayerTurnEvent -> canGiveOrder = true
       else -> Unit
     }
   }
@@ -149,20 +151,18 @@ class CombatScreen(
 
   override fun render(delta: Float) {
     //TODO remove debug stuff
-    if (canGiveOrder && Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-      canGiveOrder = false
+    if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        it.combatCmp.effect = CommandEffectAttack
-        it.combatCmp.orderTargets.add(
-          engine.getEntitiesFor(
-            allOf(CombatComponent::class).exclude(PlayerComponent::class).get()
-          ).random()
+        if (it.combatCmp.commandRequests.isNotEmpty()) return@forEach
+        it.addCommandRequest(
+          CommandAttack::class,
+          engine.getEntitiesFor(allOf(CombatComponent::class).exclude(PlayerComponent::class).get()).random()
         )
       }
-    } else if (canGiveOrder && Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-      canGiveOrder = false
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        it.combatCmp.effect = CommandEffectProtect
+        if (it.combatCmp.commandRequests.isNotEmpty()) return@forEach
+        it.addCommandRequest(CommandProtect::class)
       }
     } else if (combatOver && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
       game.setScreen<GameScreen>()

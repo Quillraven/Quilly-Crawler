@@ -19,7 +19,7 @@ class CombatAIComponent : Component, Pool.Poolable {
     TMP_ARRAY.clear()
 
     allTargets.forEach {
-      if (it[PlayerComponent.MAPPER] != null) {
+      if (it.isPlayer && it.isAlive) {
         TMP_ARRAY.add(it)
       }
     }

@@ -6,7 +6,7 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.component.shake
 import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.combat.effect.CommandEffectDeath
+import com.github.quillraven.quillycrawler.combat.command.CommandDeath
 import com.github.quillraven.quillycrawler.event.CombatDamageEvent
 import com.github.quillraven.quillycrawler.event.CombatDeathEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
@@ -56,7 +56,7 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
       if (targetLife <= 0f) {
         LOG.debug { "Entity ${damageEmitterCmp.target} died" }
         damageEmitterCmp.target[CombatAIComponent.MAPPER]?.behaviorTree?.step()
-        if (damageEmitterCmp.target.combatCmp.effect == CommandEffectDeath || damageEmitterCmp.target[PlayerComponent.MAPPER] != null) {
+        if (hasDeathCommand(damageEmitterCmp.target.combatCmp) || damageEmitterCmp.target.isPlayer) {
           // target really died or was a player entity
           gameEventDispatcher.dispatchEvent(deathEvent.apply { this.entity = damageEmitterCmp.target })
         }
@@ -67,6 +67,15 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
     } else {
       damageEmitterCmp.damageDelay -= deltaTime
     }
+  }
+
+  private fun hasDeathCommand(combatCmp: CombatComponent): Boolean {
+    combatCmp.commandRequests.forEach {
+      if (it.type == CommandDeath::class) {
+        return true
+      }
+    }
+    return false
   }
 
   companion object {
