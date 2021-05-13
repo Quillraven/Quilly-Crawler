@@ -4,27 +4,29 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.ashley.component.AnimationComponent
+import com.github.quillraven.commons.ashley.component.RenderComponent
+import com.github.quillraven.commons.ashley.component.TransformComponent
+import com.github.quillraven.commons.ashley.component.animationCmp
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import ktx.ashley.EngineEntity
 import ktx.ashley.with
 import ktx.collections.set
 import kotlin.math.floor
 
 private fun EngineEntity.withTransformAndAnimation(
-  origEntity: Entity,
-  scale: Float,
+  regionKey: String,
+  size: Float,
   setPos: TransformComponent.() -> Unit
 ) {
-  val transformCmp = origEntity.transformCmp
   with<TransformComponent> {
-    size.set(transformCmp.size.x * scale, transformCmp.size.y * scale)
+    this.size.set(size, size)
     this.apply(setPos)
   }
-  val aniCmp = origEntity.animationCmp
   with<AnimationComponent> {
-    this.atlasFilePath = aniCmp.atlasFilePath
-    this.regionKey = aniCmp.regionKey
+    this.atlasFilePath = TextureAtlasAssets.ENTITIES.descriptor.fileName
+    this.regionKey = regionKey
     this.stateKey = "idle"
     this.animationSpeed = 0f
   }
@@ -32,7 +34,7 @@ private fun EngineEntity.withTransformAndAnimation(
 }
 
 fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Viewport) {
-  withTransformAndAnimation(playerEntity, 1.5f) {
+  withTransformAndAnimation(playerEntity.animationCmp.regionKey, 1.5f) {
     position.set(
       viewport.camera.position.x - size.x * 0.5f + 2f,
       viewport.camera.position.y - viewport.worldHeight * 0.5f + 0.5f,
@@ -48,13 +50,13 @@ fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Vie
 }
 
 fun EngineEntity.configureEnemyCombatEntity(
-  enemyEntity: Entity,
+  name: String,
   dungeonLevel: Int,
   viewport: Viewport,
   enemyIndex: Int,
   numEntities: Int
 ) {
-  withTransformAndAnimation(enemyEntity, 1.25f) {
+  withTransformAndAnimation(name, 1.25f) {
     val leftX = viewport.camera.position.x - viewport.worldWidth * 0.5f
     position.set(
       leftX + (viewport.worldWidth / (numEntities + 1)) * (enemyIndex + 1) - size.x * 0.5f,
@@ -65,7 +67,7 @@ fun EngineEntity.configureEnemyCombatEntity(
   with<CombatComponent>()
   with<BuffComponent>()
 
-  val statsCmp: StatsComponent = when (enemyEntity.tiledCmp.name) {
+  val statsCmp: StatsComponent = when (name) {
     "GOBLIN" -> {
       with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
       with {
@@ -115,7 +117,7 @@ fun EngineEntity.configureEnemyCombatEntity(
       }
     }
     else -> {
-      throw GdxRuntimeException("Unsupported enemy combat name: ${enemyEntity.tiledCmp.name}")
+      throw GdxRuntimeException("Unsupported enemy combat name: $name")
     }
   }
 

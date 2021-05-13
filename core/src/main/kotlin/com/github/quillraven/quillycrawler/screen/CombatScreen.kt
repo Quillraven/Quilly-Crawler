@@ -6,6 +6,7 @@ import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.component.tiledCmp
@@ -28,6 +29,7 @@ import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.exclude
+import ktx.collections.gdxArrayOf
 import ktx.collections.isNotEmpty
 import ktx.collections.set
 
@@ -62,16 +64,42 @@ class CombatScreen(
     gameEventDispatcher.addListener(GameEventType.COMBAT_DEFEAT, this)
     gameEventDispatcher.addListener(GameEventType.PLAYER_TURN, this)
     audioService.play(MusicAssets.QUANTUM_LOOP)
-    val dungeonLevel = playerEntity.playerCmp.dungeonLevel
+
     engine.entity { configurePlayerCombatEntity(playerEntity, gameViewport) }
-    val numEnemies = when (enemyEntity.tiledCmp.type) {
-      "EASY" -> MathUtils.random(1, 2)
-      "MEDIUM" -> MathUtils.random(2, 3)
-      "HARD" -> MathUtils.random(3, 4)
-      else -> 1
-    }
-    for (i in 0 until numEnemies) {
-      engine.entity { configureEnemyCombatEntity(enemyEntity, dungeonLevel, gameViewport, i, numEnemies) }
+
+    spawnEnemies()
+  }
+
+  private fun spawnEnemies() {
+    val dungeonLevel = playerEntity.playerCmp.dungeonLevel
+    val tiledCmp = enemyEntity.tiledCmp
+    when (val enemyType = tiledCmp.type) {
+      "BOSS" -> {
+        // spawn exact boss setup
+        when (tiledCmp.name) {
+          "BIG_DEMON" -> {
+            val bossEnemies = gdxArrayOf("CHORT", "BIG_DEMON", "IMP")
+            bossEnemies.forEachIndexed { index, name ->
+              engine.entity { configureEnemyCombatEntity(name, dungeonLevel, gameViewport, index, bossEnemies.size) }
+            }
+          }
+          else -> {
+            throw GdxRuntimeException("Unsupported boss $enemyType")
+          }
+        }
+      }
+      else -> {
+        // spawn between 1 to 4 enemies depending on difficulty
+        val numEnemies = when (enemyType) {
+          "EASY" -> MathUtils.random(1, 2)
+          "MEDIUM" -> MathUtils.random(2, 3)
+          "HARD" -> MathUtils.random(3, 4)
+          else -> 1
+        }
+        for (i in 0 until numEnemies) {
+          engine.entity { configureEnemyCombatEntity(tiledCmp.name, dungeonLevel, gameViewport, i, numEnemies) }
+        }
+      }
     }
   }
 
