@@ -2,6 +2,7 @@ package com.github.quillraven.quillycrawler.ashley
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.maps.MapLayer
 import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.World
@@ -81,16 +82,17 @@ fun EngineEntity.withAnimationComponents(
   with<RenderComponent>()
 }
 
-fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): Boolean {
+fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, world: World?): Boolean {
   if (world == null) {
     throw GdxRuntimeException("Box2D world must not be null")
   }
 
   val x = mapObject.x * QuillyCrawler.UNIT_SCALE
   val y = mapObject.y * QuillyCrawler.UNIT_SCALE
+  val name = mapObject.name
 
-  when (mapObject.name) {
-    "PLAYER" -> {
+  when {
+    name == "PLAYER" -> {
       val playerEntities = engine.getEntitiesFor(playerFamily)
       if (playerEntities.size() <= 0) {
         // player entity does not exist yet -> create it
@@ -110,7 +112,7 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
       }
       return false
     }
-    "CHEST_COMMON", "CHEST_RARE", "CHEST_EPIC" -> {
+    name.startsWith("CHEST_") -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "chest")
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
@@ -129,15 +131,15 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
         }
       }
     }
-    "BIG_DEMON" -> {
-      withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon")
-      withBox2DComponents(world, BodyType.StaticBody, x, y)
-      with<StateComponent> { state = BigDemonState.RUN }
-      with<ActionableComponent> { type = ActionType.ENEMY }
-    }
-    "EXIT" -> {
+    name == "EXIT" -> {
       withBox2DComponents(world, BodyType.StaticBody, x, y, onlySensor = true)
       with<ActionableComponent> { type = ActionType.EXIT }
+    }
+    layer.name == "enemies" -> {
+      withAnimationComponents(TextureAtlasAssets.ENTITIES, name)
+      withBox2DComponents(world, BodyType.StaticBody, x - 0.5f, y)
+      with<StateComponent> { state = BigDemonState.RUN }
+      with<ActionableComponent> { type = ActionType.ENEMY }
     }
     else -> {
       MapService.LOG.error { "Unsupported MapObject name '${mapObject.name}'" }
@@ -165,7 +167,7 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<CameraLockComponent>()
     with<GearComponent>()
     with<StatsComponent> {
-      stats[StatsType.LIFE] = 10f
+      stats[StatsType.LIFE] = 30f
       stats[StatsType.MAX_LIFE] = 30f
       stats[StatsType.MANA] = 10f
       stats[StatsType.MAX_MANA] = 10f

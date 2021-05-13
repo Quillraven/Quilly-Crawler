@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="15">
+<map version="1.5" tiledversion="1.5.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="24">
  <properties>
   <property name="musicFilePath" value="audio/music/Try and Solve This.ogg"/>
  </properties>
@@ -42,9 +42,6 @@
   </object>
  </objectgroup>
  <objectgroup id="6" name="entities">
-  <object id="5" name="BIG_DEMON" x="152.25" y="170">
-   <point/>
-  </object>
   <object id="6" name="PLAYER" x="127" y="129">
    <point/>
   </object>
@@ -68,6 +65,23 @@
    <point/>
   </object>
   <object id="14" name="CHEST_EPIC" x="165.75" y="242.5">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ff0000" id="7" name="enemies">
+  <object id="19" name="BIG_DEMON" type="BOSS" x="160.25" y="165.5">
+   <point/>
+  </object>
+  <object id="20" name="GOBLIN" type="EASY" x="41.75" y="272.75">
+   <point/>
+  </object>
+  <object id="21" name="SKELET" type="MEDIUM" x="99.5" y="285.75">
+   <point/>
+  </object>
+  <object id="22" name="IMP" type="HARD" x="218.75" y="277.75">
+   <point/>
+  </object>
+  <object id="23" name="CHORT" type="HARD" x="252.75" y="279.5">
    <point/>
   </object>
  </objectgroup>

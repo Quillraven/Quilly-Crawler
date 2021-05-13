@@ -5,9 +5,10 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.github.quillraven.commons.ashley.component.TransformComponent
+import com.badlogic.gdx.math.MathUtils
 import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
+import com.github.quillraven.commons.ashley.component.tiledCmp
 import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
@@ -16,18 +17,17 @@ import com.github.quillraven.quillycrawler.ashley.system.BuffSystem
 import com.github.quillraven.quillycrawler.ashley.system.CombatSystem
 import com.github.quillraven.quillycrawler.ashley.system.ConsumeSystem
 import com.github.quillraven.quillycrawler.ashley.system.DamageEmitterSystem
-import com.github.quillraven.quillycrawler.ashley.withAnimationComponents
 import com.github.quillraven.quillycrawler.assets.MusicAssets
-import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.command.CommandAttack
 import com.github.quillraven.quillycrawler.combat.command.CommandProtect
+import com.github.quillraven.quillycrawler.combat.configureEnemyCombatEntity
+import com.github.quillraven.quillycrawler.combat.configurePlayerCombatEntity
 import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.exclude
-import ktx.ashley.with
 import ktx.collections.isNotEmpty
 import ktx.collections.set
 
@@ -62,8 +62,17 @@ class CombatScreen(
     gameEventDispatcher.addListener(GameEventType.COMBAT_DEFEAT, this)
     gameEventDispatcher.addListener(GameEventType.PLAYER_TURN, this)
     audioService.play(MusicAssets.QUANTUM_LOOP)
-    createPlayerCombatEntity(playerEntity)
-    createEnemyCombatEntities(enemyEntity, playerEntity.playerCmp.dungeonLevel)
+    val dungeonLevel = playerEntity.playerCmp.dungeonLevel
+    engine.entity { configurePlayerCombatEntity(playerEntity, gameViewport) }
+    val numEnemies = when (enemyEntity.tiledCmp.type) {
+      "EASY" -> MathUtils.random(1, 2)
+      "MEDIUM" -> MathUtils.random(2, 3)
+      "HARD" -> MathUtils.random(3, 4)
+      else -> 1
+    }
+    for (i in 0 until numEnemies) {
+      engine.entity { configureEnemyCombatEntity(enemyEntity, dungeonLevel, gameViewport, i, numEnemies) }
+    }
   }
 
   override fun hide() {
@@ -71,51 +80,6 @@ class CombatScreen(
     gameEventDispatcher.removeListener(this)
     audioService.playPreviousMusic()
     engine.removeAllEntities()
-  }
-
-  private fun createPlayerCombatEntity(playerEntity: Entity) {
-    playerCombatEntity = engine.entity {
-      with<TransformComponent> {
-        position.set(
-          gameViewport.camera.position.x - gameViewport.camera.viewportWidth * 0.5f + 6f,
-          gameViewport.camera.position.y - gameViewport.camera.viewportHeight * 0.5f + 0.5f,
-          position.z
-        )
-        size.set(1.5f, 1.5f)
-      }
-      withAnimationComponents(TextureAtlasAssets.ENTITIES, "wizard-m", "idle", 0f)
-      with<PlayerComponent> { dungeonLevel = playerEntity.playerCmp.dungeonLevel }
-      with<BagComponent> { playerEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value } }
-      with<GearComponent> { playerEntity.gearCmp.gear.forEach { entry -> gear[entry.key] = entry.value } }
-      with<StatsComponent> { playerEntity.statsCmp.stats.forEach { entry -> stats[entry.key] = entry.value } }
-      with<CombatComponent>()
-      with<BuffComponent>()
-    }
-  }
-
-  private fun createEnemyCombatEntities(enemyEntity: Entity, dungeonLevel: Int) {
-    //TODO adjust combat stats by dungeonLevel
-    //TODO get enemy strength information (EASY,MEDIUM,HARD) --> maybe part of Tiled map information?
-    //TODO create 1-4 enemies if it is a NORMAL combat
-    //TODO create exact boss setup if it is a BOSS combat
-    engine.entity {
-      with<TransformComponent> {
-        position.set(
-          gameViewport.camera.position.x - gameViewport.camera.viewportWidth * 0.5f + 8f,
-          gameViewport.camera.position.y + gameViewport.camera.viewportHeight * 0.5f - 2.5f,
-          position.z
-        )
-      }
-      withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon", "idle", 0f)
-      with<StatsComponent> {
-        stats[StatsType.AGILITY] = 1f
-        stats[StatsType.LIFE] = 150f
-        stats[StatsType.PHYSICAL_DAMAGE] = 1f
-      }
-      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
-      with<CombatComponent>()
-      with<BuffComponent>()
-    }
   }
 
   override fun onEvent(event: GameEvent) {
@@ -165,6 +129,8 @@ class CombatScreen(
         it.addCommandRequest(CommandProtect::class)
       }
     } else if (combatOver && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+      game.setScreen<GameScreen>()
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       game.setScreen<GameScreen>()
     }
 

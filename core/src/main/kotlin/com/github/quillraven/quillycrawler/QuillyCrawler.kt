@@ -30,7 +30,7 @@ class QuillyCrawler : AbstractGame() {
 
   override fun resize(width: Int, height: Int) {
     super.resize(width, height)
-    gameViewport.update(width, height, true)
+    gameViewport.update(width, height, false)
   }
 
   override fun create() {
