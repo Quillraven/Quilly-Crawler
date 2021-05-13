@@ -104,14 +104,20 @@ class RenderSystem(
 
       // update sprite position according to the physic's interpolated position
       // or normal transform position
+      //
+      // some explanation to the calculations below
+      // transformCmp.position is the bottom left corner of an entity transform rectangle
+      // origin is half the width and height of the sprite itself
+      // -> [origin * (1 - scale)]: puts the sprite correctly to the bottom left corner if scaling is applied
+      // -> [scale - width * scale]: centers the sprite horizontally within its bounding rectangle of the transform component
       if (box2dCmp == null) {
         setPosition(
-          transformCmp.position.x - originX * (1f - scaleX) + renderCmp.offset.x,
+          transformCmp.position.x - originX * (1f - scaleX) + (scaleX - width * scaleX) * 0.5f + renderCmp.offset.x,
           transformCmp.position.y - originY * (1f - scaleY) + renderCmp.offset.y
         )
       } else {
         setPosition(
-          box2dCmp.renderPosition.x - originX * (1f - scaleX) + renderCmp.offset.x,
+          box2dCmp.renderPosition.x - originX * (1f - scaleX) + (scaleX - width * scaleX) * 0.5f + renderCmp.offset.x,
           box2dCmp.renderPosition.y - originY * (1f - scaleY) + renderCmp.offset.y
         )
       }
