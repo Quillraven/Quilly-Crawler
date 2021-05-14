@@ -10,6 +10,9 @@ import com.github.quillraven.commons.ashley.component.TransformComponent
 import com.github.quillraven.commons.ashley.component.animationCmp
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
+import com.github.quillraven.quillycrawler.combat.command.CommandAttack
+import com.github.quillraven.quillycrawler.combat.command.CommandDeath
+import com.github.quillraven.quillycrawler.combat.command.CommandDefend
 import ktx.ashley.EngineEntity
 import ktx.ashley.with
 import ktx.collections.set
@@ -45,7 +48,7 @@ fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Vie
   with<BagComponent> { playerEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value } }
   with<GearComponent> { playerEntity.gearCmp.gear.forEach { entry -> gear[entry.key] = entry.value } }
   with<StatsComponent> { playerEntity.statsCmp.stats.forEach { entry -> stats[entry.key] = entry.value } }
-  with<CombatComponent>()
+  with<CombatComponent> { learnedCommands.addAll(playerEntity.combatCmp.learnedCommands) }
   with<BuffComponent>()
 }
 
@@ -64,7 +67,11 @@ fun EngineEntity.configureEnemyCombatEntity(
       position.z
     )
   }
-  with<CombatComponent>()
+  with<CombatComponent> {
+    learn<CommandAttack>()
+    learn<CommandDefend>()
+    learn<CommandDeath>()
+  }
   with<BuffComponent>()
 
   val statsCmp: StatsComponent = when (name) {

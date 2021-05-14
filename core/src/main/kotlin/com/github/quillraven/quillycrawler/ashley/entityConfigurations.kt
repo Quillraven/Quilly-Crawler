@@ -15,6 +15,8 @@ import com.github.quillraven.quillycrawler.ai.ChestState
 import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
+import com.github.quillraven.quillycrawler.combat.command.CommandAttack
+import com.github.quillraven.quillycrawler.combat.command.CommandDeath
 import ktx.ashley.*
 import ktx.box2d.BodyDefinition
 import ktx.box2d.body
@@ -178,6 +180,10 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
       stats[StatsType.MAGIC_DAMAGE] = 4f
       stats[StatsType.PHYSICAL_ARMOR] = 3f
       stats[StatsType.MAGIC_ARMOR] = 1f
+    }
+    with<CombatComponent> {
+      learn<CommandAttack>()
+      learn<CommandDeath>()
     }
   }
 }

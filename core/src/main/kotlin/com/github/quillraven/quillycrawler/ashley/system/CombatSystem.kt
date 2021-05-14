@@ -16,7 +16,6 @@ import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.command.Command
 import com.github.quillraven.quillycrawler.combat.command.CommandDefend
-import com.github.quillraven.quillycrawler.combat.command.CommandRequest
 import com.github.quillraven.quillycrawler.combat.command.CommandTargetType
 import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
@@ -25,7 +24,7 @@ import ktx.ashley.get
 import ktx.collections.GdxArray
 import ktx.collections.getOrPut
 import ktx.collections.isNotEmpty
-import ktx.collections.iterate
+import ktx.collections.set
 import ktx.log.debug
 import ktx.log.error
 import ktx.log.logger
@@ -82,6 +81,11 @@ class CombatSystem(
 
     //TODO how does task pooling work?
 
+    // initialize commands
+    with(entity.combatCmp) {
+      learnedCommands.forEach { availableCommands[it] = obtainCommand(entity, it) }
+    }
+
     // initialize AI
     entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
       // initialize tree
@@ -99,6 +103,12 @@ class CombatSystem(
 
   override fun entityRemoved(entity: Entity) {
     super.entityRemoved(entity)
+
+    // cleanup commands
+    with(entity.combatCmp) {
+      availableCommands.values().forEach { freeCommand(it) }
+    }
+
     // cleanup AI
     entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
       bTreeManager.disposeBehaviorTree(combatAiCmp.treeFilePath, combatAiCmp.behaviorTree)
@@ -134,11 +144,12 @@ class CombatSystem(
           iter.remove()
         }
       }
+
       // add final commands of dying entity to queue like e.g. the death command
-      event.entity.combatCmp.commandRequests.iterate { request, iterator ->
-        commandQueue.addFirst(obtainCommand(event.entity, request))
-        iterator.remove()
+      event.entity.combatCmp.commandsToExecute.forEach {
+        commandQueue.addFirst(it)
       }
+
       // update command targets by removing the dying entity
       updateCommandTargets(event.entity)
     }
@@ -203,16 +214,15 @@ class CombatSystem(
     // get new AI orders for next round; player order is added via UI
     entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
       combatAiCmp.behaviorTree.step()
-      if (combatCmp.commandRequests.isEmpty) {
+      if (combatCmp.commandsToExecute.isEmpty) {
         LOG.error { "Stepping behavior tree of entity $entity did not define a combat order" }
-        entity.addCommandRequest(CommandDefend::class)
       }
     }
   }
 
   private fun updatePlayerCommands() {
     playerEntities.forEach {
-      if (it.combatCmp.commandRequests.isEmpty) {
+      if (it.combatCmp.commandsToExecute.isEmpty) {
         // not all player entities have a command
         return
       }
@@ -222,38 +232,29 @@ class CombatSystem(
   }
 
   private fun prepareCommands(entity: Entity) {
-    entity.combatCmp.commandRequests.iterate { request, iterator ->
-      commandQueue.addLast(obtainCommand(entity, request))
-      iterator.remove()
+    entity.combatCmp.commandsToExecute.forEach {
+      commandQueue.addLast(it)
     }
   }
 
-  private fun obtainCommand(entity: Entity, request: CommandRequest): Command {
+  private fun obtainCommand(entity: Entity, type: KClass<out Command>): Command {
     // get command type
-    val commandType = if (request.type == Command::class) {
-      LOG.error { "CommandRequest has type Command. It must be a correct subtype" }
+    val commandType = if (type == Command::class) {
+      LOG.error { "Trying to obtain command of type 'Command'. It must be a correct subtype" }
       CommandDefend::class
     } else {
-      request.type
+      type
     }
 
     // create new command
-    val newCommand = commandPools.getOrPut(commandType) {
+    return commandPools.getOrPut(commandType) {
       try {
         val constructor = ClassReflection.getConstructor(commandType.java, CombatContext::class.java)
         CommandPool(constructor, combatContext)
       } catch (e: ReflectionException) {
         throw GdxRuntimeException("Could not find (CombatContext) constructor for command ${commandType.simpleName}")
       }
-    }.obtain().apply {
-      this.entity = entity
-      targets.addAll(request.targets)
-    }
-
-    // free request
-    CombatComponent.REQUEST_POOL.free(request)
-
-    return newCommand
+    }.obtain().apply { this.entity = entity }
   }
 
   private fun freeCommand(command: Command) {

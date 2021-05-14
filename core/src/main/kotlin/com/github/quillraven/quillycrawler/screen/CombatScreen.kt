@@ -30,7 +30,6 @@ import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.exclude
 import ktx.collections.gdxArrayOf
-import ktx.collections.isNotEmpty
 import ktx.collections.set
 
 class CombatScreen(
@@ -145,16 +144,15 @@ class CombatScreen(
     //TODO remove debug stuff
     if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        if (it.combatCmp.commandRequests.isNotEmpty()) return@forEach
-        it.addCommandRequest(
-          CommandAttack::class,
-          engine.getEntitiesFor(allOf(CombatComponent::class).exclude(PlayerComponent::class).get()).random()
+        it.addCommand<CommandAttack>(
+          engine.getEntitiesFor(
+            allOf(CombatComponent::class).exclude(PlayerComponent::class).get()
+          ).random()
         )
       }
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        if (it.combatCmp.commandRequests.isNotEmpty()) return@forEach
-        it.addCommandRequest(CommandProtect::class)
+        it.addCommand<CommandProtect>()
       }
     } else if (combatOver && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
       game.setScreen<GameScreen>()

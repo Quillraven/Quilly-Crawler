@@ -70,8 +70,8 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
   }
 
   private fun hasDeathCommand(combatCmp: CombatComponent): Boolean {
-    combatCmp.commandRequests.forEach {
-      if (it.type == CommandDeath::class) {
+    combatCmp.commandsToExecute.forEach {
+      if (it is CommandDeath) {
         return true
       }
     }

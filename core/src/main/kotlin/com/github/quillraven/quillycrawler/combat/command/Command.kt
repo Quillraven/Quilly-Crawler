@@ -12,7 +12,6 @@ import com.github.quillraven.quillycrawler.combat.CombatContext
 import ktx.collections.GdxArray
 import ktx.log.debug
 import ktx.log.logger
-import kotlin.reflect.KClass
 
 enum class CommandAiType {
   UNDEFINED, OFFENSIVE, DEFENSIVE, SUPPORTIVE
@@ -20,15 +19,6 @@ enum class CommandAiType {
 
 enum class CommandTargetType {
   UNDEFINED, NO_TARGET, SINGLE_TARGET
-}
-
-class CommandRequest : Pool.Poolable {
-  lateinit var type: KClass<out Command>
-  val targets: GdxArray<Entity> = GdxArray()
-
-  override fun reset() {
-    targets.clear()
-  }
 }
 
 sealed class Command(
