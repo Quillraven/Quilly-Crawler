@@ -100,7 +100,7 @@ class CombatSystem(
 
     // initialize commands
     with(entity.combatCmp) {
-      learnedCommands.forEach { availableCommands[it] = obtainCommand(entity, it) }
+      commandsToLearn.forEach { availableCommands[it] = obtainCommand(entity, it) }
     }
 
     // initialize AI
@@ -163,7 +163,7 @@ class CombatSystem(
       }
 
       // add final commands of dying entity to queue like e.g. the death command
-      event.entity.combatCmp.commandsToExecute.forEach {
+      event.entity.combatCmp.forEachCommand {
         commandQueue.addFirst(it)
       }
 
@@ -231,7 +231,7 @@ class CombatSystem(
     // get new AI orders for next round; player order is added via UI
     entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
       combatAiCmp.behaviorTree.step()
-      if (combatCmp.commandsToExecute.isEmpty) {
+      if (combatCmp.hasNoCommands()) {
         LOG.error { "Stepping behavior tree of entity $entity did not define a combat order" }
       }
     }
@@ -239,7 +239,7 @@ class CombatSystem(
 
   private fun updatePlayerCommands() {
     playerEntities.forEach {
-      if (it.combatCmp.commandsToExecute.isEmpty) {
+      if (it.combatCmp.hasNoCommands()) {
         // not all player entities have a command
         return
       }
@@ -249,7 +249,7 @@ class CombatSystem(
   }
 
   private fun prepareCommands(entity: Entity) {
-    entity.combatCmp.commandsToExecute.forEach {
+    entity.combatCmp.forEachCommand {
       commandQueue.addLast(it)
     }
   }
@@ -282,7 +282,7 @@ class CombatSystem(
 
   private fun updateCommandTargets(entityToRemove: Entity) {
     commandQueue.forEach { command ->
-      if (command.targets.isNotEmpty()) {
+      if (command.isNotCompleted() && command.targets.isNotEmpty()) {
         command.targets.removeValue(entityToRemove, true)
         if (command.targets.isEmpty) {
           // no more targets left -> reassign new target

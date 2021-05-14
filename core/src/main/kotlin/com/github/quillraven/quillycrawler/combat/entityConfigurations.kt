@@ -48,7 +48,7 @@ fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Vie
   with<BagComponent> { playerEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value } }
   with<GearComponent> { playerEntity.gearCmp.gear.forEach { entry -> gear[entry.key] = entry.value } }
   with<StatsComponent> { playerEntity.statsCmp.stats.forEach { entry -> stats[entry.key] = entry.value } }
-  with<CombatComponent> { learnedCommands.addAll(playerEntity.combatCmp.learnedCommands) }
+  with<CombatComponent> { commandsToLearn.addAll(playerEntity.combatCmp.commandsToLearn) }
   with<BuffComponent>()
 }
 

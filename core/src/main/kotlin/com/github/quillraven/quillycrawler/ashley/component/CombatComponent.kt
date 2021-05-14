@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Queue
 import com.github.quillraven.quillycrawler.combat.command.Command
+import com.github.quillraven.quillycrawler.combat.command.CommandDeath
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.collections.GdxArray
@@ -16,24 +17,49 @@ import kotlin.reflect.KClass
 
 class CombatComponent : Component, Pool.Poolable {
   val availableCommands = ObjectMap<KClass<out Command>, Command>()
-  val learnedCommands = GdxSet<KClass<out Command>>()
-  val commandsToExecute = Queue<Command>()
+  val commandsToLearn = GdxSet<KClass<out Command>>()
+  private val commandsToExecute = Queue<Command>()
 
   inline fun <reified T : Command> command(): T {
     return availableCommands.get(T::class) as T
   }
 
   inline fun <reified T : Command> learn() {
-    learnedCommands.add(T::class)
+    commandsToLearn.add(T::class)
   }
 
-  fun addCommand(command: Command, target: Entity) {
-    commandsToExecute.addFirst(command.apply { targets.add(target) })
+  fun addCommand(command: Command, targets: GdxArray<Entity>) {
+    commandsToExecute.addFirst(command.apply { this.targets.addAll(targets) })
   }
+
+  fun addCommand(command: Command, target: Entity? = null) {
+    commandsToExecute.addFirst(command.apply {
+      if (target != null) {
+        this.targets.addAll(target)
+      }
+    })
+  }
+
+  fun hasNoCommands(): Boolean = commandsToExecute.isEmpty
+
+  fun hasDeathCommand(): Boolean {
+    commandsToExecute.forEach {
+      if (it is CommandDeath) {
+        return true
+      }
+    }
+    return false
+  }
+
+  fun forEachCommand(action: (Command) -> Unit) {
+    commandsToExecute.forEach { it.run(action) }
+  }
+
+  fun clearCommands() = commandsToExecute.clear()
 
   override fun reset() {
     availableCommands.clear()
-    learnedCommands.clear()
+    commandsToLearn.clear()
     commandsToExecute.clear()
   }
 
@@ -49,9 +75,7 @@ val Entity.combatCmp: CombatComponent
 inline fun <reified T : Command> Entity.addCommand(targets: GdxArray<Entity>) {
   with(this.combatCmp) {
     if (T::class in availableCommands) {
-      commandsToExecute.addFirst(command<T>().apply {
-        this.targets.addAll(targets)
-      })
+      addCommand(command<T>(), targets)
     }
   }
 }
@@ -59,11 +83,7 @@ inline fun <reified T : Command> Entity.addCommand(targets: GdxArray<Entity>) {
 inline fun <reified T : Command> Entity.addCommand(target: Entity? = null) {
   with(this.combatCmp) {
     if (T::class in availableCommands) {
-      commandsToExecute.addFirst(command<T>().apply {
-        if (target != null) {
-          this.targets.addAll(target)
-        }
-      })
+      addCommand(command<T>(), target)
     }
   }
 }

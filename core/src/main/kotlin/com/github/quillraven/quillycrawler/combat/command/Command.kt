@@ -32,12 +32,18 @@ sealed class Command(
   lateinit var entity: Entity
   var targets = GdxArray<Entity>()
   var totalTime = 0f
+  private var completed = false
 
   open fun onStart() = Unit
 
   open fun onUpdate(deltaTime: Float) = Unit
 
   fun update(deltaTime: Float): Boolean {
+    if (completed) {
+      // command finished -> nothing to do
+      return true
+    }
+
     if (totalTime == 0f) {
       LOG.debug { "Executing command ${this::class.simpleName} for ${if (entity.isPlayer) "PLAYER" else "ENEMY"} entity $entity" }
       onStart()
@@ -45,21 +51,27 @@ sealed class Command(
 
     totalTime += deltaTime
     onUpdate(deltaTime)
-    return if (isFinished()) {
+    if (isFinished()) {
+      // command is finished but we will still return false for the current frame in order
+      // to make sure that anything that happens in onUpdate/onFinish like dealing damage gets processed
+      // before executing another command
+      completed = true
       entity.statsCmp[StatsType.MANA] = entity.statsCmp[StatsType.MANA] - manaCost
       onFinish()
       entity.playAnimation("idle", 0f)
-      true
-    } else {
-      false
     }
+
+    return false
   }
 
   abstract fun isFinished(): Boolean
 
   open fun onFinish() = Unit
 
+  fun isNotCompleted() = !completed
+
   override fun reset() {
+    completed = false
     totalTime = 0f
     targets.clear()
   }
