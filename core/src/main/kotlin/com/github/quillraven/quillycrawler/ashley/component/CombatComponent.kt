@@ -27,6 +27,10 @@ class CombatComponent : Component, Pool.Poolable {
     learnedCommands.add(T::class)
   }
 
+  fun addCommand(command: Command, target: Entity) {
+    commandsToExecute.addFirst(command.apply { targets.add(target) })
+  }
+
   override fun reset() {
     availableCommands.clear()
     learnedCommands.clear()
@@ -45,7 +49,7 @@ val Entity.combatCmp: CombatComponent
 inline fun <reified T : Command> Entity.addCommand(targets: GdxArray<Entity>) {
   with(this.combatCmp) {
     if (T::class in availableCommands) {
-      commandsToExecute.addLast(command<T>().apply {
+      commandsToExecute.addFirst(command<T>().apply {
         this.targets.addAll(targets)
       })
     }
@@ -55,7 +59,7 @@ inline fun <reified T : Command> Entity.addCommand(targets: GdxArray<Entity>) {
 inline fun <reified T : Command> Entity.addCommand(target: Entity? = null) {
   with(this.combatCmp) {
     if (T::class in availableCommands) {
-      commandsToExecute.addLast(command<T>().apply {
+      commandsToExecute.addFirst(command<T>().apply {
         if (target != null) {
           this.targets.addAll(target)
         }

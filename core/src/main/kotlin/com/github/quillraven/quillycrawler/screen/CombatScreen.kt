@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.utils.GdxRuntimeException
+import com.badlogic.gdx.utils.ObjectMap
 import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.component.tiledCmp
@@ -29,6 +30,7 @@ import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.exclude
+import ktx.collections.GdxArray
 import ktx.collections.gdxArrayOf
 import ktx.collections.set
 
@@ -55,6 +57,11 @@ class CombatScreen(
   }
   private var playerCombatEntity = playerEntity
   private var combatOver = false
+  private val enemyEncounters = ObjectMap<String, GdxArray<String>>().apply {
+    this["CHORT"] = gdxArrayOf("CHORT", "IMP")
+    this["IMP"] = gdxArrayOf("CHORT", "IMP")
+    this["SKELET"] = gdxArrayOf("SKELET", "GOBLIN")
+  }
 
   override fun show() {
     super.show()
@@ -95,10 +102,31 @@ class CombatScreen(
           "HARD" -> MathUtils.random(3, 4)
           else -> 1
         }
-        for (i in 0 until numEnemies) {
-          engine.entity { configureEnemyCombatEntity(tiledCmp.name, dungeonLevel, gameViewport, i, numEnemies) }
+
+        // create enemy of exact type that you see on the map
+        engine.entity { configureEnemyCombatEntity(tiledCmp.name, dungeonLevel, gameViewport, 0, numEnemies) }
+        // create remaining enemies which can be of a different type
+        for (i in 1 until numEnemies) {
+          engine.entity {
+            configureEnemyCombatEntity(
+              enemyType(tiledCmp.name),
+              dungeonLevel,
+              gameViewport,
+              i,
+              numEnemies
+            )
+          }
         }
       }
+    }
+  }
+
+  private fun enemyType(enemyName: String): String {
+    val enemyTypes = enemyEncounters[enemyName]
+    return if (enemyTypes == null) {
+      enemyName
+    } else {
+      enemyTypes.random()
     }
   }
 

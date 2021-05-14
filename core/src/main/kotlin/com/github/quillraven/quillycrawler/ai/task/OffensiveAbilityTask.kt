@@ -32,7 +32,7 @@ class OffensiveAbilityTask : LeafTask<Entity>() {
     }
 
     val command = TMP_ARRAY.random()
-    combatCmp.commandsToExecute.addLast(command.apply { targets.add(`object`.combatAICmp.randomPlayerEntity()) })
+    combatCmp.addCommand(command, `object`.combatAICmp.randomPlayerEntity())
 
     return Status.SUCCEEDED
   }

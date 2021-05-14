@@ -44,6 +44,23 @@ private class CommandPool<T : Command>(
   }
 }
 
+/*
+### NEW TURN
+- sort entities
+- store entities in separate array to avoid that summoned entities do something on their first turn
+
+### EXECUTE COMMANDS
+- for each entity in the separate array
+  + if it is an AI then step tree to fill in commands to execute
+  + if it is a player entity then send event that player can give order
+  + for each command to execute -> execute it [use queue and always execute first command in case DEATH or something else gets added]
+    ~ after every command execute commands of other entities in case they die or transform
+    ~ do this until there are no other commands left
+    ~ check player win/lose condition
+    ~ if condition not met continue with next command of current entity
+    ~ if there are no commands left -> go to next entity
+    ~ if there are no entities left -> go to next turn
+ */
 class CombatSystem(
   private val combatContext: CombatContext,
   private val gameEventDispatcher: GameEventDispatcher,
