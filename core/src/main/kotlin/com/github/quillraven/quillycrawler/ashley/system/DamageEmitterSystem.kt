@@ -53,12 +53,23 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
       }
 
       targetStatsCmp[StatsType.LIFE] = targetLife
-      if (targetLife <= 0f) {
-        LOG.debug { "Entity ${damageEmitterCmp.target} died" }
+      if (targetLife < Float.MIN_VALUE) {
+        val targetCombatCmp = damageEmitterCmp.target.combatCmp
+
+        // remove remaining commands of dying entity
+        targetCombatCmp.commandsToExecute.clear()
+
+        // if it is an AI then step its tree to either handle death or a boss transformation
         damageEmitterCmp.target[CombatAIComponent.MAPPER]?.behaviorTree?.step()
-        if (hasDeathCommand(damageEmitterCmp.target.combatCmp) || damageEmitterCmp.target.isPlayer) {
+
+        if (hasDeathCommand(targetCombatCmp) || damageEmitterCmp.target.isPlayer) {
           // target really died or was a player entity
+          LOG.debug { "Entity ${damageEmitterCmp.target} died" }
           gameEventDispatcher.dispatchEvent(deathEvent.apply { this.entity = damageEmitterCmp.target })
+        } else {
+          // set life to smallest amount that it doesn't count as 'isDead' for the StatsComponent utility method
+          // which is used in the CombatSystem to decide if an entity is really dead
+          targetStatsCmp[StatsType.LIFE] = Float.MIN_VALUE
         }
       }
 
