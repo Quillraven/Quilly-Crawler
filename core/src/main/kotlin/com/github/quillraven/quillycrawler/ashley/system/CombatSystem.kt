@@ -64,6 +64,9 @@ class CombatSystem(
   override fun onEvent(event: GameEvent) {
     if (event is CombatCommandAddedEvent) {
       // new command added -> add it to commands to execute
+      // Note: commands are added and remove similar to a stack with last in first out behavior
+      // This means that e.g. if a DeathCommand occurs after an AttackCommand is finished then the
+      // DeathCommand will be executed before any other of the remaining commands are executed
       if (event.command in commands) {
         // command already part of current list -> remove it first before adding it again
         // this can happen e.g. if an entity has a command added to the commands list and as a response
