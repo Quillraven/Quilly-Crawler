@@ -29,6 +29,7 @@ enum class MusicAssets(
   TAKE_COVER("audio/music/Take Cover.ogg"),
   TRY_AND_SOLVE_THIS("audio/music/Try and Solve This.ogg"),
   QUANTUM_LOOP("audio/music/Quantum Loop.ogg"),
+  LASER_QUEST("audio/music/Laser Quest Loop.ogg"),
   DEFEAT("audio/music/Defeat.mp3"),
   VICTORY("audio/music/Victory.mp3"),
 }
@@ -52,6 +53,8 @@ enum class SoundAssets(
   PUNCH_01("audio/sounds/sfx_punch_01.wav"),
   DEFEND_01("audio/sounds/sfx_defend_01.wav"),
   PROTECT("audio/sounds/sfx_protect.wav"),
+  PROTECT_CAST("audio/sounds/sfx_protect_cast.wav"),
+  DEATH("audio/sounds/sfx_death.wav"),
 }
 
 fun AudioService.play(asset: SoundAssets, volume: Float = 1f, loop: Boolean = false) =

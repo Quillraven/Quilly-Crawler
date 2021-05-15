@@ -2,22 +2,16 @@ package com.github.quillraven.quillycrawler.ashley.system
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
-import com.badlogic.gdx.utils.GdxRuntimeException
-import com.badlogic.gdx.utils.ObjectMap
-import com.badlogic.gdx.utils.Pool
-import com.badlogic.gdx.utils.reflect.ClassReflection
-import com.badlogic.gdx.utils.reflect.Constructor
-import com.badlogic.gdx.utils.reflect.ReflectionException
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.quillycrawler.ashley.component.BuffComponent
 import com.github.quillraven.quillycrawler.ashley.component.buffCmp
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.buff.Buff
+import com.github.quillraven.quillycrawler.combat.buff.BuffPools
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import com.github.quillraven.quillycrawler.event.GameEventType
 import ktx.ashley.allOf
 import ktx.ashley.exclude
-import ktx.collections.getOrPut
 import ktx.collections.iterate
 import ktx.collections.set
 import ktx.log.debug
@@ -25,21 +19,11 @@ import ktx.log.error
 import ktx.log.logger
 import kotlin.reflect.KClass
 
-private class BuffPool<T : Buff>(
-  private val constructor: Constructor,
-  private val context: CombatContext
-) : Pool<T>() {
-  override fun newObject(): T {
-    @Suppress("UNCHECKED_CAST")
-    return constructor.newInstance(context) as T
-  }
-}
-
 class BuffSystem(
-  private val combatContext: CombatContext,
+  combatContext: CombatContext,
   private val gameEventDispatcher: GameEventDispatcher,
 ) : IteratingSystem(allOf(BuffComponent::class).exclude(RemoveComponent::class).get()) {
-  private val buffPools = ObjectMap<KClass<out Buff>, BuffPool<out Buff>>()
+  private val buffPools = BuffPools(combatContext)
 
   private fun updateEntityBuff(entity: Entity, buffCmp: BuffComponent, buffType: KClass<out Buff>) {
     if (buffType == Buff::class) {
@@ -56,15 +40,9 @@ class BuffSystem(
     }
 
     // entity does not have buff yet -> create it
-    val newBuff = buffPools.getOrPut(buffType) {
-      try {
-        val constructor = ClassReflection.getConstructor(buffType.java, CombatContext::class.java)
-        BuffPool(constructor, combatContext)
-      } catch (e: ReflectionException) {
-        throw GdxRuntimeException("Could not find (CombatContext) constructor for buff ${buffType.simpleName}")
-      }
-    }.obtain()
-    newBuff.entity = entity
+    val newBuff = buffPools.obtainBuff(buffType) {
+      this.entity = entity
+    }
     gameEventDispatcher.addListener(GameEventType.DAMAGE, newBuff)
     newBuff.onAdd()
     // add new buff to entity buff map to avoid adding the same buff multiple times
@@ -85,9 +63,7 @@ class BuffSystem(
           // remove finished buffs
           gameEventDispatcher.removeListener(buff)
           buff.onRemove()
-          @Suppress("UNCHECKED_CAST")
-          val pool = buffPools.get(buffType) as BuffPool<Buff>
-          pool.free(buff)
+          buffPools.freeBuff(buff)
           iterator.remove()
         }
       }

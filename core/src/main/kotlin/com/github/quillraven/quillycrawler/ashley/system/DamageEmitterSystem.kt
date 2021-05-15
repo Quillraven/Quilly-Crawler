@@ -6,8 +6,8 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.component.shake
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.combat.command.CommandDeath
 import com.github.quillraven.quillycrawler.event.CombatDamageEvent
-import com.github.quillraven.quillycrawler.event.CombatDeathEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.allOf
 import ktx.ashley.exclude
@@ -17,9 +17,6 @@ import ktx.log.logger
 
 class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) :
   IteratingSystem(allOf(DamageEmitterComponent::class).exclude(RemoveComponent::class).get()) {
-  private val damageEvent = CombatDamageEvent(DamageEmitterComponent())
-  private val deathEvent = CombatDeathEvent()
-
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val damageEmitterCmp = entity.damageEmitterCmp
 
@@ -29,7 +26,7 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
       // modifying the emitter data
       val physicalDamageBefore = damageEmitterCmp.physicalDamage
       val magicalDamageBefore = damageEmitterCmp.magicDamage
-      gameEventDispatcher.dispatchEvent(damageEvent.apply { this.damageEmitterComponent = damageEmitterCmp })
+      gameEventDispatcher.dispatchEvent<CombatDamageEvent> { this.damageEmitterComponent = damageEmitterCmp }
       val targetStatsCmp = damageEmitterCmp.target.statsCmp
 
       var targetLife = targetStatsCmp[StatsType.LIFE]
@@ -53,22 +50,14 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
 
       targetStatsCmp[StatsType.LIFE] = targetLife
       if (targetLife < Float.MIN_VALUE) {
-        val targetCombatCmp = damageEmitterCmp.target.combatCmp
-
-        // remove remaining commands of dying entity
-        targetCombatCmp.clearCommands()
-
         // if it is an AI then step its tree to either handle death or a boss transformation
         damageEmitterCmp.target[CombatAIComponent.MAPPER]?.behaviorTree?.step()
 
-        if (targetCombatCmp.hasDeathCommand() || damageEmitterCmp.target.isPlayer) {
-          // target really died or was a player entity
-          LOG.debug { "Entity ${damageEmitterCmp.target} died" }
-          gameEventDispatcher.dispatchEvent(deathEvent.apply { this.entity = damageEmitterCmp.target })
-        } else {
-          // set life to smallest amount that it doesn't count as 'isDead' for the StatsComponent utility method
-          // which is used in the CombatSystem to decide if an entity is really dead
-          targetStatsCmp[StatsType.LIFE] = Float.MIN_VALUE
+        // if it is a player then add the death command with a custom target alpha
+        if (damageEmitterCmp.target.isPlayer) {
+          damageEmitterCmp.target.combatCmp.newCommand<CommandDeath> {
+            targetAlpha = 0.5f
+          }
         }
       }
 

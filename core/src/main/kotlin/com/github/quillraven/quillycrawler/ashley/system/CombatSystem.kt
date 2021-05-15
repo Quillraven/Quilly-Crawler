@@ -3,119 +3,53 @@ package com.github.quillraven.quillycrawler.ashley.system
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.ashley.utils.ImmutableArray
-import com.badlogic.gdx.ai.btree.utils.BehaviorTreeLibraryManager
-import com.badlogic.gdx.utils.GdxRuntimeException
-import com.badlogic.gdx.utils.ObjectMap
-import com.badlogic.gdx.utils.Pool
-import com.badlogic.gdx.utils.Queue
-import com.badlogic.gdx.utils.reflect.ClassReflection
-import com.badlogic.gdx.utils.reflect.Constructor
-import com.badlogic.gdx.utils.reflect.ReflectionException
+import com.badlogic.gdx.Application
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.utils.OrderedSet
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.command.Command
-import com.github.quillraven.quillycrawler.combat.command.CommandDefend
+import com.github.quillraven.quillycrawler.combat.command.CommandDeath
+import com.github.quillraven.quillycrawler.combat.command.CommandPools
 import com.github.quillraven.quillycrawler.combat.command.CommandTargetType
 import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
-import ktx.collections.GdxArray
-import ktx.collections.getOrPut
-import ktx.collections.isNotEmpty
-import ktx.collections.set
+import ktx.collections.*
 import ktx.log.debug
 import ktx.log.error
 import ktx.log.logger
-import kotlin.reflect.KClass
 
-private enum class CombatPhase {
-  NEW_TURN, WAIT_FOR_PLAYER_ORDER, PREPARE_COMMANDS, EXECUTE_COMMANDS
-}
-
-private class CommandPool<T : Command>(
-  private val constructor: Constructor,
-  private val context: CombatContext
-) : Pool<T>() {
-  override fun newObject(): T {
-    @Suppress("UNCHECKED_CAST")
-    return constructor.newInstance(context) as T
-  }
-}
-
-/*
-### NEW TURN
-- sort entities
-- store entities in separate array to avoid that summoned entities do something on their first turn
-
-### EXECUTE COMMANDS
-- for each entity in the separate array
-  + if it is an AI then step tree to fill in commands to execute
-  + if it is a player entity then send event that player can give order
-  + for each command to execute -> execute it [use queue and always execute first command in case DEATH or something else gets added]
-    ~ after every command execute commands of other entities in case they die or transform
-    ~ do this until there are no other commands left
-    ~ check player win/lose condition
-    ~ if condition not met continue with next command of current entity
-    ~ if there are no commands left -> go to next entity
-    ~ if there are no entities left -> go to next turn
- */
 class CombatSystem(
-  private val combatContext: CombatContext,
+  combatContext: CombatContext,
   private val gameEventDispatcher: GameEventDispatcher,
-  private val bTreeManager: BehaviorTreeLibraryManager = BehaviorTreeLibraryManager.getInstance()
 ) : GameEventListener, SortedIteratingSystem(
   allOf(CombatComponent::class, StatsComponent::class).exclude(RemoveComponent::class).get(),
   // Agility defines the order how entities are executed.
-  // Higher agility means an entity executes its combat order faster.
-  compareBy { -it.statsCmp[StatsType.AGILITY] }
+  // Higher agility means an entity executes its command faster.
+  compareBy { it.statsCmp[StatsType.AGILITY] }
 ) {
-  private val commandQueue = Queue<Command>()
-  private var combatPhase = CombatPhase.NEW_TURN
-    set(value) {
-      LOG.debug { "Switching to combat phase $value" }
-      field = value
-    }
-  private val victoryEvent = CombatVictoryEvent()
-  private val defeatEvent = CombatDefeatEvent()
-  private val playerTurnEvent = CombatPlayerTurnEvent()
+  private val commandPools = CommandPools(combatContext)
   private val playerFamily = allOf(CombatComponent::class, StatsComponent::class, PlayerComponent::class).get()
   private val playerEntities by lazy { engine.getEntitiesFor(playerFamily) }
   private val enemyFamily = allOf(CombatComponent::class, StatsComponent::class).exclude(PlayerComponent::class).get()
   private val enemyEntities by lazy { engine.getEntitiesFor(enemyFamily) }
-  private val commandPools = ObjectMap<KClass<out Command>, CommandPool<out Command>>()
+  private var newTurn = true
+  private var playerCommand: Command? = null
+  private val commands = OrderedSet<Command>()
+  private var currentCommand: Command? = null
 
   init {
-    //TODO find out why pooling isn't working. Only works the first time. When opening combatscreen a second time
-    //it fails because the roottask of the tree is null
-    // bTreeManager.library = PooledBehaviorTreeLibrary()
+    gameEventDispatcher.addListener(GameEventType.COMBAT_COMMAND_ADDED, this)
+    gameEventDispatcher.addListener(GameEventType.COMBAT_COMMAND_PLAYER, this)
     gameEventDispatcher.addListener(GameEventType.DEATH, this)
   }
 
   override fun entityAdded(entity: Entity) {
     super.entityAdded(entity)
-
-    //TODO how does task pooling work?
-
-    // initialize commands
-    with(entity.combatCmp) {
-      commandsToLearn.forEach { availableCommands[it] = obtainCommand(entity, it) }
-    }
-
-    // initialize AI
-    entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
-      // initialize tree
-      combatAiCmp.behaviorTree = try {
-        bTreeManager.createBehaviorTree(combatAiCmp.treeFilePath, entity)
-      } catch (e: RuntimeException) {
-        LOG.error { "Couldn't parse behavior tree '${combatAiCmp.treeFilePath}' -> fall back to default AI" }
-        combatAiCmp.treeFilePath = DEFAULT_COMBAT_TREE_PATH
-        bTreeManager.createBehaviorTree(DEFAULT_COMBAT_TREE_PATH, entity)
-      }
-      // set all possible combat targets for AI
-      combatAiCmp.allTargets = entities
-    }
+    entity.combatCmp.eventDispatcher = gameEventDispatcher
   }
 
   override fun entityRemoved(entity: Entity) {
@@ -123,200 +57,218 @@ class CombatSystem(
 
     // cleanup commands
     with(entity.combatCmp) {
-      availableCommands.values().forEach { freeCommand(it) }
+      availableCommands.values().forEach { commandPools.freeCommand(it) }
     }
-
-    // cleanup AI
-    entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
-      bTreeManager.disposeBehaviorTree(combatAiCmp.treeFilePath, combatAiCmp.behaviorTree)
-    }
-  }
-
-  private fun isPlayerVictorious(): Boolean {
-    enemyEntities.forEach {
-      if (it.isAlive) {
-        return false
-      }
-    }
-    return true
-  }
-
-  private fun isPlayerDefeated(): Boolean {
-    playerEntities.forEach {
-      if (it.isAlive) {
-        return false
-      }
-    }
-    return true
   }
 
   override fun onEvent(event: GameEvent) {
-    if (event is CombatDeathEvent && !event.entity.isPlayer) {
-      // remove remaining commands of dying entity
-      val iter = commandQueue.iterator()
-      while (iter.hasNext()) {
-        val command = iter.next()
-        if (command.entity == event.entity) {
-          freeCommand(command)
-          iter.remove()
+    if (event is CombatCommandAddedEvent) {
+      // new command added -> add it to commands to execute
+      if (event.command in commands) {
+        // command already part of current list -> remove it first before adding it again
+        // this can happen e.g. if an entity has a command added to the commands list and as a response
+        // to another command that is getting executed it will execute the command again
+        commands.remove(event.command)
+      }
+      commands.add(event.command)
+      debugTurnCommand()
+    } else if (event is CombatCommandPlayer) {
+      // player gave command for next turn -> this will start a combat turn in 'update'
+      playerCommand = event.command
+    } else if (event is CombatDeathEvent) {
+      // entity died -> check victory / defeat conditions
+      val allPlayersDead = allEntitiesDead(playerEntities)
+      if (allPlayersDead || allEntitiesDead(enemyEntities)) {
+        // combat is over and either a victory or defeat happened -> wait for next combat
+        // Note: this is triggered out of [update] meaning that [cleanupTurn] is called after this
+        if (allPlayersDead) {
+          LOG.debug { "PLAYER defeat" }
+          gameEventDispatcher.dispatchEvent<CombatDefeatEvent>()
+        } else {
+          LOG.debug { "PLAYER victory" }
+          gameEventDispatcher.dispatchEvent<CombatVictoryEvent>()
         }
-      }
 
-      // add final commands of dying entity to queue like e.g. the death command
-      event.entity.combatCmp.forEachCommand {
-        commandQueue.addFirst(it)
+        // clear commands to execute to run [cleanupTurn] in [update]
+        commands.clear()
+      } else {
+        // remove remaining commands of dying entity and redirect commands that target this entity
+        val iterator = commands.iterator()
+        while (iterator.hasNext()) {
+          val cmd = iterator.next()
+          if (cmd.entity == event.entity) {
+            // remove command of dying entity
+            iterator.remove()
+          } else if (event.entity in cmd.targets) {
+            // reassign targets if necessary
+            reassignTargets(cmd, event.entity)
+          }
+        }
+        debugTurnCommand()
       }
-
-      // update command targets by removing the dying entity
-      updateCommandTargets(event.entity)
     }
+  }
+
+  /**
+   * This method checks the [CombatComponent.defeated] flag of each entity of [entities].
+   * The flag is set in [CommandDeath] when an entity is dead and executed its death animation.
+   *
+   * Returns true if and only if all entities have this flag set to true.
+   */
+  private fun allEntitiesDead(entities: ImmutableArray<Entity>): Boolean {
+    entities.forEach {
+      if (!it.combatCmp.defeated) {
+        return false
+      }
+    }
+    return true
   }
 
   override fun update(deltaTime: Float) {
-    when (combatPhase) {
-      CombatPhase.NEW_TURN -> {
-        when {
-          isPlayerDefeated() -> gameEventDispatcher.dispatchEvent(defeatEvent)
-          isPlayerVictorious() -> gameEventDispatcher.dispatchEvent(victoryEvent)
-          else -> updateAiCommands(deltaTime)
-        }
-      }
-      CombatPhase.WAIT_FOR_PLAYER_ORDER -> updatePlayerCommands()
-      CombatPhase.PREPARE_COMMANDS -> {
-        entities.forEach {
-          if (it.isAlive) {
-            // only consider entities which are still alive
-            prepareCommands(it)
-          }
-        }
-        combatPhase = CombatPhase.EXECUTE_COMMANDS
-        LOG.debug { "Starting new round with ${commandQueue.size} commands" }
-      }
-      CombatPhase.EXECUTE_COMMANDS -> {
-        if (commandQueue.isEmpty) {
-          // all commands executed -> start next turn
-          combatPhase = CombatPhase.NEW_TURN
-        } else {
-          val currentCommand = commandQueue.first()
-          if (currentCommand.update(deltaTime)) {
-            freeCommand(currentCommand)
-            commandQueue.removeFirst()
-          }
-        }
-      }
-    }
-  }
-
-  private fun updateAiCommands(deltaTime: Float) {
-    if (isPlayerDefeated()) {
-      // all player entities dead -> do not execute AI because it will not be possible to get a player target
-      return
-    }
-
-    // sort entities in case their agility changed during combat
-    forceSort()
+    // learn commands if needed. refer to [processEntity]
     super.update(deltaTime)
-    combatPhase = CombatPhase.WAIT_FOR_PLAYER_ORDER
-    gameEventDispatcher.dispatchEvent(playerTurnEvent)
-  }
 
-  override fun processEntity(entity: Entity, deltaTime: Float) {
-    if (entity.isDead) {
-      // ignore dead entities
+    if (newTurn) {
+      // notify UI that player can give input for next turn
+      newTurn = false
+      gameEventDispatcher.dispatchEvent<CombatPlayerTurnEvent>()
       return
     }
 
-    val combatCmp = entity.combatCmp
+    // wait until player made decision for his next move
+    val playerCmd = playerCommand ?: return
 
-    // get new AI orders for next round; player order is added via UI
-    entity[CombatAIComponent.MAPPER]?.let { combatAiCmp ->
-      combatAiCmp.behaviorTree.step()
-      if (combatCmp.hasNoCommands()) {
-        LOG.error { "Stepping behavior tree of entity $entity did not define a combat order" }
+    if (currentCommand == null && commands.isEmpty) {
+      // start of new turn -> sort entities by agility
+      forceSort()
+      super.update(0f)
+
+      // add commands to execute for this turn. refer to [onEvent]
+      entities.forEach { entity ->
+        if (entity.isAlive) {
+          val combatAiCmp = entity[CombatAIComponent.MAPPER]
+          if (combatAiCmp != null) {
+            // for AI entities simply step the tree which will add the necessary commands
+            combatAiCmp.behaviorTree.step()
+          } else if (entity.isPlayerCombatEntity) {
+            // for a player controlled entity use the [playerCommand] that is given via the UI
+            entity.combatCmp.newCommand(playerCmd)
+          }
+        }
+      }
+
+      // set current command to execute
+      currentCommand = if (commands.isEmpty) null else commands.orderedItems()[commands.size - 1]
+      return
+    }
+
+    // player command and all other entity commands are given -> execute them one by one
+    val cmdToExecute = currentCommand
+    if (cmdToExecute != null && cmdToExecute.update(deltaTime)) {
+      // command finished -> go to next command
+      cmdToExecute.reset()
+      commands.remove(cmdToExecute)
+
+      if (cmdToExecute is CommandDeath) {
+        // dispatch death event in case of death commands
+        gameEventDispatcher.dispatchEvent<CombatDeathEvent> { this.entity = cmdToExecute.entity }
+      }
+
+      currentCommand = if (commands.isEmpty) null else commands.orderedItems()[commands.size - 1]
+      if (currentCommand == null) {
+        // if there is no command left go to next turn
+        cleanupTurn()
       }
     }
   }
 
-  private fun updatePlayerCommands() {
-    playerEntities.forEach {
-      if (it.combatCmp.hasNoCommands()) {
-        // not all player entities have a command
-        return
-      }
+  /**
+   * Debugs information of [commands] by printing each command, its entity and its entity's agility
+   */
+  private fun debugTurnCommand() {
+    if (Gdx.app.logLevel != Application.LOG_DEBUG) {
+      return
     }
 
-    combatPhase = CombatPhase.PREPARE_COMMANDS
-  }
-
-  private fun prepareCommands(entity: Entity) {
-    entity.combatCmp.forEachCommand {
-      commandQueue.addLast(it)
+    LOG.debug { "Turn Commands:" }
+    commands.forEach { cmd ->
+      val entity = cmd.entity
+      val cmdName = cmd::class.simpleName
+      LOG.debug { "$cmdName: ${entity.statsCmp[StatsType.AGILITY]} ${if (entity.isPlayer) "PLAYER" else "ENEMY"} $entity" }
     }
   }
 
-  private fun obtainCommand(entity: Entity, type: KClass<out Command>): Command {
-    // get command type
-    val commandType = if (type == Command::class) {
-      LOG.error { "Trying to obtain command of type 'Command'. It must be a correct subtype" }
-      CommandDefend::class
-    } else {
-      type
-    }
-
-    // create new command
-    return commandPools.getOrPut(commandType) {
-      try {
-        val constructor = ClassReflection.getConstructor(commandType.java, CombatContext::class.java)
-        CommandPool(constructor, combatContext)
-      } catch (e: ReflectionException) {
-        throw GdxRuntimeException("Could not find (CombatContext) constructor for command ${commandType.simpleName}")
-      }
-    }.obtain().apply { this.entity = entity }
+  /**
+   * Resets commands and flags to start a new turn
+   */
+  private fun cleanupTurn() {
+    LOG.debug { "End of turn" }
+    playerCommand = null
+    currentCommand = null
+    commands.clear()
+    newTurn = true
   }
 
-  private fun freeCommand(command: Command) {
-    @Suppress("UNCHECKED_CAST")
-    val pool = commandPools.get(command::class) as CommandPool<Command>
-    pool.free(command)
-  }
-
-  private fun updateCommandTargets(entityToRemove: Entity) {
-    commandQueue.forEach { command ->
-      if (command.isNotCompleted() && command.targets.isNotEmpty()) {
-        command.targets.removeValue(entityToRemove, true)
-        if (command.targets.isEmpty) {
-          // no more targets left -> reassign new target
-          reassignTargets(command)
+  /**
+   * Updates [CombatComponent.availableCommands] for the given [entity] by creating a [Command] instances
+   * for each command in [CombatComponent.commandsToLearn].
+   */
+  override fun processEntity(entity: Entity, deltaTime: Float) {
+    with(entity.combatCmp) {
+      // add commands that should be learned to the entity
+      if (commandsToLearn.isNotEmpty()) {
+        commandsToLearn.iterate { commandType, iterator ->
+          availableCommands[commandType] = commandPools.obtainCommand(entity, commandType)
+          iterator.remove()
         }
       }
     }
   }
 
-  private fun reassignTargets(command: Command) {
+  /**
+   * This function gets called when the dying entity [removedEntity] is part of the given [command]'s targets.
+   * If the command is of [CommandTargetType.SINGLE_TARGET] then a new random entity is added as a target instead.
+   *
+   * If [removedEntity] is an enemy then a random entity from [enemyEntities] is used instead.
+   * Otherwise a random entity from [playerEntities] is used.
+   */
+  private fun reassignTargets(command: Command, removedEntity: Entity) {
+    // remove entity from targets
+    command.targets.removeValue(removedEntity, true)
+
+    // get new target
     when (command.targetType) {
       CommandTargetType.SINGLE_TARGET -> {
-        if (command.entity.isPlayer) {
-          command.targets.add(randomEntity(enemyEntities))
+        if (enemyEntities.contains(removedEntity, true)) {
+          addRandomEntity(command.targets, enemyEntities)
         } else {
-          command.targets.add(randomEntity(playerEntities))
+          addRandomEntity(command.targets, playerEntities)
         }
       }
       else -> LOG.error { "Reassign for target type ${command.targetType} is not supported" }
     }
   }
 
-  private fun randomEntity(entities: ImmutableArray<Entity>): Entity {
+  /**
+   * Adds a random [Entity] from [entities] which is still alive to the [targets] array.
+   * If there is no entity alive then targets is not updated.
+   */
+  private fun addRandomEntity(targets: GdxArray<Entity>, entities: ImmutableArray<Entity>) {
+    // get alive targets
     TMP_ARRAY.clear()
     entities.forEach {
       if (it.isAlive) {
         TMP_ARRAY.add(it)
       }
     }
-    return TMP_ARRAY.random()
+
+    if (TMP_ARRAY.isNotEmpty()) {
+      // there are alive entities -> pick a random one
+      targets.add(TMP_ARRAY.random())
+    }
   }
 
   companion object {
-    private const val DEFAULT_COMBAT_TREE_PATH = "ai/genericCombat.tree"
     private val LOG = logger<CombatSystem>()
     private val TMP_ARRAY = GdxArray<Entity>()
   }

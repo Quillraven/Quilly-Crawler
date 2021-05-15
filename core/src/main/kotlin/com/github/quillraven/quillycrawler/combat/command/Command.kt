@@ -64,11 +64,9 @@ sealed class Command(
     return false
   }
 
-  abstract fun isFinished(): Boolean
+  open fun isFinished(): Boolean = totalTime >= 1f
 
   open fun onFinish() = Unit
-
-  fun isNotCompleted() = !completed
 
   override fun reset() {
     completed = false

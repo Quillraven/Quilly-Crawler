@@ -14,8 +14,4 @@ class CommandDefend(context: CombatContext) : Command(context) {
   override fun onStart() {
     audioService.play(SoundAssets.DEFEND_01)
   }
-
-  override fun isFinished(): Boolean {
-    return totalTime >= 0.5f
-  }
 }

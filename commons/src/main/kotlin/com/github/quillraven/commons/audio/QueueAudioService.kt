@@ -57,7 +57,7 @@ class QueueAudioService(
     }
 
   private val soundRequests = ObjectMap<String, SoundRequest>(maxSimultaneousSounds)
-  private var currentMusicFilePath: String = ""
+  override var currentMusicFilePath: String = ""
   private var previousMusicPath = ""
   private var currentMusic: Music? = null
   private val playedSounds = GdxSet<String>(maxSimultaneousSounds)

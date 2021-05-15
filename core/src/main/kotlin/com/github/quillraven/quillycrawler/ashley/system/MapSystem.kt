@@ -40,7 +40,10 @@ class MapSystem(
     if (nextMapFilePath.isNotBlank()) {
       mapService.setMap(engine, nextMapFilePath)
     }
-    gameEventDispatcher.dispatchEvent(MapChangeEvent(entity, playerCmp.dungeonLevel))
+    gameEventDispatcher.dispatchEvent<MapChangeEvent> {
+      this.entity = entity
+      this.level = playerCmp.dungeonLevel
+    }
 
     entity.remove(GoToNextLevelComponent::class.java)
   }

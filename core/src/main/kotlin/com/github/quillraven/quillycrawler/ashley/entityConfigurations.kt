@@ -17,6 +17,7 @@ import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.combat.command.CommandAttack
 import com.github.quillraven.quillycrawler.combat.command.CommandDeath
+import com.github.quillraven.quillycrawler.combat.command.CommandProtect
 import ktx.ashley.*
 import ktx.box2d.BodyDefinition
 import ktx.box2d.body
@@ -184,6 +185,8 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<CombatComponent> {
       learn<CommandAttack>()
       learn<CommandDeath>()
+      //TODO remove debug stuff
+      learn<CommandProtect>()
     }
   }
 }

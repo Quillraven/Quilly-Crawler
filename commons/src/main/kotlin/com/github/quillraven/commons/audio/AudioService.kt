@@ -11,6 +11,7 @@ import com.badlogic.gdx.audio.Sound
 interface AudioService {
   var musicVolume: Float
   var soundVolume: Float
+  val currentMusicFilePath: String
 
   fun playSound(soundFilePath: String, volume: Float = 1f, loop: Boolean = false)
 
@@ -35,6 +36,7 @@ interface AudioService {
 object DefaultAudioService : AudioService {
   override var musicVolume = 1f
   override var soundVolume = 1f
+  override val currentMusicFilePath = ""
 
   override fun playSound(soundFilePath: String, volume: Float, loop: Boolean) = Unit
 

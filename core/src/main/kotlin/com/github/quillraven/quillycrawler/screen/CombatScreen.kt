@@ -15,10 +15,7 @@ import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.ashley.system.BuffSystem
-import com.github.quillraven.quillycrawler.ashley.system.CombatSystem
-import com.github.quillraven.quillycrawler.ashley.system.ConsumeSystem
-import com.github.quillraven.quillycrawler.ashley.system.DamageEmitterSystem
+import com.github.quillraven.quillycrawler.ashley.system.*
 import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.CombatContext
@@ -45,6 +42,7 @@ class CombatScreen(
   private val engine = PooledEngine().apply {
     val combatContext = CombatContext(this, audioService)
 
+    addSystem(CombatAiSystem())
     addSystem(CombatSystem(combatContext, gameEventDispatcher))
     addSystem(BuffSystem(combatContext, gameEventDispatcher))
     addSystem(ConsumeSystem())
@@ -62,6 +60,8 @@ class CombatScreen(
     this["IMP"] = gdxArrayOf("CHORT", "IMP")
     this["SKELET"] = gdxArrayOf("SKELET", "GOBLIN")
   }
+  private var gameMusic = ""
+  private var playerTurn = false
 
   override fun show() {
     super.show()
@@ -69,9 +69,9 @@ class CombatScreen(
     gameEventDispatcher.addListener(GameEventType.COMBAT_VICTORY, this)
     gameEventDispatcher.addListener(GameEventType.COMBAT_DEFEAT, this)
     gameEventDispatcher.addListener(GameEventType.PLAYER_TURN, this)
-    audioService.play(MusicAssets.QUANTUM_LOOP)
+    gameMusic = audioService.currentMusicFilePath
 
-    engine.entity { configurePlayerCombatEntity(playerEntity, gameViewport) }
+    playerCombatEntity = engine.entity { configurePlayerCombatEntity(playerEntity, gameViewport) }
 
     spawnEnemies()
   }
@@ -81,6 +81,8 @@ class CombatScreen(
     val tiledCmp = enemyEntity.tiledCmp
     when (val enemyType = tiledCmp.type) {
       "BOSS" -> {
+        audioService.play(MusicAssets.LASER_QUEST)
+
         // spawn exact boss setup
         when (tiledCmp.name) {
           "BIG_DEMON" -> {
@@ -95,6 +97,8 @@ class CombatScreen(
         }
       }
       else -> {
+        audioService.play(MusicAssets.QUANTUM_LOOP)
+
         // spawn between 1 to 4 enemies depending on difficulty
         val numEnemies = when (enemyType) {
           "EASY" -> MathUtils.random(1, 2)
@@ -133,7 +137,7 @@ class CombatScreen(
   override fun hide() {
     super.hide()
     gameEventDispatcher.removeListener(this)
-    audioService.playPreviousMusic()
+    audioService.playMusic(gameMusic)
     engine.removeAllEntities()
   }
 
@@ -142,6 +146,7 @@ class CombatScreen(
       is CombatVictoryEvent -> {
         combatOver = true
         audioService.play(MusicAssets.VICTORY, loop = false)
+        // remove enemy entity from original game screen
         enemyEntity.removeFromEngine(gameEngine, 1.5f)
         enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
         playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
@@ -150,8 +155,10 @@ class CombatScreen(
       is CombatDefeatEvent -> {
         combatOver = true
         audioService.play(MusicAssets.DEFEAT, loop = false)
-        playerCombatEntity.fadeTo(engine, 1f, 0f, 0f, 0.5f, 1f)
         updatePlayerItemsAfterCombat(true)
+      }
+      is CombatPlayerTurnEvent -> {
+        playerTurn = true
       }
       else -> Unit
     }
@@ -170,17 +177,31 @@ class CombatScreen(
 
   override fun render(delta: Float) {
     //TODO remove debug stuff
-    if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-      engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        it.addCommand<CommandAttack>(
-          engine.getEntitiesFor(
-            allOf(CombatComponent::class).exclude(PlayerComponent::class).get()
-          ).random()
-        )
+    if (playerTurn && Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+      playerTurn = false
+
+      val enemyEntities = engine.getEntitiesFor(
+        allOf(CombatComponent::class, StatsComponent::class).exclude(PlayerComponent::class).get()
+      )
+      lateinit var aliveEntity: Entity
+      enemyEntities.forEach { entity ->
+        if (entity.isAlive) {
+          aliveEntity = entity
+          return@forEach
+        }
       }
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        it.addCommand<CommandProtect>()
+        it.combatCmp.availableCommands[CommandAttack::class].targets.add(aliveEntity)
+        gameEventDispatcher.dispatchEvent<CombatCommandPlayer> {
+          this.command = it.combatCmp.availableCommands[CommandAttack::class]
+        }
+      }
+    } else if (playerTurn && Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+      playerTurn = false
+      engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
+        gameEventDispatcher.dispatchEvent<CombatCommandPlayer> {
+          this.command = it.combatCmp.availableCommands[CommandProtect::class]
+        }
       }
     } else if (combatOver && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
       game.setScreen<GameScreen>()
