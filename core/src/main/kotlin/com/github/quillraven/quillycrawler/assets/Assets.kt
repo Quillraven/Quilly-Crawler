@@ -55,6 +55,7 @@ enum class SoundAssets(
   PROTECT("audio/sounds/sfx_protect.wav"),
   PROTECT_CAST("audio/sounds/sfx_protect_cast.wav"),
   DEATH("audio/sounds/sfx_death.wav"),
+  TRANSFORM_DEMON("audio/sounds/sfx_transform_demon.mp3"),
 }
 
 fun AudioService.play(asset: SoundAssets, volume: Float = 1f, loop: Boolean = false) =

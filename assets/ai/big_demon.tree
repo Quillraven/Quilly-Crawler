@@ -1,0 +1,16 @@
+import offensiveAbility:"com.github.quillraven.quillycrawler.ai.task.OffensiveAbilityTask"
+import attack:"com.github.quillraven.quillycrawler.ai.task.AttackTask"
+import defend:"com.github.quillraven.quillycrawler.ai.task.DefendTask"
+import die:"com.github.quillraven.quillycrawler.ai.task.DieTask"
+import hasOffensiveAbility?:"com.github.quillraven.quillycrawler.ai.task.HasOffensiveAbility"
+import isDead?:"com.github.quillraven.quillycrawler.ai.task.IsDead"
+import canTransform?:"com.github.quillraven.quillycrawler.ai.task.CanTransform"
+import transform:"com.github.quillraven.quillycrawler.ai.task.TransformTask"
+
+root
+  selector
+    (isDead?) (canTransform?) transform
+    (isDead?) die
+    (hasOffensiveAbility?) (random success:0.5) offensiveAbility
+    (random success:0.8) attack
+    defend

@@ -45,6 +45,7 @@ class CombatSystem(
     gameEventDispatcher.addListener(GameEventType.COMBAT_COMMAND_ADDED, this)
     gameEventDispatcher.addListener(GameEventType.COMBAT_COMMAND_PLAYER, this)
     gameEventDispatcher.addListener(GameEventType.DEATH, this)
+    gameEventDispatcher.addListener(GameEventType.COMBAT_CLEAR_COMMANDS, this)
   }
 
   override fun entityAdded(entity: Entity) {
@@ -62,52 +63,77 @@ class CombatSystem(
   }
 
   override fun onEvent(event: GameEvent) {
-    if (event is CombatCommandAddedEvent) {
-      // new command added -> add it to commands to execute
-      // Note: commands are added and remove similar to a stack with last in first out behavior
-      // This means that e.g. if a DeathCommand occurs after an AttackCommand is finished then the
-      // DeathCommand will be executed before any other of the remaining commands are executed
-      if (event.command in commands) {
-        // command already part of current list -> remove it first before adding it again
-        // this can happen e.g. if an entity has a command added to the commands list and as a response
-        // to another command that is getting executed it will execute the command again
-        commands.remove(event.command)
-      }
-      commands.add(event.command)
-      debugTurnCommand()
-    } else if (event is CombatCommandPlayer) {
-      // player gave command for next turn -> this will start a combat turn in 'update'
-      playerCommand = event.command
-    } else if (event is CombatDeathEvent) {
-      // entity died -> check victory / defeat conditions
-      val allPlayersDead = allEntitiesDead(playerEntities)
-      if (allPlayersDead || allEntitiesDead(enemyEntities)) {
-        // combat is over and either a victory or defeat happened -> wait for next combat
-        // Note: this is triggered out of [update] meaning that [cleanupTurn] is called after this
-        if (allPlayersDead) {
-          LOG.debug { "PLAYER defeat" }
-          gameEventDispatcher.dispatchEvent<CombatDefeatEvent>()
-        } else {
-          LOG.debug { "PLAYER victory" }
-          gameEventDispatcher.dispatchEvent<CombatVictoryEvent>()
+    when (event) {
+      is CombatCommandAddedEvent -> {
+        // new command added -> add it to commands to execute
+        // Note: commands are added and remove similar to a stack with last in first out behavior
+        // This means that e.g. if a DeathCommand occurs after an AttackCommand is finished then the
+        // DeathCommand will be executed before any other of the remaining commands are executed
+        if (event.command in commands) {
+          // command already part of current list -> remove it first before adding it again
+          // this can happen e.g. if an entity has a command added to the commands list and as a response
+          // to another command that is getting executed it will execute the command again
+          commands.remove(event.command)
         }
+        commands.add(event.command)
+        debugTurnCommand()
+      }
+      is CombatCommandPlayerEvent -> {
+        // player gave command for next turn -> this will start a combat turn in 'update'
+        playerCommand = event.command
+      }
+      is CombatDeathEvent -> {
+        // entity died -> check victory / defeat conditions
+        val allPlayersDead = allEntitiesDead(playerEntities)
+        if (allPlayersDead || allEntitiesDead(enemyEntities)) {
+          // combat is over and either a victory or defeat happened -> wait for next combat
+          // Note: this is triggered out of [update] meaning that [cleanupTurn] is called after this
+          if (allPlayersDead) {
+            LOG.debug { "PLAYER defeat" }
+            gameEventDispatcher.dispatchEvent<CombatDefeatEvent>()
+          } else {
+            LOG.debug { "PLAYER victory" }
+            gameEventDispatcher.dispatchEvent<CombatVictoryEvent>()
+          }
 
-        // clear commands to execute to run [cleanupTurn] in [update]
-        commands.clear()
-      } else {
-        // remove remaining commands of dying entity and redirect commands that target this entity
+          // clear commands to execute to run [cleanupTurn] in [update]
+          commands.clear()
+        } else {
+          // remove remaining commands of dying entity and redirect commands that target this entity
+          val iterator = commands.iterator()
+          while (iterator.hasNext()) {
+            val cmd = iterator.next()
+            if (cmd == currentCommand) {
+              continue
+            }
+
+            if (cmd.entity == event.entity) {
+              // remove command of dying entity
+              iterator.remove()
+            } else if (event.entity in cmd.targets) {
+              // reassign targets if necessary
+              reassignTargets(cmd, event.entity)
+            }
+          }
+          debugTurnCommand()
+        }
+      }
+      is CombatClearCommandsEvent -> {
+        // clear any commands of the entity
         val iterator = commands.iterator()
         while (iterator.hasNext()) {
           val cmd = iterator.next()
-          if (cmd.entity == event.entity) {
-            // remove command of dying entity
-            iterator.remove()
-          } else if (event.entity in cmd.targets) {
-            // reassign targets if necessary
-            reassignTargets(cmd, event.entity)
+          if (cmd == currentCommand || cmd.entity != event.entity) {
+            // command not related to event entity
+            continue
           }
+
+          iterator.remove()
         }
-        debugTurnCommand()
+
+      }
+      else -> {
+        LOG.error { "Received unsupported event" }
       }
     }
   }

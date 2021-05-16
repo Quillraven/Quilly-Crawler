@@ -6,12 +6,15 @@ import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
 import com.github.quillraven.quillycrawler.combat.command.Command
+import com.github.quillraven.quillycrawler.event.CombatClearCommandsEvent
 import com.github.quillraven.quillycrawler.event.CombatCommandAddedEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.collections.GdxSet
 import ktx.collections.contains
+import ktx.log.error
+import ktx.log.logger
 import kotlin.reflect.KClass
 
 class CombatComponent : Component, Pool.Poolable {
@@ -20,7 +23,11 @@ class CombatComponent : Component, Pool.Poolable {
   val commandsToLearn = GdxSet<KClass<out Command>>()
   var defeated = false
 
-  inline fun <reified T : Command> newCommand(target: Entity? = null, action: T.() -> Unit = {}) {
+  inline fun <reified T : Command> newCommand(
+    target: Entity? = null,
+    clearPreviousCommands: Boolean = false,
+    action: T.() -> Unit = {}
+  ) {
     if (T::class in availableCommands) {
       availableCommands[T::class].apply {
         if (target != null) {
@@ -28,12 +35,18 @@ class CombatComponent : Component, Pool.Poolable {
           targets.add(target)
         }
         action(this as T)
-        newCommand(this)
+        newCommand(this, clearPreviousCommands)
       }
+    } else {
+      LOG.error { "${T::class.simpleName} is not part of available commands" }
     }
   }
 
-  fun newCommand(command: Command) {
+  fun newCommand(command: Command, clearPreviousCommands: Boolean = false) {
+    if (clearPreviousCommands) {
+      eventDispatcher.dispatchEvent<CombatClearCommandsEvent> { this.entity = command.entity }
+    }
+
     eventDispatcher.dispatchEvent<CombatCommandAddedEvent> { this.command = command }
   }
 
@@ -49,6 +62,9 @@ class CombatComponent : Component, Pool.Poolable {
 
   companion object {
     val MAPPER = mapperFor<CombatComponent>()
+
+    @PublishedApi
+    internal val LOG = logger<CombatComponent>()
   }
 }
 

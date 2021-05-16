@@ -13,6 +13,7 @@ import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.combat.command.CommandAttack
 import com.github.quillraven.quillycrawler.combat.command.CommandDeath
 import com.github.quillraven.quillycrawler.combat.command.CommandDefend
+import com.github.quillraven.quillycrawler.combat.command.CommandTransform
 import ktx.ashley.EngineEntity
 import ktx.ashley.with
 import ktx.collections.set
@@ -67,7 +68,7 @@ fun EngineEntity.configureEnemyCombatEntity(
       position.z
     )
   }
-  with<CombatComponent> {
+  val combatCmp = with<CombatComponent> {
     learn<CommandAttack>()
     learn<CommandDefend>()
     learn<CommandDeath>()
@@ -113,7 +114,8 @@ fun EngineEntity.configureEnemyCombatEntity(
       }
     }
     "BIG_DEMON" -> {
-      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
+      combatCmp.learn<CommandTransform>()
+      with<CombatAIComponent> { treeFilePath = "ai/big_demon.tree" }
       with {
         stats[StatsType.LIFE] = 50f
         stats[StatsType.AGILITY] = 11f

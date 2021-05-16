@@ -18,6 +18,7 @@ enum class GameEventType {
   COMBAT_DEFEAT,
   PLAYER_TURN,
   COMBAT_COMMAND_ADDED,
+  COMBAT_CLEAR_COMMANDS,
   COMBAT_COMMAND_PLAYER,
 }
 
@@ -46,8 +47,12 @@ class CombatCommandAddedEvent : GameEvent(GameEventType.COMBAT_COMMAND_ADDED) {
   lateinit var command: Command
 }
 
-class CombatCommandPlayer : GameEvent(GameEventType.COMBAT_COMMAND_PLAYER) {
+class CombatCommandPlayerEvent : GameEvent(GameEventType.COMBAT_COMMAND_PLAYER) {
   lateinit var command: Command
+}
+
+class CombatClearCommandsEvent : GameEvent(GameEventType.COMBAT_CLEAR_COMMANDS) {
+  lateinit var entity: Entity
 }
 
 interface GameEventListener {

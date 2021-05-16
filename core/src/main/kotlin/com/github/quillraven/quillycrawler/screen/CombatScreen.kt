@@ -48,6 +48,7 @@ class CombatScreen(
     addSystem(ConsumeSystem())
     addSystem(DamageEmitterSystem(gameEventDispatcher))
     addSystem(FadeSystem())
+    addSystem(ResizeSystem())
     addSystem(AnimationSystem(game.assetStorage, QuillyCrawler.UNIT_SCALE))
     addSystem(ShakeSystem())
     addSystem(RenderSystem(game.batch, gameViewport))
@@ -192,14 +193,14 @@ class CombatScreen(
       }
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
         it.combatCmp.availableCommands[CommandAttack::class].targets.add(aliveEntity)
-        gameEventDispatcher.dispatchEvent<CombatCommandPlayer> {
+        gameEventDispatcher.dispatchEvent<CombatCommandPlayerEvent> {
           this.command = it.combatCmp.availableCommands[CommandAttack::class]
         }
       }
     } else if (playerTurn && Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
       playerTurn = false
       engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        gameEventDispatcher.dispatchEvent<CombatCommandPlayer> {
+        gameEventDispatcher.dispatchEvent<CombatCommandPlayerEvent> {
           this.command = it.combatCmp.availableCommands[CommandProtect::class]
         }
       }

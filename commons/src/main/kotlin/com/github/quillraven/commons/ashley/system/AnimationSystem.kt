@@ -9,10 +9,12 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.ObjectMap
-import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.ashley.component.AnimationComponent
+import com.github.quillraven.commons.ashley.component.RenderComponent
+import com.github.quillraven.commons.ashley.component.animationCmp
+import com.github.quillraven.commons.ashley.component.renderCmp
 import kotlinx.coroutines.launch
 import ktx.ashley.allOf
-import ktx.ashley.exclude
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
 import ktx.collections.gdxArrayOf
@@ -49,7 +51,7 @@ class AnimationSystem(
   private val unitScale: Float,
   private val defaultFrameDuration: Float = 1 / 10f,
   private val maxCacheSize: Int = 100
-) : IteratingSystem(allOf(AnimationComponent::class, RenderComponent::class).exclude(RemoveComponent::class).get()) {
+) : IteratingSystem(allOf(AnimationComponent::class, RenderComponent::class).get()) {
   private val animationCache = ObjectMap<String, ObjectMap<String, Animation<TextureRegion>>>(maxCacheSize)
   private val stateKeyStringCache = ObjectMap<String, ObjectMap<String, ObjectMap<String, String>>>(maxCacheSize)
 
