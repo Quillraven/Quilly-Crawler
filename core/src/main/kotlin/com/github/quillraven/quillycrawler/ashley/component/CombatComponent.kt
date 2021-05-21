@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Pool
 import com.github.quillraven.quillycrawler.combat.command.Command
 import com.github.quillraven.quillycrawler.event.CombatClearCommandsEvent
 import com.github.quillraven.quillycrawler.event.CombatCommandAddedEvent
+import com.github.quillraven.quillycrawler.event.CombatCommandPlayerEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.get
 import ktx.ashley.mapperFor
@@ -45,6 +46,11 @@ class CombatComponent : Component, Pool.Poolable {
   fun newCommand(command: Command, clearPreviousCommands: Boolean = false) {
     if (clearPreviousCommands) {
       eventDispatcher.dispatchEvent<CombatClearCommandsEvent> { this.entity = command.entity }
+    }
+
+    if (command.entity.isPlayer && command.entity[CombatAIComponent.MAPPER] == null) {
+      // player controlled entity command -> send event to CombatSystem that decision was made
+      eventDispatcher.dispatchEvent<CombatCommandPlayerEvent> { this.command = command }
     }
 
     eventDispatcher.dispatchEvent<CombatCommandAddedEvent> { this.command = command }

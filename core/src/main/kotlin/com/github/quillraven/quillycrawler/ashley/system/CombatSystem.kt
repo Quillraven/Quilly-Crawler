@@ -167,12 +167,13 @@ class CombatSystem(
     // wait until player made decision for his next move
     val playerCmd = playerCommand ?: return
 
-    if (currentCommand == null && commands.isEmpty) {
+    if (currentCommand == null) {
       // start of new turn -> sort entities by agility
       forceSort()
       super.update(0f)
 
       // add commands to execute for this turn. refer to [onEvent]
+      commands.clear()
       entities.forEach { entity ->
         if (entity.isAlive) {
           val combatAiCmp = entity[CombatAIComponent.MAPPER]
