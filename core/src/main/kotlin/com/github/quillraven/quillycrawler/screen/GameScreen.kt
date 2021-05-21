@@ -92,12 +92,14 @@ class GameScreen(
     gameEventDispatcher.addListener(GameEventType.MAP_CHANGE, viewModel)
     stage.addActor(view)
     engine.getSystem<AmbientSoundSystem>().setProcessing(true)
+    engine.getSystem<PlayerControlSystem>().setProcessing(true)
   }
 
   override fun hide() {
     super.hide()
     gameEventDispatcher.removeListener(viewModel)
     engine.getSystem<AmbientSoundSystem>().setProcessing(false)
+    engine.getSystem<PlayerControlSystem>().setProcessing(false)
   }
 
   override fun render(delta: Float) {
