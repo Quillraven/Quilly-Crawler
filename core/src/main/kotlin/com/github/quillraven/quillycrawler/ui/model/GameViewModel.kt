@@ -7,17 +7,17 @@ import com.github.quillraven.quillycrawler.event.GameEventListener
 import com.github.quillraven.quillycrawler.event.MapChangeEvent
 import ktx.collections.GdxSet
 
-interface GameListener {
+interface GameUiListener {
   fun onMapChange(mapName: StringBuilder) = Unit
 }
 
 data class GameViewModel(val bundle: I18NBundle) : GameEventListener {
-  private val listeners = GdxSet<GameListener>()
+  private val listeners = GdxSet<GameUiListener>()
   private val mapNameBuilder = StringBuilder()
 
-  fun addGameListener(listener: GameListener) = listeners.add(listener)
+  fun addGameListener(listener: GameUiListener) = listeners.add(listener)
 
-  fun removeGameListener(listener: GameListener) = listeners.remove(listener)
+  fun removeGameListener(listener: GameUiListener) = listeners.remove(listener)
 
   override fun onEvent(event: GameEvent) {
     if (event is MapChangeEvent) {
