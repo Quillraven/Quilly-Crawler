@@ -40,7 +40,7 @@ private fun EngineEntity.withTransformAndAnimation(
 fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Viewport) {
   withTransformAndAnimation(playerEntity.animationCmp.regionKey, 1.5f) {
     position.set(
-      viewport.camera.position.x - size.x * 0.5f + 2f,
+      viewport.camera.position.x - size.x * 0.5f + 1f,
       viewport.camera.position.y - viewport.worldHeight * 0.5f + 0.5f,
       position.z
     )
@@ -63,8 +63,10 @@ fun EngineEntity.configureEnemyCombatEntity(
   withTransformAndAnimation(name, 1.25f) {
     val leftX = viewport.camera.position.x - viewport.worldWidth * 0.5f
     position.set(
-      leftX + (viewport.worldWidth / (numEntities + 1)) * (enemyIndex + 1) - size.x * 0.5f,
-      viewport.camera.position.y + viewport.worldHeight * 0.5f - 2.5f - MathUtils.random(0f, 1.1f),
+      // -1f at the end is used to move the entities to the left because there is an UI element that is on the right edge
+      leftX + (viewport.worldWidth / (numEntities + 1)) * (enemyIndex + 1) - size.x * 0.5f - 1f,
+      // -3.5f is used to move the entities away from the top edge because of UI elements and some scaling combat orders
+      viewport.camera.position.y + viewport.worldHeight * 0.5f - 3.5f - MathUtils.random(0f, 1.1f),
       position.z
     )
   }

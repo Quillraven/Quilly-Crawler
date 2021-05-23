@@ -36,6 +36,7 @@ class CombatSystem(
   private val playerEntities by lazy { engine.getEntitiesFor(playerFamily) }
   private val enemyFamily = allOf(CombatComponent::class, StatsComponent::class).exclude(PlayerComponent::class).get()
   private val enemyEntities by lazy { engine.getEntitiesFor(enemyFamily) }
+  private var turnNum = 0
   private var newTurn = true
   private var playerCommand: Command? = null
   private val commands = OrderedSet<Command>()
@@ -88,6 +89,8 @@ class CombatSystem(
         if (allPlayersDead || allEntitiesDead(enemyEntities)) {
           // combat is over and either a victory or defeat happened -> wait for next combat
           // Note: this is triggered out of [update] meaning that [cleanupTurn] is called after this
+          turnNum = 0
+
           if (allPlayersDead) {
             LOG.debug { "PLAYER defeat" }
             gameEventDispatcher.dispatchEvent<CombatDefeatEvent>()
@@ -158,9 +161,23 @@ class CombatSystem(
     super.update(deltaTime)
 
     if (newTurn) {
-      // notify UI that player can give input for next turn
       newTurn = false
-      gameEventDispatcher.dispatchEvent<CombatPlayerTurnEvent>()
+      ++turnNum
+
+      // start of new turn -> sort entities by agility
+      forceSort()
+      super.update(0f)
+
+      // notify UI that player can give input for next turn
+      gameEventDispatcher.dispatchEvent<CombatNewTurnEvent> {
+        entities.forEach { entity ->
+          if (entity.isAlive) {
+            this.turnEntities.add(entity)
+          }
+        }
+        this.turn = turnNum
+      }
+
       return
     }
 
@@ -168,10 +185,6 @@ class CombatSystem(
     val playerCmd = playerCommand ?: return
 
     if (currentCommand == null) {
-      // start of new turn -> sort entities by agility
-      forceSort()
-      super.update(0f)
-
       // add commands to execute for this turn. refer to [onEvent]
       commands.clear()
       entities.forEach { entity ->
@@ -231,7 +244,7 @@ class CombatSystem(
   /**
    * Resets commands and flags to start a new turn
    */
-  private fun cleanupTurn() {
+  fun cleanupTurn() {
     LOG.debug { "End of turn" }
     playerCommand = null
     currentCommand = null

@@ -30,19 +30,24 @@ enum class SkinImages(val regionKey: String) {
 }
 
 enum class SkinFontStyle(val fntFilePath: String, val regionKey: String, val scale: Float) {
-  TITLE("fonts/immortal.fnt", "immortal", 0.4f),
   DEFAULT("fonts/immortal.fnt", "immortal", 0.15f),
+  LARGE("fonts/immortal.fnt", "immortal", 0.275f),
+  TITLE("fonts/immortal.fnt", "immortal", 0.4f),
 }
 
 enum class SkinTextButtonStyle {
-  TITLE, DEFAULT,
+  TITLE, DEFAULT, BRIGHT
 }
 
 enum class SkinLabelStyle {
-  DEFAULT, DUNGEON_LEVEL
+  DEFAULT, DUNGEON_LEVEL, FRAMED_BRIGHT
 }
 
 enum class SkinListStyle {
+  DEFAULT
+}
+
+enum class SkinScrollPaneStyle {
   DEFAULT
 }
 
@@ -77,6 +82,13 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
         rightWidth = 10f
       }
     }
+    skin.label(SkinLabelStyle.FRAMED_BRIGHT.name) {
+      font = skin[SkinFontStyle.LARGE.name]
+      background = skin.newDrawable(SkinImages.FRAME_2.regionKey).apply {
+        leftWidth = 10f
+        rightWidth = 10f
+      }
+    }
 
     // buttons
     skin.textButton(SkinTextButtonStyle.TITLE.name) {
@@ -86,6 +98,11 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
     skin.textButton(SkinTextButtonStyle.DEFAULT.name) {
       up = skin[SkinImages.BUTTON_1.regionKey]
       font = skin[SkinFontStyle.DEFAULT.name]
+    }
+    skin.textButton(SkinTextButtonStyle.BRIGHT.name) {
+      up = skin[SkinImages.BUTTON_2.regionKey]
+      font = skin[SkinFontStyle.LARGE.name]
+      fontColor = Color.BLACK
     }
 
     // list
@@ -97,6 +114,13 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
         topHeight = 1f
         bottomHeight = 1f
         leftWidth = 3f
+      }
+    }
+
+    // scroll pane
+    skin.scrollPane(SkinScrollPaneStyle.DEFAULT.name) {
+      background = skin.newDrawable(SkinImages.FRAME_3.regionKey).apply {
+        bottomHeight = 6f
       }
     }
   }

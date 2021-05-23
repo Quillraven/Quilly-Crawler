@@ -14,19 +14,23 @@ import com.github.quillraven.commons.ashley.component.tiledCmp
 import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
-import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.ashley.component.bagCmp
+import com.github.quillraven.quillycrawler.ashley.component.interactCmp
+import com.github.quillraven.quillycrawler.ashley.component.playerCmp
 import com.github.quillraven.quillycrawler.ashley.system.*
+import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.CombatContext
-import com.github.quillraven.quillycrawler.combat.command.CommandAttack
-import com.github.quillraven.quillycrawler.combat.command.CommandProtect
 import com.github.quillraven.quillycrawler.combat.configureEnemyCombatEntity
 import com.github.quillraven.quillycrawler.combat.configurePlayerCombatEntity
-import com.github.quillraven.quillycrawler.event.*
-import ktx.ashley.allOf
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.event.GameEventType
+import com.github.quillraven.quillycrawler.ui.model.CombatState
+import com.github.quillraven.quillycrawler.ui.model.CombatViewModel
+import com.github.quillraven.quillycrawler.ui.view.CombatView
 import ktx.ashley.entity
-import ktx.ashley.exclude
+import ktx.ashley.getSystem
 import ktx.collections.GdxArray
 import ktx.collections.gdxArrayOf
 import ktx.collections.set
@@ -37,44 +41,75 @@ class CombatScreen(
   var playerEntity: Entity,
   var enemyEntity: Entity,
   private val gameEventDispatcher: GameEventDispatcher = game.gameEventDispatcher
-) : AbstractScreen(game), GameEventListener {
+) : AbstractScreen(game) {
   private val gameViewport = game.gameViewport
   private val engine = PooledEngine().apply {
     val combatContext = CombatContext(this, audioService)
 
-    addSystem(CombatAiSystem())
-    addSystem(CombatSystem(combatContext, gameEventDispatcher))
-    addSystem(BuffSystem(combatContext, gameEventDispatcher))
-    addSystem(ConsumeSystem())
-    addSystem(DamageEmitterSystem(gameEventDispatcher))
     addSystem(FadeSystem())
     addSystem(ResizeSystem())
     addSystem(AnimationSystem(game.assetStorage, QuillyCrawler.UNIT_SCALE))
     addSystem(ShakeSystem())
     addSystem(RenderSystem(game.batch, gameViewport))
     addSystem(RemoveSystem())
+    // It is important that AnimationSystem and render stuff runs BEFORE the real logic
+    // because the UI requires that the sprites for the combat entities are already initialized.
+    // Otherwise the order entity table will not show anything in the UI because sprite's region size is 0/0
+    addSystem(CombatAiSystem())
+    addSystem(CombatSystem(combatContext, gameEventDispatcher))
+    addSystem(BuffSystem(combatContext, gameEventDispatcher))
+    addSystem(ConsumeSystem())
+    addSystem(DamageEmitterSystem(gameEventDispatcher))
   }
   private var playerCombatEntity = playerEntity
-  private var combatOver = false
+  private var gameMusic = ""
   private val enemyEncounters = ObjectMap<String, GdxArray<String>>().apply {
     this["CHORT"] = gdxArrayOf("CHORT", "IMP")
     this["IMP"] = gdxArrayOf("CHORT", "IMP")
     this["SKELET"] = gdxArrayOf("SKELET", "GOBLIN")
   }
-  private var gameMusic = ""
-  private var playerTurn = false
+  private val viewModel =
+    CombatViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, game)
+  private val view = CombatView(viewModel)
 
   override fun show() {
     super.show()
-    combatOver = false
-    gameEventDispatcher.addListener(GameEventType.COMBAT_VICTORY, this)
-    gameEventDispatcher.addListener(GameEventType.COMBAT_DEFEAT, this)
-    gameEventDispatcher.addListener(GameEventType.PLAYER_TURN, this)
+
+    // remember previous game music
     gameMusic = audioService.currentMusicFilePath
 
+    // spawn combat entities
     playerCombatEntity = engine.entity { configurePlayerCombatEntity(playerEntity, gameViewport) }
-
     spawnEnemies()
+
+    // setup UI stuff
+    viewModel.combatState = CombatState.RUNNING
+    gameEventDispatcher.addListener(GameEventType.COMBAT_VICTORY, viewModel)
+    gameEventDispatcher.addListener(GameEventType.COMBAT_DEFEAT, viewModel)
+    gameEventDispatcher.addListener(GameEventType.PLAYER_TURN, viewModel)
+    stage.addActor(view)
+  }
+
+  override fun hide() {
+    super.hide()
+
+    // return to previous game music
+    audioService.playMusic(gameMusic)
+
+    // update player entity after combat
+    updatePlayerItemsAfterCombat()
+
+    // cleanup combat engine
+    engine.removeAllEntities()
+
+    if (viewModel.combatState == CombatState.VICTORY) {
+      // remove enemy entity from original game screen
+      enemyEntity.removeFromEngine(gameEngine, 1.5f)
+      enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
+      playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
+    }
+
+    gameEventDispatcher.removeListener(viewModel)
   }
 
   private fun spawnEnemies() {
@@ -135,36 +170,6 @@ class CombatScreen(
     }
   }
 
-  override fun hide() {
-    super.hide()
-    gameEventDispatcher.removeListener(this)
-    audioService.playMusic(gameMusic)
-    engine.removeAllEntities()
-  }
-
-  override fun onEvent(event: GameEvent) {
-    when (event) {
-      is CombatVictoryEvent -> {
-        combatOver = true
-        audioService.play(MusicAssets.VICTORY, loop = false)
-        // remove enemy entity from original game screen
-        enemyEntity.removeFromEngine(gameEngine, 1.5f)
-        enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
-        playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
-        updatePlayerItemsAfterCombat()
-      }
-      is CombatDefeatEvent -> {
-        combatOver = true
-        audioService.play(MusicAssets.DEFEAT, loop = false)
-        updatePlayerItemsAfterCombat(true)
-      }
-      is CombatPlayerTurnEvent -> {
-        playerTurn = true
-      }
-      else -> Unit
-    }
-  }
-
   private fun updatePlayerItemsAfterCombat(reduceGold: Boolean = false) {
     with(playerEntity.bagCmp) {
       items.clear()
@@ -177,37 +182,11 @@ class CombatScreen(
   }
 
   override fun render(delta: Float) {
-    //TODO remove debug stuff
-    if (playerTurn && Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-      playerTurn = false
-
-      val enemyEntities = engine.getEntitiesFor(
-        allOf(CombatComponent::class, StatsComponent::class).exclude(PlayerComponent::class).get()
-      )
-      lateinit var aliveEntity: Entity
-      enemyEntities.forEach { entity ->
-        if (entity.isAlive) {
-          aliveEntity = entity
-          return@forEach
-        }
-      }
-      engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        it.combatCmp.availableCommands[CommandAttack::class].targets.add(aliveEntity)
-        gameEventDispatcher.dispatchEvent<CombatCommandPlayerEvent> {
-          this.command = it.combatCmp.availableCommands[CommandAttack::class]
-        }
-      }
-    } else if (playerTurn && Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-      playerTurn = false
-      engine.getEntitiesFor(allOf(PlayerComponent::class).get()).forEach {
-        gameEventDispatcher.dispatchEvent<CombatCommandPlayerEvent> {
-          this.command = it.combatCmp.availableCommands[CommandProtect::class]
-        }
-      }
-    } else if (combatOver && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-      game.setScreen<GameScreen>()
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-      game.setScreen<GameScreen>()
+    // TODO remove debug
+    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+      stage.clear()
+      stage.addActor(CombatView(viewModel, assetStorage[I18NAssets.DEFAULT.descriptor]))
+      engine.getSystem<CombatSystem>().cleanupTurn()
     }
 
     engine.update(delta)
