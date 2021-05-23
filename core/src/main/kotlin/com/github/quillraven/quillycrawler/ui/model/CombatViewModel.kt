@@ -11,7 +11,6 @@ import com.github.quillraven.commons.ashley.component.renderCmp
 import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.ashley.system.CombatSystem
 import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.command.CommandAttack
@@ -19,7 +18,6 @@ import com.github.quillraven.quillycrawler.event.*
 import com.github.quillraven.quillycrawler.screen.GameScreen
 import ktx.ashley.allOf
 import ktx.ashley.exclude
-import ktx.ashley.getSystem
 import ktx.collections.GdxArray
 import ktx.collections.GdxSet
 
@@ -74,7 +72,6 @@ data class CombatViewModel(
   }
 
   fun returnToGame() {
-    engine.getSystem<CombatSystem>().cleanupTurn()
     game.setScreen<GameScreen>()
   }
 

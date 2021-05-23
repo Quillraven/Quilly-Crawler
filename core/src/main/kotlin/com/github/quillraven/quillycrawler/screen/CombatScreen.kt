@@ -79,6 +79,7 @@ class CombatScreen(
     gameMusic = audioService.currentMusicFilePath
 
     // spawn combat entities
+    engine.getSystem<CombatSystem>().cleanupTurn(true)
     playerCombatEntity = engine.entity { configurePlayerCombatEntity(playerEntity, gameViewport) }
     spawnEnemies()
 

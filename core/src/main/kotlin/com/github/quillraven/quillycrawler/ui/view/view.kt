@@ -3,6 +3,7 @@ package com.github.quillraven.quillycrawler.ui.view
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.github.quillraven.commons.input.XboxInputProcessor
@@ -11,8 +12,11 @@ import ktx.scene2d.Scene2DSkin
 
 abstract class View(private val inputView: Boolean = true) : Table(Scene2DSkin.defaultSkin), KTable,
   InputProcessor, XboxInputProcessor {
+  private var initialized = false
+
   override fun setStage(stage: Stage?) {
     if (stage == null) {
+      initialized = false
       if (inputView) {
         removeXboxControllerListener()
         Gdx.input.inputProcessor = null
@@ -23,9 +27,20 @@ abstract class View(private val inputView: Boolean = true) : Table(Scene2DSkin.d
         addXboxControllerListener()
         Gdx.input.inputProcessor = this
       }
-      onShow()
     }
     super.setStage(stage)
+  }
+
+  override fun draw(batch: Batch?, parentAlpha: Float) {
+    super.draw(batch, parentAlpha)
+    if (!initialized) {
+      // onShow is called here AFTER draw is called because actors' position gets modified within draw
+      // and for certain initialization logic we already need the correct position of actors.
+      // It is weird to me that a call to pack doesn't solve that but I don't want to waste more time on that
+      // and this is an acceptable hack-around ;)
+      initialized = true
+      onShow()
+    }
   }
 
   abstract fun onShow()

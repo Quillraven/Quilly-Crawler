@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
+import com.github.quillraven.commons.ui.widget.bar
 import kotlinx.coroutines.launch
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
@@ -13,6 +14,9 @@ import ktx.style.*
 
 enum class SkinImages(val regionKey: String) {
   UNDEFINED("undefined"),
+  BAR_FRAME("bar_frame-1"),
+  BAR_RED("bar_red"),
+  BAR_BLUE("bar_blue"),
   BUTTON_1("button-1"),
   BUTTON_2("button-2"),
   WINDOW("window-1"),
@@ -40,7 +44,7 @@ enum class SkinTextButtonStyle {
 }
 
 enum class SkinLabelStyle {
-  DEFAULT, DUNGEON_LEVEL, FRAMED_BRIGHT
+  DEFAULT, LARGE, DUNGEON_LEVEL, FRAMED_BRIGHT
 }
 
 enum class SkinListStyle {
@@ -49,6 +53,10 @@ enum class SkinListStyle {
 
 enum class SkinScrollPaneStyle {
   DEFAULT
+}
+
+enum class SkinBarStyle {
+  LIFE, MANA
 }
 
 fun configureSkin(assetStorage: AssetStorage): Skin {
@@ -74,6 +82,9 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
     // labels
     skin.label(SkinLabelStyle.DEFAULT.name) {
       font = skin[SkinFontStyle.DEFAULT.name]
+    }
+    skin.label(SkinLabelStyle.LARGE.name) {
+      font = skin[SkinFontStyle.LARGE.name]
     }
     skin.label(SkinLabelStyle.DUNGEON_LEVEL.name) {
       font = skin[SkinFontStyle.TITLE.name]
@@ -102,7 +113,6 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
     skin.textButton(SkinTextButtonStyle.BRIGHT.name) {
       up = skin[SkinImages.BUTTON_2.regionKey]
       font = skin[SkinFontStyle.LARGE.name]
-      fontColor = Color.BLACK
     }
 
     // list
@@ -122,6 +132,16 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
       background = skin.newDrawable(SkinImages.FRAME_3.regionKey).apply {
         bottomHeight = 6f
       }
+    }
+
+    // bar
+    skin.bar(SkinBarStyle.LIFE.name, skin[SkinImages.BAR_FRAME.regionKey], skin[SkinImages.BAR_RED.regionKey]) {
+      barOffsetX = 1f
+      barOffsetY = 2f
+    }
+    skin.bar(SkinBarStyle.MANA.name, skin[SkinImages.BAR_FRAME.regionKey], skin[SkinImages.BAR_BLUE.regionKey]) {
+      barOffsetX = 1f
+      barOffsetY = 2f
     }
   }
 }

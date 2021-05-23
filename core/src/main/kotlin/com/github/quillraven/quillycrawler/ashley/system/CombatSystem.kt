@@ -89,7 +89,10 @@ class CombatSystem(
         if (allPlayersDead || allEntitiesDead(enemyEntities)) {
           // combat is over and either a victory or defeat happened -> wait for next combat
           // Note: this is triggered out of [update] meaning that [cleanupTurn] is called after this
-          turnNum = 0
+
+          // reduce turn number by 1 because it will get increased again in update and will trigger an UI
+          // update. To keep the correct turn in the UI we need to reduce it here by 1
+          turnNum--
 
           if (allPlayersDead) {
             LOG.debug { "PLAYER defeat" }
@@ -244,12 +247,16 @@ class CombatSystem(
   /**
    * Resets commands and flags to start a new turn
    */
-  fun cleanupTurn() {
+  fun cleanupTurn(resetTurnNum: Boolean = false) {
     LOG.debug { "End of turn" }
     playerCommand = null
     currentCommand = null
     commands.clear()
     newTurn = true
+
+    if (resetTurnNum) {
+      turnNum = 0
+    }
   }
 
   /**
