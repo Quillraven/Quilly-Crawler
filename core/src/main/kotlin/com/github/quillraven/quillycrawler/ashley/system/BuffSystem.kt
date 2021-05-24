@@ -8,8 +8,8 @@ import com.github.quillraven.quillycrawler.ashley.component.buffCmp
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.combat.buff.BuffPools
+import com.github.quillraven.quillycrawler.event.CombatPreDamageEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
-import com.github.quillraven.quillycrawler.event.GameEventType
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.collections.iterate
@@ -43,7 +43,7 @@ class BuffSystem(
     val newBuff = buffPools.obtainBuff(buffType) {
       this.entity = entity
     }
-    gameEventDispatcher.addListener(GameEventType.DAMAGE, newBuff)
+    gameEventDispatcher.addListener<CombatPreDamageEvent>(newBuff)
     newBuff.onAdd()
     // add new buff to entity buff map to avoid adding the same buff multiple times
     buffCmp.buffs[buffType] = newBuff

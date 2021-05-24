@@ -24,8 +24,7 @@ import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.configureEnemyCombatEntity
 import com.github.quillraven.quillycrawler.combat.configurePlayerCombatEntity
-import com.github.quillraven.quillycrawler.event.GameEventDispatcher
-import com.github.quillraven.quillycrawler.event.GameEventType
+import com.github.quillraven.quillycrawler.event.*
 import com.github.quillraven.quillycrawler.ui.model.CombatState
 import com.github.quillraven.quillycrawler.ui.model.CombatViewModel
 import com.github.quillraven.quillycrawler.ui.view.CombatView
@@ -85,9 +84,13 @@ class CombatScreen(
 
     // setup UI stuff
     viewModel.combatState = CombatState.RUNNING
-    gameEventDispatcher.addListener(GameEventType.COMBAT_VICTORY, viewModel)
-    gameEventDispatcher.addListener(GameEventType.COMBAT_DEFEAT, viewModel)
-    gameEventDispatcher.addListener(GameEventType.PLAYER_TURN, viewModel)
+    with(gameEventDispatcher) {
+      addListener<CombatVictoryEvent>(viewModel)
+      addListener<CombatDefeatEvent>(viewModel)
+      addListener<CombatNewTurnEvent>(viewModel)
+      addListener<CombatStartEvent>(viewModel)
+      addListener<CombatPostDamageEvent>(viewModel)
+    }
     stage.addActor(view)
   }
 

@@ -5,6 +5,7 @@ import com.badlogic.ashley.systems.SortedIteratingSystem
 import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.OrderedSet
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.quillycrawler.ashley.component.*
@@ -43,10 +44,10 @@ class CombatSystem(
   private var currentCommand: Command? = null
 
   init {
-    gameEventDispatcher.addListener(GameEventType.COMBAT_COMMAND_ADDED, this)
-    gameEventDispatcher.addListener(GameEventType.COMBAT_COMMAND_PLAYER, this)
-    gameEventDispatcher.addListener(GameEventType.DEATH, this)
-    gameEventDispatcher.addListener(GameEventType.COMBAT_CLEAR_COMMANDS, this)
+    gameEventDispatcher.addListener<CombatCommandAddedEvent>(this)
+    gameEventDispatcher.addListener<CombatCommandPlayerEvent>(this)
+    gameEventDispatcher.addListener<CombatDeathEvent>(this)
+    gameEventDispatcher.addListener<CombatClearCommandsEvent>(this)
   }
 
   override fun entityAdded(entity: Entity) {
@@ -164,6 +165,26 @@ class CombatSystem(
     super.update(deltaTime)
 
     if (newTurn) {
+      if (turnNum == 0) {
+        // combat starts
+        var numPlayers = 0
+        lateinit var player: Entity
+        playerEntities.forEach { entity ->
+          if (entity[CombatAIComponent.MAPPER] == null) {
+            ++numPlayers
+            player = entity
+          }
+        }
+
+        if (numPlayers != 1) {
+          throw GdxRuntimeException("There is not exactly one player controlled combat entity")
+        }
+
+        gameEventDispatcher.dispatchEvent<CombatStartEvent> {
+          playerEntity = player
+        }
+      }
+
       newTurn = false
       ++turnNum
 

@@ -60,21 +60,21 @@ button-2
   index: -1
 button-down
   rotate: false
-  xy: 588, 686
+  xy: 540, 603
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 button-esc
   rotate: false
-  xy: 520, 567
+  xy: 4, 32
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 button-space
   rotate: false
-  xy: 572, 686
+  xy: 520, 567
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
@@ -115,7 +115,7 @@ frame-3
   index: -1
 gamepad-a
   rotate: false
-  xy: 4, 32
+  xy: 588, 686
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
@@ -157,14 +157,14 @@ gamepad-up
   index: -1
 gamepad-x
   rotate: false
-  xy: 4, 48
+  xy: 572, 686
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gamepad-y
   rotate: false
-  xy: 520, 583
+  xy: 4, 48
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
@@ -185,14 +185,14 @@ immortal
   index: -1
 item-20
   rotate: false
-  xy: 520, 599
+  xy: 4, 64
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-24
   rotate: false
-  xy: 540, 619
+  xy: 520, 599
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -220,14 +220,14 @@ item-35
   index: -1
 item-51
   rotate: false
-  xy: 540, 639
+  xy: 4, 84
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-55
   rotate: false
-  xy: 4, 84
+  xy: 540, 619
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -241,14 +241,21 @@ item-56
   index: -1
 item-61
   rotate: false
-  xy: 4, 64
+  xy: 540, 639
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+selection
+  rotate: false
+  xy: 604, 690
+  size: 6, 8
+  orig: 6, 8
+  offset: 0, 0
+  index: -1
 undefined
   rotate: false
-  xy: 540, 603
+  xy: 520, 583
   size: 12, 12
   orig: 12, 12
   offset: 0, 0

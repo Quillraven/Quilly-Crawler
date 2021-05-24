@@ -4,8 +4,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.commons.ui.widget.bar
+import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import kotlinx.coroutines.launch
 import ktx.assets.async.AssetStorage
 import ktx.async.KtxAsync
@@ -31,6 +31,7 @@ enum class SkinImages(val regionKey: String) {
   KEY_BOARD_UP("button-up"),
   KEY_BOARD_DOWN("button-down"),
   KEY_BOARD_ESCAPE("button-esc"),
+  SELECTION("selection"),
 }
 
 enum class SkinFontStyle(val fntFilePath: String, val regionKey: String, val scale: Float) {

@@ -16,7 +16,7 @@ import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
 import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
-import com.github.quillraven.quillycrawler.event.GameEventType
+import com.github.quillraven.quillycrawler.event.MapChangeEvent
 import com.github.quillraven.quillycrawler.shader.DefaultShaderService
 import com.github.quillraven.quillycrawler.ui.model.GameViewModel
 import com.github.quillraven.quillycrawler.ui.view.GameView
@@ -89,7 +89,7 @@ class GameScreen(
 
   override fun show() {
     super.show()
-    gameEventDispatcher.addListener(GameEventType.MAP_CHANGE, viewModel)
+    gameEventDispatcher.addListener<MapChangeEvent>(viewModel)
     stage.addActor(view)
     engine.getSystem<AmbientSoundSystem>().setProcessing(true)
     engine.getSystem<PlayerControlSystem>().setProcessing(true)

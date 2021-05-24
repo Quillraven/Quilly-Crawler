@@ -27,19 +27,29 @@ class CombatComponent : Component, Pool.Poolable {
   inline fun <reified T : Command> newCommand(
     target: Entity? = null,
     clearPreviousCommands: Boolean = false,
-    action: T.() -> Unit = {}
+    noinline action: T.() -> Unit = {}
   ) {
-    if (T::class in availableCommands) {
-      availableCommands[T::class].apply {
+    @Suppress("UNCHECKED_CAST")
+    newCommand(T::class, target, clearPreviousCommands, action as Command.() -> Unit)
+  }
+
+  fun newCommand(
+    type: KClass<out Command>,
+    target: Entity? = null,
+    clearPreviousCommands: Boolean = false,
+    action: Command.() -> Unit = {}
+  ) {
+    if (type in availableCommands) {
+      availableCommands[type].apply {
         if (target != null) {
           targets.clear()
           targets.add(target)
         }
-        action(this as T)
+        action(this)
         newCommand(this, clearPreviousCommands)
       }
     } else {
-      LOG.error { "${T::class.simpleName} is not part of available commands" }
+      LOG.error { "${type.simpleName} is not part of available commands" }
     }
   }
 

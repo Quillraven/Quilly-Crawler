@@ -7,7 +7,8 @@ import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.component.shake
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.combat.command.CommandDeath
-import com.github.quillraven.quillycrawler.event.CombatDamageEvent
+import com.github.quillraven.quillycrawler.event.CombatPostDamageEvent
+import com.github.quillraven.quillycrawler.event.CombatPreDamageEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.allOf
 import ktx.ashley.exclude
@@ -26,7 +27,7 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
       // modifying the emitter data
       val physicalDamageBefore = damageEmitterCmp.physicalDamage
       val magicalDamageBefore = damageEmitterCmp.magicDamage
-      gameEventDispatcher.dispatchEvent<CombatDamageEvent> { this.damageEmitterComponent = damageEmitterCmp }
+      gameEventDispatcher.dispatchEvent<CombatPreDamageEvent> { this.damageEmitterComponent = damageEmitterCmp }
       val targetStatsCmp = damageEmitterCmp.target.statsCmp
 
       var targetLife = targetStatsCmp[StatsType.LIFE]
@@ -49,6 +50,7 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
       }
 
       targetStatsCmp[StatsType.LIFE] = targetLife
+      gameEventDispatcher.dispatchEvent<CombatPostDamageEvent> { this.damageEmitterComponent = damageEmitterCmp }
       if (targetLife < Float.MIN_VALUE) {
         // if it is an AI then step its tree to either handle death or a boss transformation
         damageEmitterCmp.target[CombatAIComponent.MAPPER]?.behaviorTree?.step()
