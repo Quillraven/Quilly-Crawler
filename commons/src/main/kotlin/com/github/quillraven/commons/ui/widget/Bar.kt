@@ -41,8 +41,6 @@ class Bar(
   private val bar: Image = Image(style.bar)
 
   init {
-    width = frame.drawable.minWidth
-    height = frame.drawable.minHeight
     bar.setPosition(style.barOffsetX, style.barOffsetY)
 
     addActor(frame)
@@ -61,9 +59,9 @@ class Bar(
   }
 
   // for whatever reason we should not multiply here by scaleX because otherwise the widget gets a left indent
-  override fun getPrefWidth() = width
+  override fun getPrefWidth() = frame.drawable.minWidth
 
-  override fun getPrefHeight() = height * scaleY
+  override fun getPrefHeight() = frame.drawable.minHeight * scaleY
 }
 
 /**

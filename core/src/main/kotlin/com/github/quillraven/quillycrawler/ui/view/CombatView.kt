@@ -136,7 +136,7 @@ class CombatView(
     // set scroll pane of entity order as last child to be rendered to avoid additional texture bindings
     sp.zIndex = children.size - 1
 
-    debugAll()
+    // debugAll()
   }
 
   private fun selectButton(idx: Int) {
@@ -216,7 +216,7 @@ class CombatView(
     manaBar.fill(mana / maxMana, 0f)
     manaLabel.text.clear()
     manaLabel.text.append(mana.roundToInt()).append(" / ").append(maxMana.roundToInt())
-    //manaLabel.invalidateHierarchy()
+    manaLabel.invalidateHierarchy()
   }
 
   override fun onCombatStart(life: Float, maxLife: Float, mana: Float, maxMana: Float) {
