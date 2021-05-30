@@ -46,3 +46,25 @@ fun Entity.dealAttackDamage(engine: Engine, targets: GdxArray<Entity>) {
     }
   }
 }
+
+fun Entity.dealDamage(
+  engine: Engine,
+  targets: GdxArray<Entity>,
+  physicalDamage: Float,
+  magicalDamage: Float,
+  delay: Float = 0f
+) {
+  val sourceEntity = this
+
+  targets.forEach { targetEntity ->
+    engine.entity {
+      with<DamageEmitterComponent> {
+        this.source = sourceEntity
+        this.target = targetEntity
+        this.physicalDamage = physicalDamage
+        this.magicDamage = magicalDamage
+        this.damageDelay = delay
+      }
+    }
+  }
+}

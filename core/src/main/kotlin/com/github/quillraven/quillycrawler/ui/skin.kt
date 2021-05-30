@@ -23,6 +23,8 @@ enum class SkinImages(val regionKey: String) {
   FRAME_1("frame-1"),
   FRAME_2("frame-2"),
   FRAME_3("frame-3"),
+  FRAME_RED("frame-red"),
+  FRAME_GREEN("frame-green"),
   GAME_PAD_DOWN("gamepad-down"),
   GAME_PAD_UP("gamepad-up"),
   GAME_PAD_A("gamepad-a"),
@@ -41,7 +43,7 @@ enum class SkinFontStyle(val fntFilePath: String, val regionKey: String, val sca
 }
 
 enum class SkinTextButtonStyle {
-  TITLE, DEFAULT, BRIGHT
+  TITLE, DEFAULT, BRIGHT, GREEN, RED
 }
 
 enum class SkinLabelStyle {
@@ -49,7 +51,7 @@ enum class SkinLabelStyle {
 }
 
 enum class SkinListStyle {
-  DEFAULT
+  DEFAULT, LARGE
 }
 
 enum class SkinScrollPaneStyle {
@@ -115,10 +117,38 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
       up = skin[SkinImages.BUTTON_2.regionKey]
       font = skin[SkinFontStyle.LARGE.name]
     }
+    skin.textButton(SkinTextButtonStyle.GREEN.name) {
+      up = skin.newDrawable(SkinImages.FRAME_GREEN.regionKey).apply {
+        leftWidth = 5f
+        rightWidth = 5f
+        topHeight = 5f
+        bottomHeight = 5f
+      }
+      font = skin[SkinFontStyle.TITLE.name]
+    }
+    skin.textButton(SkinTextButtonStyle.RED.name) {
+      up = skin.newDrawable(SkinImages.FRAME_RED.regionKey).apply {
+        leftWidth = 5f
+        rightWidth = 5f
+        topHeight = 5f
+        bottomHeight = 5f
+      }
+      font = skin[SkinFontStyle.TITLE.name]
+    }
 
     // list
     skin.list(SkinListStyle.DEFAULT.name) {
       font = skin[SkinFontStyle.DEFAULT.name]
+      fontColorSelected = Color.BLACK
+      fontColorUnselected = Color.WHITE
+      selection = skin.newDrawable(SkinImages.BUTTON_2.regionKey).apply {
+        topHeight = 1f
+        bottomHeight = 1f
+        leftWidth = 3f
+      }
+    }
+    skin.list(SkinListStyle.LARGE.name) {
+      font = skin[SkinFontStyle.LARGE.name]
       fontColorSelected = Color.BLACK
       fontColorUnselected = Color.WHITE
       selection = skin.newDrawable(SkinImages.BUTTON_2.regionKey).apply {

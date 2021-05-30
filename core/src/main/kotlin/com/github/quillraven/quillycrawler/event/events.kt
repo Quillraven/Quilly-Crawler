@@ -20,6 +20,10 @@ class MapChangeEvent : GameEvent() {
   var level: Int = 0
 }
 
+class CombatCommandStarted : GameEvent() {
+  lateinit var command: Command
+}
+
 class CombatPreDamageEvent : GameEvent() {
   lateinit var damageEmitterComponent: DamageEmitterComponent
 }
@@ -28,9 +32,9 @@ class CombatPostDamageEvent : GameEvent() {
   lateinit var damageEmitterComponent: DamageEmitterComponent
 }
 
-class CombatVictoryEvent : GameEvent()
+object CombatVictoryEvent : GameEvent()
 
-class CombatDefeatEvent : GameEvent()
+object CombatDefeatEvent : GameEvent()
 
 class CombatStartEvent : GameEvent() {
   lateinit var playerEntity: Entity

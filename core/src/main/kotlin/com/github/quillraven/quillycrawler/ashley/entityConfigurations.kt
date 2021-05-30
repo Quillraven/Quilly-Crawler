@@ -15,10 +15,7 @@ import com.github.quillraven.quillycrawler.ai.ChestState
 import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
-import com.github.quillraven.quillycrawler.combat.command.CommandAttack
-import com.github.quillraven.quillycrawler.combat.command.CommandDeath
-import com.github.quillraven.quillycrawler.combat.command.CommandProtect
-import com.github.quillraven.quillycrawler.combat.command.CommandTransform
+import com.github.quillraven.quillycrawler.combat.command.*
 import ktx.ashley.*
 import ktx.box2d.BodyDefinition
 import ktx.box2d.body
@@ -165,13 +162,16 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<StateComponent> { state = PlayerState.IDLE }
     with<PlayerComponent>()
     with<PlayerControlComponent>()
-    with<BagComponent>()
+    with<BagComponent> {
+      // TODO remove debug stuff
+      items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION, 5)
+    }
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
     with<CameraLockComponent>()
     with<GearComponent>()
     with<StatsComponent> {
-      stats[StatsType.LIFE] = 30f
+      stats[StatsType.LIFE] = 10f
       stats[StatsType.MAX_LIFE] = 30f
       stats[StatsType.MANA] = 10f
       stats[StatsType.MAX_MANA] = 10f
@@ -188,7 +188,8 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
       learn<CommandDeath>()
       //TODO remove debug stuff
       learn<CommandProtect>()
-      learn<CommandTransform>()
+      learn<CommandFirebolt>()
+      learn<CommandExplosion>()
     }
   }
 }

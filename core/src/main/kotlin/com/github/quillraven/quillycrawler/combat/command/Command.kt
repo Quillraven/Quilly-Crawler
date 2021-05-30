@@ -9,6 +9,8 @@ import com.github.quillraven.quillycrawler.ashley.component.StatsType
 import com.github.quillraven.quillycrawler.ashley.component.isPlayer
 import com.github.quillraven.quillycrawler.ashley.component.statsCmp
 import com.github.quillraven.quillycrawler.combat.CombatContext
+import com.github.quillraven.quillycrawler.event.CombatCommandStarted
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.collections.GdxArray
 import ktx.log.debug
 import ktx.log.logger
@@ -18,13 +20,14 @@ enum class CommandAiType {
 }
 
 enum class CommandTargetType {
-  UNDEFINED, NO_TARGET, SINGLE_TARGET
+  UNDEFINED, NO_TARGET, SINGLE_TARGET, ALL_TARGETS
 }
 
 sealed class Command(
   context: CombatContext,
   val engine: Engine = context.engine,
-  val audioService: AudioService = context.audioService
+  val audioService: AudioService = context.audioService,
+  val eventDispatcher: GameEventDispatcher = context.eventDispatcher,
 ) : Pool.Poolable {
   abstract val manaCost: Int
   abstract val aiType: CommandAiType
@@ -46,6 +49,8 @@ sealed class Command(
 
     if (totalTime == 0f) {
       LOG.debug { "Executing command ${this::class.simpleName} for ${if (entity.isPlayer) "PLAYER" else "ENEMY"} entity $entity" }
+      entity.statsCmp[StatsType.MANA] = entity.statsCmp[StatsType.MANA] - manaCost
+      eventDispatcher.dispatchEvent<CombatCommandStarted> { this.command = this@Command }
       onStart()
     }
 
@@ -56,7 +61,6 @@ sealed class Command(
       // to make sure that anything that happens in onUpdate/onFinish like dealing damage gets processed
       // before executing another command
       completed = true
-      entity.statsCmp[StatsType.MANA] = entity.statsCmp[StatsType.MANA] - manaCost
       onFinish()
       entity.playAnimation("idle", 0f)
     }
@@ -74,7 +78,11 @@ sealed class Command(
     targets.clear()
   }
 
+  fun hasSufficientMana(): Boolean = entity.statsCmp.totalStatValue(entity, StatsType.MANA) >= manaCost
+
   companion object {
     private val LOG = logger<Command>()
   }
 }
+
+abstract class CommandUnknown(context: CombatContext) : Command(context)

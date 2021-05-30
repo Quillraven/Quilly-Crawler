@@ -12,6 +12,7 @@ import com.github.quillraven.quillycrawler.event.CombatCommandPlayerEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.get
 import ktx.ashley.mapperFor
+import ktx.collections.GdxArray
 import ktx.collections.GdxSet
 import ktx.collections.contains
 import ktx.log.error
@@ -41,10 +42,28 @@ class CombatComponent : Component, Pool.Poolable {
   ) {
     if (type in availableCommands) {
       availableCommands[type].apply {
+        targets.clear()
         if (target != null) {
-          targets.clear()
           targets.add(target)
         }
+        action(this)
+        newCommand(this, clearPreviousCommands)
+      }
+    } else {
+      LOG.error { "${type.simpleName} is not part of available commands" }
+    }
+  }
+
+  fun newCommand(
+    type: KClass<out Command>,
+    targetEntities: GdxArray<Entity>,
+    clearPreviousCommands: Boolean = false,
+    action: Command.() -> Unit = {}
+  ) {
+    if (type in availableCommands) {
+      availableCommands[type].apply {
+        targets.clear()
+        targets.addAll(targetEntities)
         action(this)
         newCommand(this, clearPreviousCommands)
       }

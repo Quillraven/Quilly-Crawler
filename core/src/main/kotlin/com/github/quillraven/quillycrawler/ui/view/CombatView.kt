@@ -2,8 +2,11 @@ package com.github.quillraven.quillycrawler.ui.view
 
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.controllers.Controller
+import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo
+import com.badlogic.gdx.scenes.scene2d.actions.Actions
+import com.badlogic.gdx.scenes.scene2d.actions.Actions.*
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Table
@@ -15,6 +18,8 @@ import com.github.quillraven.commons.ui.widget.bar
 import com.github.quillraven.quillycrawler.ui.*
 import com.github.quillraven.quillycrawler.ui.model.CombatUiListener
 import com.github.quillraven.quillycrawler.ui.model.CombatViewModel
+import ktx.actors.centerPosition
+import ktx.actors.plus
 import ktx.actors.plusAssign
 import ktx.collections.GdxArray
 import ktx.scene2d.*
@@ -41,6 +46,8 @@ class CombatView(
   private val selectionTargets = GdxArray<Vector2>()
   private var currentSelectionTarget = -1
   private var waitForTurn = true
+  private val btnDefeat = TextButton(bundle["CombatView.defeat"], skin, SkinTextButtonStyle.RED.name)
+  private val btnVictory = TextButton(bundle["CombatView.victory"], skin, SkinTextButtonStyle.GREEN.name)
 
   init {
     setFillParent(true)
@@ -103,8 +110,8 @@ class CombatView(
       defaults().expand().fill()
 
       stack {
-        this@CombatView.abilityList = listWidget(SkinListStyle.DEFAULT.name)
-        this@CombatView.itemList = listWidget(SkinListStyle.DEFAULT.name)
+        this@CombatView.abilityList = listWidget(SkinListStyle.LARGE.name)
+        this@CombatView.itemList = listWidget(SkinListStyle.LARGE.name)
       }
 
       cell.expand().left().bottom()
@@ -183,9 +190,15 @@ class CombatView(
 
   override fun onShow() {
     stage.addActor(selection)
+    stage.addActor(btnDefeat)
+    stage.addActor(btnVictory)
     selection.isVisible = false
     abilityList.isVisible = false
     itemList.isVisible = false
+    btnDefeat.isVisible = false
+    btnDefeat.centerPosition()
+    btnVictory.isVisible = false
+    btnVictory.centerPosition()
 
     viewModel.addCombatListener(this)
 
@@ -224,6 +237,18 @@ class CombatView(
     updateManaInfo(mana, maxMana)
   }
 
+  override fun onDefeat() {
+    btnDefeat.isVisible = true
+    btnDefeat.clearActions()
+    btnDefeat += alpha(0f) + fadeIn(1.5f)
+  }
+
+  override fun onVictory() {
+    btnVictory.isVisible = true
+    btnVictory.clearActions()
+    btnVictory += alpha(0f) + fadeIn(1.5f)
+  }
+
   override fun onNextTurn(
     turn: Int,
     entityImages: GdxArray<Image>,
@@ -249,12 +274,10 @@ class CombatView(
 
     // update abilities and items
     abilityList.run {
-      clear()
       setItems(abilities)
-      selectedIndex = if (abilities.isEmpty) -1 else 0
+      selectAbility(0)
     }
     itemList.run {
-      clear()
       setItems(items)
       selectedIndex = if (items.isEmpty) -1 else 0
     }
@@ -268,16 +291,73 @@ class CombatView(
 
   override fun onLifeChange(life: Float, maxLife: Float) = updateLifeInfo(life, maxLife)
 
-  private fun selectAbility(idx: Int) {
+  override fun onManaChange(mana: Float, maxMana: Float) = updateManaInfo(mana, maxMana)
+
+  override fun onDamage(entityPos: Vector2, damage: Float) {
+    val dmgLabel = Label("[#ff0000]${damage.roundToInt()}[]", skin, SkinLabelStyle.LARGE.name)
+    stage.addActor(dmgLabel)
+    dmgLabel.setPosition(entityPos.x, entityPos.y)
+    dmgLabel += parallel(
+      moveBy(
+        MathUtils.random(-stage.width * 0.1f, stage.width * 0.1f),
+        stage.height * 0.15f,
+        2.5f,
+        Interpolation.circleOut
+      ), fadeOut(2.5f)
+    ) + after(Actions.removeActor(dmgLabel))
+  }
+
+  private fun hasSelectableAbility(): Boolean {
     if (abilityList.items.isEmpty) {
+      return false
+    }
+
+    var numDisabled = 0
+    abilityList.items.forEach {
+      if (it.startsWith(CombatViewModel.DISABLED_COMMAND)) {
+        ++numDisabled
+      }
+    }
+
+    return numDisabled < abilityList.items.size
+  }
+
+  private fun goToNextValidAbility(direction: Int) {
+    val origIdx = abilityList.selectedIndex
+    abilityList.selectedIndex += direction
+    while (origIdx != abilityList.selectedIndex) {
+      abilityList.selectedIndex = when {
+        abilityList.selectedIndex < 0 -> abilityList.items.size - 1
+        abilityList.selectedIndex >= abilityList.items.size -> 0
+        else -> abilityList.selectedIndex
+      }
+
+      if (!abilityList.selected.startsWith(CombatViewModel.DISABLED_COMMAND)) {
+        return
+      }
+
+      abilityList.selectedIndex += direction
+    }
+  }
+
+  private fun selectAbility(idx: Int) {
+    if (!hasSelectableAbility()) {
+      abilityList.selectedIndex = -1
       return
     }
 
+    val direction = idx - abilityList.selectedIndex
     abilityList.selectedIndex = when {
       idx < 0 -> abilityList.items.size - 1
       idx >= abilityList.items.size -> 0
       else -> idx
     }
+
+    if (abilityList.selected.startsWith(CombatViewModel.DISABLED_COMMAND)) {
+      // ability cannot be casted -> select next castable ability
+      goToNextValidAbility(if (direction == 0) 1 else direction)
+    }
+
     viewModel.selectCommand(abilityList.selected)
   }
 
@@ -295,6 +375,10 @@ class CombatView(
   }
 
   private fun navigateUp() {
+    if (btnVictory.isVisible || btnDefeat.isVisible) {
+      return
+    }
+
     when {
       selection.isVisible -> return
       abilityList.isVisible -> selectAbility(abilityList.selectedIndex - 1)
@@ -306,6 +390,10 @@ class CombatView(
   }
 
   private fun navigateDown() {
+    if (btnVictory.isVisible || btnDefeat.isVisible) {
+      return
+    }
+
     when {
       selection.isVisible -> return
       abilityList.isVisible -> selectAbility(abilityList.selectedIndex + 1)
@@ -326,6 +414,10 @@ class CombatView(
   }
 
   private fun navigateBackwards() {
+    if (btnVictory.isVisible || btnDefeat.isVisible) {
+      return
+    }
+
     when {
       selection.isVisible -> {
         selection.isVisible = false
@@ -346,10 +438,24 @@ class CombatView(
 
   private fun doSelection() {
     when {
+      btnVictory.isVisible || btnDefeat.isVisible -> viewModel.returnToGame()
       selection.isVisible -> executeSelection()
       abilityList.isVisible -> {
-        //TODO get target type and either execute selection or select target
-        executeSelection()
+        when {
+          abilityList.selectedIndex == -1 -> {
+            // there are no valid abilities to cast (e.g. insufficient mana)
+            return
+          }
+          viewModel.isSingleTargetCommand() -> {
+            // single target command -> choose target
+            selection.isVisible = true
+            selectTarget(0)
+          }
+          else -> {
+            // no target or all target command -> execute it
+            executeSelection()
+          }
+        }
       }
       else -> {
         when (activeOrderIdx) {
@@ -358,12 +464,14 @@ class CombatView(
             abilityItemTable.isVisible = true
             abilityList.isVisible = true
             itemList.isVisible = false
+            selectAbility(0)
           }
           IDX_ITEM -> {
             // item command selection
             abilityItemTable.isVisible = true
             abilityList.isVisible = false
             itemList.isVisible = true
+            selectItem(0)
           }
           else -> {
             // attack selection

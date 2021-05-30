@@ -43,7 +43,7 @@ class CombatScreen(
 ) : AbstractScreen(game) {
   private val gameViewport = game.gameViewport
   private val engine = PooledEngine().apply {
-    val combatContext = CombatContext(this, audioService)
+    val combatContext = CombatContext(this, audioService, gameEventDispatcher)
 
     addSystem(FadeSystem())
     addSystem(ResizeSystem())
@@ -90,6 +90,7 @@ class CombatScreen(
       addListener<CombatNewTurnEvent>(viewModel)
       addListener<CombatStartEvent>(viewModel)
       addListener<CombatPostDamageEvent>(viewModel)
+      addListener<CombatCommandStarted>(viewModel)
     }
     stage.addActor(view)
   }
