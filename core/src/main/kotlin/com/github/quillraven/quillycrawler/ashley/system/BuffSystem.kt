@@ -8,6 +8,8 @@ import com.github.quillraven.quillycrawler.ashley.component.buffCmp
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.combat.buff.BuffPools
+import com.github.quillraven.quillycrawler.event.CombatBuffAdded
+import com.github.quillraven.quillycrawler.event.CombatBuffRemoved
 import com.github.quillraven.quillycrawler.event.CombatPreDamageEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.allOf
@@ -47,6 +49,8 @@ class BuffSystem(
     newBuff.onAdd()
     // add new buff to entity buff map to avoid adding the same buff multiple times
     buffCmp.buffs[buffType] = newBuff
+
+    gameEventDispatcher.dispatchEvent<CombatBuffAdded> { this.buff = newBuff }
   }
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
@@ -63,8 +67,9 @@ class BuffSystem(
           // remove finished buffs
           gameEventDispatcher.removeListener(buff)
           buff.onRemove()
-          buffPools.freeBuff(buff)
           iterator.remove()
+          gameEventDispatcher.dispatchEvent<CombatBuffRemoved> { this.buff = buff }
+          buffPools.freeBuff(buff)
         }
       }
     }

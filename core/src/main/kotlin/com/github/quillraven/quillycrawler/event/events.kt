@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.ReflectionPool
 import com.github.quillraven.quillycrawler.ashley.component.DamageEmitterComponent
+import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.combat.command.Command
 import ktx.collections.GdxArray
 import ktx.collections.GdxSet
@@ -30,6 +31,20 @@ class CombatPreDamageEvent : GameEvent() {
 
 class CombatPostDamageEvent : GameEvent() {
   lateinit var damageEmitterComponent: DamageEmitterComponent
+}
+
+class CombatBuffAdded : GameEvent() {
+  lateinit var buff: Buff
+}
+
+class CombatBuffRemoved : GameEvent() {
+  lateinit var buff: Buff
+}
+
+class CombatHealEvent : GameEvent() {
+  lateinit var entity: Entity
+  var amountLife = 0f
+  var amountMana = 0f
 }
 
 object CombatVictoryEvent : GameEvent()

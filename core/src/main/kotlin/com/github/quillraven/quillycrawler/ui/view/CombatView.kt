@@ -18,10 +18,13 @@ import com.github.quillraven.commons.ui.widget.bar
 import com.github.quillraven.quillycrawler.ui.*
 import com.github.quillraven.quillycrawler.ui.model.CombatUiListener
 import com.github.quillraven.quillycrawler.ui.model.CombatViewModel
+import com.github.quillraven.quillycrawler.ui.model.ItemViewModel
+import ktx.actors.alpha
 import ktx.actors.centerPosition
 import ktx.actors.plus
 import ktx.actors.plusAssign
 import ktx.collections.GdxArray
+import ktx.collections.iterate
 import ktx.scene2d.*
 import kotlin.math.roundToInt
 import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
@@ -36,7 +39,7 @@ class CombatView(
   private val orderButtons = GdxArray<TextButton>()
   private var activeOrderIdx = IDX_ATTACK
   private val abilityList: GdxList<String>
-  private val itemList: GdxList<String>
+  private val itemList: GdxList<ItemViewModel>
   private val abilityItemTable: Table
   private val lifeLabel: Label
   private val lifeBar: Bar
@@ -48,6 +51,7 @@ class CombatView(
   private var waitForTurn = true
   private val btnDefeat = TextButton(bundle["CombatView.defeat"], skin, SkinTextButtonStyle.RED.name)
   private val btnVictory = TextButton(bundle["CombatView.victory"], skin, SkinTextButtonStyle.GREEN.name)
+  private val playerBuffs = GdxArray<Image>()
 
   init {
     setFillParent(true)
@@ -218,23 +222,23 @@ class CombatView(
     turnOrderTable.clear()
   }
 
-  private fun updateLifeInfo(life: Float, maxLife: Float) {
-    lifeBar.fill(life / maxLife, 0f)
+  private fun updateLifeInfo(life: Float, maxLife: Float, scaleDuration: Float = 0.5f) {
+    lifeBar.fill(life / maxLife, scaleDuration)
     lifeLabel.text.clear()
     lifeLabel.text.append(life.roundToInt()).append(" / ").append(maxLife.roundToInt())
     lifeLabel.invalidateHierarchy()
   }
 
-  private fun updateManaInfo(mana: Float, maxMana: Float) {
-    manaBar.fill(mana / maxMana, 0f)
+  private fun updateManaInfo(mana: Float, maxMana: Float, scaleDuration: Float = 0.5f) {
+    manaBar.fill(mana / maxMana, scaleDuration)
     manaLabel.text.clear()
     manaLabel.text.append(mana.roundToInt()).append(" / ").append(maxMana.roundToInt())
     manaLabel.invalidateHierarchy()
   }
 
   override fun onCombatStart(life: Float, maxLife: Float, mana: Float, maxMana: Float) {
-    updateLifeInfo(life, maxLife)
-    updateManaInfo(mana, maxMana)
+    updateLifeInfo(life, maxLife, 0f)
+    updateManaInfo(mana, maxMana, 0f)
   }
 
   override fun onDefeat() {
@@ -253,7 +257,7 @@ class CombatView(
     turn: Int,
     entityImages: GdxArray<Image>,
     abilities: GdxArray<String>,
-    items: GdxArray<String>,
+    items: GdxArray<ItemViewModel>,
     targets: GdxArray<Vector2>
   ) {
     // activate player input
@@ -293,10 +297,10 @@ class CombatView(
 
   override fun onManaChange(mana: Float, maxMana: Float) = updateManaInfo(mana, maxMana)
 
-  override fun onDamage(entityPos: Vector2, damage: Float) {
-    val dmgLabel = Label("[#ff0000]${damage.roundToInt()}[]", skin, SkinLabelStyle.LARGE.name)
+  private fun newFloatingText(text: String, position: Vector2) {
+    val dmgLabel = Label(text, skin, SkinLabelStyle.LARGE.name)
     stage.addActor(dmgLabel)
-    dmgLabel.setPosition(entityPos.x, entityPos.y)
+    dmgLabel.setPosition(position.x, position.y)
     dmgLabel += parallel(
       moveBy(
         MathUtils.random(-stage.width * 0.1f, stage.width * 0.1f),
@@ -305,6 +309,39 @@ class CombatView(
         Interpolation.circleOut
       ), fadeOut(2.5f)
     ) + after(Actions.removeActor(dmgLabel))
+  }
+
+  override fun onDamage(entityPos: Vector2, damage: Float) {
+    newFloatingText("[#ff0000]${damage.roundToInt()}[]", entityPos)
+  }
+
+  override fun onHeal(entityPos: Vector2, life: Float, mana: Float) {
+    if (life > 0f) {
+      newFloatingText("[#00ff00]+${life.roundToInt()}[]", entityPos)
+    }
+    if (mana != 0f) {
+      newFloatingText("[#0000ff]${if (mana > 0f) "+" else ""}${mana.roundToInt()}[]", entityPos)
+    }
+  }
+
+  override fun onBuffsUpdated(entityPos: Vector2, buffRegionKeys: GdxArray<String>) {
+    playerBuffs.iterate { image, iterator ->
+      image += fadeOut(0.5f, Interpolation.bounceOut) + Actions.removeActor(image)
+      iterator.remove()
+    }
+
+    var imgIdx = 0
+    buffRegionKeys.forEach { regionKey ->
+      val image = Image(skin.getDrawable(regionKey))
+      image.scaleBy(-0.25f)
+      image.alpha = 0f
+      image += fadeIn(0.5f, Interpolation.bounceIn)
+      stage.addActor(image)
+      // every image is 16 pixels -> move every image 16 pixels times scaling to the right
+      image.setPosition(entityPos.x + (imgIdx * 16 * 0.75f), entityPos.y)
+      playerBuffs.add(image)
+      ++imgIdx
+    }
   }
 
   private fun hasSelectableAbility(): Boolean {
@@ -324,7 +361,13 @@ class CombatView(
 
   private fun goToNextValidAbility(direction: Int) {
     val origIdx = abilityList.selectedIndex
-    abilityList.selectedIndex += direction
+
+    abilityList.selectedIndex = when {
+      abilityList.selectedIndex + direction < 0 -> abilityList.items.size - 1
+      abilityList.selectedIndex + direction >= abilityList.items.size -> 0
+      else -> abilityList.selectedIndex + direction
+    }
+
     while (origIdx != abilityList.selectedIndex) {
       abilityList.selectedIndex = when {
         abilityList.selectedIndex < 0 -> abilityList.items.size - 1
@@ -371,7 +414,7 @@ class CombatView(
       idx >= itemList.items.size -> 0
       else -> idx
     }
-    viewModel.selectItem(itemList.selected)
+    viewModel.selectItem(itemList.selected.itemName)
   }
 
   private fun navigateUp() {
@@ -382,9 +425,7 @@ class CombatView(
     when {
       selection.isVisible -> return
       abilityList.isVisible -> selectAbility(abilityList.selectedIndex - 1)
-      itemList.isVisible -> {
-        // TODO update item selection
-      }
+      itemList.isVisible -> selectItem(itemList.selectedIndex - 1)
       else -> selectButton(activeOrderIdx - 1)
     }
   }
@@ -397,9 +438,7 @@ class CombatView(
     when {
       selection.isVisible -> return
       abilityList.isVisible -> selectAbility(abilityList.selectedIndex + 1)
-      itemList.isVisible -> {
-        // TODO update item selection
-      }
+      itemList.isVisible -> selectItem(itemList.selectedIndex + 1)
       else -> selectButton(activeOrderIdx + 1)
     }
   }
@@ -457,6 +496,14 @@ class CombatView(
           }
         }
       }
+      itemList.isVisible -> {
+        if (itemList.selectedIndex == -1) {
+          // no valid item selected -> do nothing
+          return
+        } else {
+          executeSelection()
+        }
+      }
       else -> {
         when (activeOrderIdx) {
           IDX_ABILITY -> {
@@ -472,6 +519,7 @@ class CombatView(
             abilityList.isVisible = false
             itemList.isVisible = true
             selectItem(0)
+            viewModel.selectItemCommand()
           }
           else -> {
             // attack selection

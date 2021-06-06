@@ -57,7 +57,7 @@ class CombatScreen(
     addSystem(CombatAiSystem())
     addSystem(CombatSystem(combatContext, gameEventDispatcher))
     addSystem(BuffSystem(combatContext, gameEventDispatcher))
-    addSystem(ConsumeSystem())
+    addSystem(ConsumeSystem(gameEventDispatcher))
     addSystem(DamageEmitterSystem(gameEventDispatcher))
   }
   private var playerCombatEntity = playerEntity
@@ -91,6 +91,9 @@ class CombatScreen(
       addListener<CombatStartEvent>(viewModel)
       addListener<CombatPostDamageEvent>(viewModel)
       addListener<CombatCommandStarted>(viewModel)
+      addListener<CombatHealEvent>(viewModel)
+      addListener<CombatBuffAdded>(viewModel)
+      addListener<CombatBuffRemoved>(viewModel)
     }
     stage.addActor(view)
   }

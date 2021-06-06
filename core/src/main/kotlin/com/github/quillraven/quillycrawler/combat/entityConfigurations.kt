@@ -41,7 +41,7 @@ fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Vie
   withTransformAndAnimation(playerEntity.animationCmp.regionKey, 1.5f) {
     position.set(
       viewport.camera.position.x - size.x * 0.5f + 1f,
-      viewport.camera.position.y - viewport.worldHeight * 0.5f + 0.5f,
+      viewport.camera.position.y - viewport.worldHeight * 0.5f + 1f,
       position.z
     )
   }

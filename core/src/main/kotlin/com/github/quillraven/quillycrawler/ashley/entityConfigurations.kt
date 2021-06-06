@@ -165,6 +165,7 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<BagComponent> {
       // TODO remove debug stuff
       items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION, 5)
+      items[ItemType.MANA_POTION] = createItemEntity(ItemType.MANA_POTION, 1)
     }
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
@@ -186,6 +187,7 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<CombatComponent> {
       learn<CommandAttack>()
       learn<CommandDeath>()
+      learn<CommandUseItem>()
       //TODO remove debug stuff
       learn<CommandProtect>()
       learn<CommandFirebolt>()
@@ -227,6 +229,12 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
         with<ConsumableComponent>()
         with<StatsComponent> {
           stats[StatsType.LIFE] = 50f
+        }
+      }
+      ItemType.MANA_POTION -> {
+        with<ConsumableComponent>()
+        with<StatsComponent> {
+          stats[StatsType.MANA] = 10f
         }
       }
       ItemType.LEATHER_BOOTS -> {
