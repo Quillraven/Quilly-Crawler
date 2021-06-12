@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.physics.box2d.*
+import com.github.quillraven.commons.ashley.component.isRemoved
 import com.github.quillraven.quillycrawler.ashley.component.*
 import ktx.ashley.allOf
 import ktx.ashley.get
@@ -25,9 +26,9 @@ class CollisionSystem(
     world.setContactListener(null)
   }
 
-  private fun Any.isPlayerEntity() = this is Entity && this[PlayerComponent.MAPPER] != null && !this.isRemoving
+  private fun Any.isPlayerEntity() = this is Entity && this[PlayerComponent.MAPPER] != null && !this.isRemoved
 
-  private fun Any.isActionableEntity() = this is Entity && this[ActionableComponent.MAPPER] != null && !this.isRemoving
+  private fun Any.isActionableEntity() = this is Entity && this[ActionableComponent.MAPPER] != null && !this.isRemoved
 
   private fun forEachPlayerSensorCollision(contact: Contact, lambda: (Entity, Entity) -> Unit) {
     val userDataA = contact.fixtureA.body.userData

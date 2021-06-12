@@ -12,5 +12,6 @@ dependencies {
   api(libs.ktx.collections)
   api(libs.ktx.graphics)
   api(libs.ktx.log)
+  api(libs.bundles.ktx.scene2d)
   api(libs.ktx.tiled)
 }

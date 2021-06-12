@@ -27,3 +27,6 @@ class PlayerComponent : Component, Pool.Poolable {
 val Entity.playerCmp: PlayerComponent
   get() = this[PlayerComponent.MAPPER]
     ?: throw GdxRuntimeException("PlayerComponent for entity '$this' is null")
+
+val Entity.isPlayer: Boolean
+  get() = this[PlayerComponent.MAPPER] != null

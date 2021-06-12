@@ -1,13 +1,9 @@
 package com.github.quillraven.quillycrawler.ui.view
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.controllers.Controller
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.Scaling
@@ -26,9 +22,7 @@ import ktx.scene2d.*
 import java.util.*
 import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
 
-class InventoryView(private val viewModel: InventoryViewModel, private val bundle: I18NBundle) :
-  Table(Scene2DSkin.defaultSkin), KTable,
-  InputProcessor, XboxInputProcessor,
+class InventoryView(private val viewModel: InventoryViewModel, private val bundle: I18NBundle) : View(),
   InventoryListener {
   // item details
   private val bagItems: GdxList<String>
@@ -174,24 +168,17 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
     // debugAll()
   }
 
-  override fun setStage(stage: Stage?) {
-    if (stage == null) {
-      // active screen changes away from InventoryScreen
-      removeXboxControllerListener()
-      Gdx.input.inputProcessor = null
-      viewModel.removeInventoryListener(this)
-    } else {
-      // InventoryScreen becomes active screen
-      addXboxControllerListener()
-      Gdx.input.inputProcessor = this
-      viewModel.addInventoryListener(this)
+  override fun onShow() {
+    viewModel.addInventoryListener(this)
 
-      bagItems.run {
-        clearItems()
-        viewModel.load()
-      }
+    bagItems.run {
+      clearItems()
+      viewModel.load()
     }
-    super.setStage(stage)
+  }
+
+  override fun onHide() {
+    viewModel.removeInventoryListener(this)
   }
 
   override fun onSelectionChange(newIndex: Int, regionKey: String, description: String) {
@@ -245,20 +232,6 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
     return true
   }
 
-  override fun keyUp(keycode: Int) = false
-
-  override fun keyTyped(character: Char) = false
-
-  override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
-
-  override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
-
-  override fun touchDragged(screenX: Int, screenY: Int, pointer: Int) = false
-
-  override fun mouseMoved(screenX: Int, screenY: Int) = false
-
-  override fun scrolled(amountX: Float, amountY: Float) = false
-
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
     when (buttonCode) {
       XboxInputProcessor.BUTTON_DOWN -> viewModel.moveItemSelectionIndex(1)
@@ -270,8 +243,4 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
 
     return true
   }
-
-  override fun buttonUp(controller: Controller?, buttonCode: Int) = false
-
-  override fun axisMoved(controller: Controller?, axisCode: Int, value: Float) = false
 }

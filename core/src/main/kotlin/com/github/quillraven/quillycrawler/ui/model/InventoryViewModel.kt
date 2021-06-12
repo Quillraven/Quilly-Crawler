@@ -45,9 +45,7 @@ data class InventoryViewModel(
 
   fun addInventoryListener(listener: InventoryListener) = listeners.add(listener)
 
-  fun removeInventoryListener(listener: InventoryListener) {
-    listeners.remove(listener)
-  }
+  fun removeInventoryListener(listener: InventoryListener) = listeners.remove(listener)
 
   private fun GdxSet<InventoryListener>.dispatchBagUpdate() {
     this.forEach {
@@ -313,8 +311,8 @@ data class InventoryViewModel(
         engine.update(0f)
 
         // update items if consumable got removed
+        val idxOf = itemEntities.indexOf(selectedItem)
         if (selectedItem.components.size() == 0) {
-          val idxOf = itemEntities.indexOf(selectedItem)
           itemStrings.removeIndex(idxOf)
           itemEntities.removeIndex(idxOf)
 
@@ -326,9 +324,11 @@ data class InventoryViewModel(
             // last item got removed -> select last item again
             else -> itemStrings.size - 1
           }
-
-          listeners.dispatchBagUpdate()
+        } else {
+          // update remaining amount of item
+          itemStrings[idxOf] = "${itemCmp.amount}x ${itemName(itemCmp)}"
         }
+        listeners.dispatchBagUpdate()
       }
     }
 

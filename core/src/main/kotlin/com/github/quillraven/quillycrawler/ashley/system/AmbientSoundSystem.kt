@@ -29,10 +29,9 @@ class AmbientSoundSystem(
 
   override fun setProcessing(processing: Boolean) {
     super.setProcessing(processing)
+    audioService.stop(SoundAssets.AMBIENCE_CAVE)
     if (processing) {
       audioService.play(SoundAssets.AMBIENCE_CAVE, loop = true)
-    } else if (!processing) {
-      audioService.stop(SoundAssets.AMBIENCE_CAVE)
     }
   }
 

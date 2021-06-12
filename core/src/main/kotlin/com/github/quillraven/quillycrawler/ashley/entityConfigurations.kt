@@ -2,6 +2,7 @@ package com.github.quillraven.quillycrawler.ashley
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.maps.MapLayer
 import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.World
@@ -14,6 +15,7 @@ import com.github.quillraven.quillycrawler.ai.ChestState
 import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
+import com.github.quillraven.quillycrawler.combat.command.*
 import ktx.ashley.*
 import ktx.box2d.BodyDefinition
 import ktx.box2d.body
@@ -66,24 +68,32 @@ private fun EngineEntity.withBox2DComponents(
   }
 }
 
-private fun EngineEntity.withAnimationComponents(atlas: TextureAtlasAssets, regionKey: String) {
+fun EngineEntity.withAnimationComponents(
+  atlas: TextureAtlasAssets,
+  regionKey: String,
+  stateKey: String = "",
+  animationSpeed: Float = 1f
+) {
   with<AnimationComponent> {
     this.atlasFilePath = atlas.descriptor.fileName
     this.regionKey = regionKey
+    this.stateKey = stateKey
+    this.animationSpeed = animationSpeed
   }
   with<RenderComponent>()
 }
 
-fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): Boolean {
+fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, world: World?): Boolean {
   if (world == null) {
     throw GdxRuntimeException("Box2D world must not be null")
   }
 
   val x = mapObject.x * QuillyCrawler.UNIT_SCALE
   val y = mapObject.y * QuillyCrawler.UNIT_SCALE
+  val name = mapObject.name
 
-  when (mapObject.name) {
-    "PLAYER" -> {
+  when {
+    name == "PLAYER" -> {
       val playerEntities = engine.getEntitiesFor(playerFamily)
       if (playerEntities.size() <= 0) {
         // player entity does not exist yet -> create it
@@ -103,7 +113,7 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
       }
       return false
     }
-    "CHEST_COMMON", "CHEST_RARE", "CHEST_EPIC" -> {
+    name.startsWith("CHEST_") -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "chest")
       withBox2DComponents(world, BodyType.StaticBody, x, y)
       with<StateComponent> { state = ChestState.IDLE }
@@ -122,15 +132,15 @@ fun EngineEntity.configureTiledMapEntity(mapObject: MapObject, world: World?): B
         }
       }
     }
-    "BIG_DEMON" -> {
-      withAnimationComponents(TextureAtlasAssets.ENTITIES, "big-demon")
-      withBox2DComponents(world, BodyType.StaticBody, x, y)
-      with<StateComponent> { state = BigDemonState.RUN }
-      with<ActionableComponent> { type = ActionType.ENEMY }
-    }
-    "EXIT" -> {
+    name == "EXIT" -> {
       withBox2DComponents(world, BodyType.StaticBody, x, y, onlySensor = true)
       with<ActionableComponent> { type = ActionType.EXIT }
+    }
+    layer.name == "enemies" -> {
+      withAnimationComponents(TextureAtlasAssets.ENTITIES, name)
+      withBox2DComponents(world, BodyType.StaticBody, x - 0.5f, y)
+      with<StateComponent> { state = BigDemonState.RUN }
+      with<ActionableComponent> { type = ActionType.ENEMY }
     }
     else -> {
       MapService.LOG.error { "Unsupported MapObject name '${mapObject.name}'" }
@@ -152,7 +162,11 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<StateComponent> { state = PlayerState.IDLE }
     with<PlayerComponent>()
     with<PlayerControlComponent>()
-    with<BagComponent>()
+    with<BagComponent> {
+      // TODO remove debug stuff
+      items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION, 5)
+      items[ItemType.MANA_POTION] = createItemEntity(ItemType.MANA_POTION, 1)
+    }
     with<InteractComponent>()
     with<MoveComponent> { maxSpeed = 5f }
     with<CameraLockComponent>()
@@ -169,6 +183,15 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
       stats[StatsType.MAGIC_DAMAGE] = 4f
       stats[StatsType.PHYSICAL_ARMOR] = 3f
       stats[StatsType.MAGIC_ARMOR] = 1f
+    }
+    with<CombatComponent> {
+      learn<CommandAttack>()
+      learn<CommandDeath>()
+      learn<CommandUseItem>()
+      //TODO remove debug stuff
+      learn<CommandProtect>()
+      learn<CommandFirebolt>()
+      learn<CommandExplosion>()
     }
   }
 }
@@ -206,6 +229,12 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
         with<ConsumableComponent>()
         with<StatsComponent> {
           stats[StatsType.LIFE] = 50f
+        }
+      }
+      ItemType.MANA_POTION -> {
+        with<ConsumableComponent>()
+        with<StatsComponent> {
+          stats[StatsType.MANA] = 10f
         }
       }
       ItemType.LEATHER_BOOTS -> {

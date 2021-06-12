@@ -5,6 +5,8 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.event.CombatConsumeItemEvent
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
@@ -12,9 +14,10 @@ import ktx.log.debug
 import ktx.log.error
 import ktx.log.logger
 
-class ConsumeSystem : IteratingSystem(allOf(ConsumeComponent::class).exclude(RemoveComponent::class).get()) {
-  override fun processEntity(entity: Entity, deltaTime: Float) {
-    with(entity.consumeCmp) {
+class ConsumeSystem(private val eventDispatcher: GameEventDispatcher) :
+  IteratingSystem(allOf(ConsumeComponent::class).exclude(RemoveComponent::class).get()) {
+  override fun processEntity(consumerEntity: Entity, deltaTime: Float) {
+    with(consumerEntity.consumeCmp) {
       itemsToConsume.forEach { itemEntity ->
         val itemStatsCmp = itemEntity[StatsComponent.MAPPER]
         val itemCmp = itemEntity.itemCmp
@@ -24,7 +27,7 @@ class ConsumeSystem : IteratingSystem(allOf(ConsumeComponent::class).exclude(Rem
         }
 
         // consume item and add stats to entity which is consuming the item
-        entity[StatsComponent.MAPPER]?.let { consumerStatsCmp ->
+        consumerEntity[StatsComponent.MAPPER]?.let { consumerStatsCmp ->
           itemStatsCmp.stats.forEach { itemStat ->
             when (itemStat.key) {
               StatsType.LIFE -> {
@@ -42,17 +45,22 @@ class ConsumeSystem : IteratingSystem(allOf(ConsumeComponent::class).exclude(Rem
           }
         }
 
+        eventDispatcher.dispatchEvent<CombatConsumeItemEvent> {
+          this.entity = consumerEntity
+          this.itemStats = itemStatsCmp.stats
+        }
+
         // reduce amount and remove the item if necessary
         itemCmp.amount--
         if (itemCmp.amount <= 0) {
           LOG.debug { "Item '${itemCmp.itemType}' is completely consumed and gets removed now" }
-          entity[BagComponent.MAPPER]?.items?.remove(itemCmp.itemType)
+          consumerEntity[BagComponent.MAPPER]?.items?.remove(itemCmp.itemType)
           itemEntity.removeFromEngine(engine)
         }
       }
     }
 
-    entity.remove(ConsumeComponent::class.java)
+    consumerEntity.remove(ConsumeComponent::class.java)
   }
 
   companion object {

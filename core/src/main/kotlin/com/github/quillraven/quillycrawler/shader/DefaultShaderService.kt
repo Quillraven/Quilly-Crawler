@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.utils.ImmutableArray
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.github.quillraven.commons.ashley.component.renderCmp
+import com.github.quillraven.commons.ashley.component.RenderComponent
 import com.github.quillraven.commons.shader.AbstractShaderService
 import com.github.quillraven.commons.shader.ShaderDefinition
 import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
@@ -12,6 +12,7 @@ import com.github.quillraven.quillycrawler.ashley.component.PlayerComponent
 import com.github.quillraven.quillycrawler.ashley.component.actionableCmp
 import com.github.quillraven.quillycrawler.ashley.component.interactCmp
 import ktx.ashley.allOf
+import ktx.ashley.get
 import ktx.assets.async.AssetStorage
 
 class DefaultShaderService(
@@ -37,7 +38,11 @@ class DefaultShaderService(
         batch.shader = outlineShader
       }
 
-      entitiesInRange.forEach { renderOutline(it.actionableCmp.outlineColor, it.renderCmp.sprite) }
+      entitiesInRange.forEach {
+        it[RenderComponent.MAPPER]?.let { renderCmp ->
+          renderOutline(it.actionableCmp.outlineColor, renderCmp.sprite)
+        }
+      }
     }
 
     if (batch.shader != activeShader) {

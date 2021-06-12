@@ -61,3 +61,13 @@ class StatsComponent : Component, Pool.Poolable {
 val Entity.statsCmp: StatsComponent
   get() = this[StatsComponent.MAPPER]
     ?: throw GdxRuntimeException("StatsComponent for entity '$this' is null")
+
+fun Entity.totalStatValue(type: StatsType): Float {
+  return this[StatsComponent.MAPPER]?.totalStatValue(this, type) ?: 0f
+}
+
+val Entity.isDead: Boolean
+  get() = this.statsCmp[StatsType.LIFE] < Float.MIN_VALUE
+
+val Entity.isAlive: Boolean
+  get() = this.statsCmp[StatsType.LIFE] >= Float.MIN_VALUE

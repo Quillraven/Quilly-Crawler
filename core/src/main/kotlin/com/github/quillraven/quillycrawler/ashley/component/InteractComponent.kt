@@ -13,6 +13,7 @@ import ktx.collections.GdxSet
 class InteractComponent : Component, Pool.Poolable {
   val entitiesInRange = GdxSet<Entity>()
   var interact = false
+  lateinit var lastInteractEntity: Entity
 
   override fun reset() {
     entitiesInRange.clear()

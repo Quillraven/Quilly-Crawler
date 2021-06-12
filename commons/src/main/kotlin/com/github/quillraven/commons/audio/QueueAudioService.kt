@@ -57,7 +57,8 @@ class QueueAudioService(
     }
 
   private val soundRequests = ObjectMap<String, SoundRequest>(maxSimultaneousSounds)
-  private var currentMusicFilePath: String = ""
+  override var currentMusicFilePath: String = ""
+  private var previousMusicPath = ""
   private var currentMusic: Music? = null
   private val playedSounds = GdxSet<String>(maxSimultaneousSounds)
 
@@ -121,11 +122,22 @@ class QueueAudioService(
 
     // play new music
     LOG.debug { "Play music '$musicFilePath'" }
+    previousMusicPath = currentMusicFilePath
     currentMusicFilePath = musicFilePath
     currentMusic = assetStorage.get<Music>(musicFilePath).apply {
       this.isLooping = loop
       this.volume = (volume * musicVolume).coerceIn(0f, 1f)
       play()
+    }
+  }
+
+  /**
+   * Returns the playback of the previous [Music] which was set via [playMusic].
+   * If there was no call to [playMusic] yet then this function does nothing.
+   */
+  override fun playPreviousMusic(volume: Float, loop: Boolean) {
+    if (previousMusicPath.isNotBlank()) {
+      playMusic(previousMusicPath)
     }
   }
 

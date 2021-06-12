@@ -6,7 +6,9 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.SetScreenComponent
+import com.github.quillraven.quillycrawler.ashley.component.interactCmp
 import com.github.quillraven.quillycrawler.ashley.component.setScreenCmp
+import com.github.quillraven.quillycrawler.screen.CombatScreen
 import com.github.quillraven.quillycrawler.screen.InventoryScreen
 import ktx.ashley.allOf
 import ktx.ashley.exclude
@@ -29,6 +31,7 @@ class SetScreenSystem(private val game: QuillyCrawler) :
       LOG.debug { "Screen '${nextScreenType.simpleName}' does not exist yet -> create it" }
       when (nextScreenType) {
         InventoryScreen::class -> game.addScreen(InventoryScreen(game, engine, entity))
+        CombatScreen::class -> game.addScreen(CombatScreen(game, engine, entity, entity.interactCmp.lastInteractEntity))
         else -> {
           LOG.error { "Unsupported screen type '${nextScreenType.simpleName}'" }
           return
@@ -36,8 +39,14 @@ class SetScreenSystem(private val game: QuillyCrawler) :
       }
     } else {
       // screen already exists -> update parameters if necessary
-      if (nextScreenType == InventoryScreen::class) {
-        game.getScreen<InventoryScreen>().viewModel.playerEntity = entity
+      when (nextScreenType) {
+        InventoryScreen::class -> game.getScreen<InventoryScreen>().viewModel.playerEntity = entity
+        CombatScreen::class -> {
+          with(game.getScreen<CombatScreen>()) {
+            playerEntity = entity
+            enemyEntity = entity.interactCmp.lastInteractEntity
+          }
+        }
       }
     }
 

@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.Pool
 import com.github.quillraven.commons.ashley.system.RenderSystem
@@ -20,13 +21,17 @@ import ktx.ashley.mapperFor
  *
  * Use [renderCmp] to easily access the [RenderComponent] of an [Entity]. Only use it if you are sure that
  * the component is not null. Otherwise, it will throw a [GdxRuntimeException].
+ *
+ * Use [offset] to move the sprite away of its current render position.
  */
 class RenderComponent : Component, Pool.Poolable {
   val sprite = Sprite()
+  val offset = Vector2()
 
   override fun reset() {
     sprite.texture = null
     sprite.setColor(1f, 1f, 1f, 1f)
+    offset.set(0f, 0f)
   }
 
   companion object {

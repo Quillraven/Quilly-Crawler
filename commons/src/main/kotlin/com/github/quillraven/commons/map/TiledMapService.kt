@@ -67,7 +67,7 @@ class TiledMapService(
   private val unitScale: Float,
   private val world: World? = null,
   private val audioService: AudioService = DefaultAudioService,
-  private val configureEntity: EngineEntity.(MapObject, World?) -> Boolean
+  private val configureEntity: EngineEntity.(MapLayer, MapObject, World?) -> Boolean
 ) : MapService {
   private val mapRenderer = OrthogonalTiledMapRenderer(null, unitScale, batch)
   private val tiledEntitiesFamily = allOf(TiledComponent::class).get()
@@ -149,7 +149,7 @@ class TiledMapService(
 
   /**
    * Calls [configureEntity] for any [MapObject] of object layers in Tiled and creates the collision body
-   * [Entity] if a [world] is defined and a layers with a [COLLISION_LAYER_PROPERTY] set to true exists.
+   * [Entity] if a [world] is defined and a layer with a [COLLISION_LAYER_PROPERTY] set to true exists.
    *
    * Any entity created by this function has a [TiledComponent] with the id of the object in Tiled.
    */
@@ -164,13 +164,15 @@ class TiledMapService(
 
         // call 'configureEntity' for every MapObject
         layer.objects.forEach {
-          newEntityRequired = engineEntity.configureEntity(it, world)
+          newEntityRequired = engineEntity.configureEntity(layer, it, world)
           if (newEntityRequired) {
             ++numCreated
             // entity was successfully configured -> add TiledComponent to keep it inside mapEntities array and
             // to automatically remove those entities when setMap gets called
             engineEntity.with<TiledComponent> {
               id = it.id
+              type = it.type ?: ""
+              name = it.name ?: ""
             }
             engine.addEntity(engineEntity.entity)
             // create new entity for next 'configureEntity' call
