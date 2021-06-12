@@ -235,27 +235,16 @@ data class CombatViewModel(
           }
         }
       }
-      is CombatHealEvent -> {
-        // show healing floating text
-        val transformCmp = event.entity.transformCmp
-        val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f, transformCmp.size.y * 0.8f)
-        listeners.forEach { it.onHeal(uiPosition, event.amountLife, event.amountMana) }
-        positionPool.free(uiPosition)
-
-        // update player life/mana bar
-        if (event.entity == playerEntity) {
-          playerEntity.statsCmp.let { statsCmp ->
-            val maxLife = statsCmp.totalStatValue(playerEntity, StatsType.MAX_LIFE)
-            val life = statsCmp.totalStatValue(playerEntity, StatsType.LIFE)
-            val maxMana = statsCmp.totalStatValue(playerEntity, StatsType.MAX_MANA)
-            val mana = statsCmp.totalStatValue(playerEntity, StatsType.MANA)
-            listeners.forEach {
-              it.onLifeChange(life, maxLife)
-              it.onManaChange(mana, maxMana)
-            }
-          }
-        }
-      }
+      is CombatConsumeItemEvent -> onHealEvent(
+        event.itemStats[StatsType.LIFE],
+        event.itemStats[StatsType.MANA],
+        event.entity
+      )
+      is CombatPostHealEvent -> onHealEvent(
+        event.healEmitterComponent.life,
+        event.healEmitterComponent.mana,
+        event.healEmitterComponent.target
+      )
       is CombatBuffAdded -> {
         if (event.buff.entity == playerEntity) {
           onEntityBuffsUpdated(event.buff.entity)
@@ -267,6 +256,36 @@ data class CombatViewModel(
         }
       }
       else -> Unit
+    }
+  }
+
+  private fun onHealEvent(
+    life: Float,
+    mana: Float,
+    entity: Entity
+  ) {
+    if (life <= 0f && mana <= 0f) {
+      return
+    }
+
+    // show healing floating text
+    val transformCmp = entity.transformCmp
+    val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f, transformCmp.size.y * 0.8f)
+    listeners.forEach { it.onHeal(uiPosition, life, mana) }
+    positionPool.free(uiPosition)
+
+    // update player life/mana bar
+    if (entity == playerEntity) {
+      playerEntity.statsCmp.let { statsCmp ->
+        val maxLife = statsCmp.totalStatValue(playerEntity, StatsType.MAX_LIFE)
+        val playerLife = statsCmp.totalStatValue(playerEntity, StatsType.LIFE)
+        val maxMana = statsCmp.totalStatValue(playerEntity, StatsType.MAX_MANA)
+        val playerMana = statsCmp.totalStatValue(playerEntity, StatsType.MANA)
+        listeners.forEach {
+          it.onLifeChange(playerLife, maxLife)
+          it.onManaChange(playerMana, maxMana)
+        }
+      }
     }
   }
 

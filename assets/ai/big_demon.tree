@@ -1,16 +1,21 @@
 import offensiveAbility:"com.github.quillraven.quillycrawler.ai.task.OffensiveAbilityTask"
+import defensiveAbility:"com.github.quillraven.quillycrawler.ai.task.DefensiveAbilityTask"
+import supportiveAbility:"com.github.quillraven.quillycrawler.ai.task.SupportiveAbilityTask"
 import attack:"com.github.quillraven.quillycrawler.ai.task.AttackTask"
 import defend:"com.github.quillraven.quillycrawler.ai.task.DefendTask"
 import die:"com.github.quillraven.quillycrawler.ai.task.DieTask"
 import hasOffensiveAbility?:"com.github.quillraven.quillycrawler.ai.task.HasOffensiveAbility"
+import hasDefensiveAbility?:"com.github.quillraven.quillycrawler.ai.task.HasDefensiveAbility"
+import hasSupportiveAbility?:"com.github.quillraven.quillycrawler.ai.task.HasSupportiveAbility"
 import isDead?:"com.github.quillraven.quillycrawler.ai.task.IsDead"
-import canTransform?:"com.github.quillraven.quillycrawler.ai.task.CanTransform"
-import transform:"com.github.quillraven.quillycrawler.ai.task.TransformTask"
 
 root
   selector
     (isDead?) (canTransform?) transform
     (isDead?) die
-    (hasOffensiveAbility?) (random success:0.5) offensiveAbility
-    (random success:0.8) attack
+    (hasOffensiveAbility?) (random success:0.75) offensiveAbility
+    (hasDefensiveAbility?) (random success:0.75) defensiveAbility
+    (hasSupportiveAbility?) (random success:0.75) supportiveAbility
+    (random success:0.9) attack
     defend
+

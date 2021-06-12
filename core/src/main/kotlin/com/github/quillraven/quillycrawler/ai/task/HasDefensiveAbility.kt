@@ -7,15 +7,15 @@ import com.github.quillraven.quillycrawler.ashley.component.StatsType
 import com.github.quillraven.quillycrawler.ashley.component.combatCmp
 import com.github.quillraven.quillycrawler.ashley.component.statsCmp
 import com.github.quillraven.quillycrawler.combat.command.CommandAiType
-import com.github.quillraven.quillycrawler.combat.command.CommandAttack
+import com.github.quillraven.quillycrawler.combat.command.CommandDefend
 
-class HasOffensiveAbility : LeafTask<Entity>() {
+class HasDefensiveAbility : LeafTask<Entity>() {
   override fun copyTo(task: Task<Entity>) = task
 
   override fun execute(): Status {
     val currentMana = `object`.statsCmp[StatsType.MANA]
     `object`.combatCmp.availableCommands.values().forEach {
-      if (it !is CommandAttack && it.aiType == CommandAiType.OFFENSIVE && currentMana >= it.manaCost) {
+      if (it !is CommandDefend && it.aiType == CommandAiType.DEFENSIVE && currentMana >= it.manaCost) {
         return Status.SUCCEEDED
       }
     }

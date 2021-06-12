@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.ReflectionPool
 import com.github.quillraven.quillycrawler.ashley.component.DamageEmitterComponent
+import com.github.quillraven.quillycrawler.ashley.component.HealEmitterComponent
+import com.github.quillraven.quillycrawler.ashley.component.StatsType
 import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.combat.command.Command
 import ktx.collections.GdxArray
@@ -41,10 +43,17 @@ class CombatBuffRemoved : GameEvent() {
   lateinit var buff: Buff
 }
 
-class CombatHealEvent : GameEvent() {
+class CombatPreHealEvent : GameEvent() {
+  lateinit var healEmitterComponent: HealEmitterComponent
+}
+
+class CombatPostHealEvent : GameEvent() {
+  lateinit var healEmitterComponent: HealEmitterComponent
+}
+
+class CombatConsumeItemEvent : GameEvent() {
   lateinit var entity: Entity
-  var amountLife = 0f
-  var amountMana = 0f
+  lateinit var itemStats: ObjectMap<StatsType, Float>
 }
 
 object CombatVictoryEvent : GameEvent()

@@ -3,8 +3,6 @@ package com.github.quillraven.quillycrawler.screen
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.PooledEngine
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.ObjectMap
@@ -58,6 +56,7 @@ class CombatScreen(
     addSystem(CombatSystem(combatContext, gameEventDispatcher))
     addSystem(BuffSystem(combatContext, gameEventDispatcher))
     addSystem(ConsumeSystem(gameEventDispatcher))
+    addSystem(HealEmitterSystem(gameEventDispatcher))
     addSystem(DamageEmitterSystem(gameEventDispatcher))
   }
   private var playerCombatEntity = playerEntity
@@ -90,8 +89,9 @@ class CombatScreen(
       addListener<CombatNewTurnEvent>(viewModel)
       addListener<CombatStartEvent>(viewModel)
       addListener<CombatPostDamageEvent>(viewModel)
+      addListener<CombatPostHealEvent>(viewModel)
       addListener<CombatCommandStarted>(viewModel)
-      addListener<CombatHealEvent>(viewModel)
+      addListener<CombatConsumeItemEvent>(viewModel)
       addListener<CombatBuffAdded>(viewModel)
       addListener<CombatBuffRemoved>(viewModel)
     }
@@ -190,13 +190,6 @@ class CombatScreen(
   }
 
   override fun render(delta: Float) {
-    // TODO remove debug
-    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-      stage.clear()
-      stage.addActor(CombatView(viewModel, assetStorage[I18NAssets.DEFAULT.descriptor]))
-      engine.getSystem<CombatSystem>().cleanupTurn()
-    }
-
     engine.update(delta)
   }
 }

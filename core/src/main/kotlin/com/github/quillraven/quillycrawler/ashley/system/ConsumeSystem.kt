@@ -5,7 +5,7 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.quillycrawler.ashley.component.*
-import com.github.quillraven.quillycrawler.event.CombatHealEvent
+import com.github.quillraven.quillycrawler.event.CombatConsumeItemEvent
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import ktx.ashley.allOf
 import ktx.ashley.exclude
@@ -33,26 +33,21 @@ class ConsumeSystem(private val eventDispatcher: GameEventDispatcher) :
               StatsType.LIFE -> {
                 consumerStatsCmp[StatsType.LIFE] =
                   (consumerStatsCmp[StatsType.LIFE] + itemStat.value).coerceAtMost(consumerStatsCmp[StatsType.MAX_LIFE])
-                eventDispatcher.dispatchEvent<CombatHealEvent> {
-                  this.entity = consumerEntity
-                  amountLife = itemStat.value
-                  amountMana = 0f
-                }
               }
               StatsType.MANA -> {
                 consumerStatsCmp[StatsType.MANA] =
                   (consumerStatsCmp[StatsType.MANA] + itemStat.value).coerceAtMost(consumerStatsCmp[StatsType.MAX_MANA])
-                eventDispatcher.dispatchEvent<CombatHealEvent> {
-                  this.entity = consumerEntity
-                  amountLife = 0f
-                  amountMana = itemStat.value
-                }
               }
               else -> {
                 consumerStatsCmp[itemStat.key] = consumerStatsCmp[itemStat.key] + itemStat.value
               }
             }
           }
+        }
+
+        eventDispatcher.dispatchEvent<CombatConsumeItemEvent> {
+          this.entity = consumerEntity
+          this.itemStats = itemStatsCmp.stats
         }
 
         // reduce amount and remove the item if necessary

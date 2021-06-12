@@ -5,18 +5,18 @@ import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.github.quillraven.quillycrawler.ashley.component.combatAICmp
 import com.github.quillraven.quillycrawler.ashley.component.combatCmp
-import com.github.quillraven.quillycrawler.ashley.component.randomOffensiveCommand
+import com.github.quillraven.quillycrawler.ashley.component.randomSupportiveCommand
 import ktx.log.error
 import ktx.log.logger
 
-class OffensiveAbilityTask : LeafTask<Entity>() {
+class SupportiveAbilityTask : LeafTask<Entity>() {
   override fun copyTo(task: Task<Entity>) = task
 
   override fun execute(): Status {
-    val cmd = `object`.randomOffensiveCommand()
+    val cmd = `object`.randomSupportiveCommand()
 
     if (cmd == null) {
-      LOG.error { "Called OffensiveAbilityTask for AI entity without offensive abilities or with insufficient mana" }
+      LOG.error { "Called SupportiveAbilityTask for AI entity without supportive abilities or with insufficient mana" }
       return Status.FAILED
     }
 
@@ -26,6 +26,6 @@ class OffensiveAbilityTask : LeafTask<Entity>() {
   }
 
   companion object {
-    private val LOG = logger<OffensiveAbilityTask>()
+    private val LOG = logger<SupportiveAbilityTask>()
   }
 }

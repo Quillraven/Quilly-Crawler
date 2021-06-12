@@ -10,7 +10,7 @@ class DieTask : LeafTask<Entity>() {
   override fun copyTo(task: Task<Entity>) = task
 
   override fun execute(): Status {
-    `object`.combatCmp.newCommand<CommandDeath>()
+    `object`.combatCmp.newCommand<CommandDeath>(clearPreviousCommands = true)
 
     return Status.SUCCEEDED
   }

@@ -10,10 +10,7 @@ import com.github.quillraven.commons.ashley.component.TransformComponent
 import com.github.quillraven.commons.ashley.component.animationCmp
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
-import com.github.quillraven.quillycrawler.combat.command.CommandAttack
-import com.github.quillraven.quillycrawler.combat.command.CommandDeath
-import com.github.quillraven.quillycrawler.combat.command.CommandDefend
-import com.github.quillraven.quillycrawler.combat.command.CommandTransform
+import com.github.quillraven.quillycrawler.combat.command.*
 import ktx.ashley.EngineEntity
 import ktx.ashley.with
 import ktx.collections.set
@@ -117,9 +114,12 @@ fun EngineEntity.configureEnemyCombatEntity(
     }
     "BIG_DEMON" -> {
       combatCmp.learn<CommandTransform>()
+      combatCmp.learn<CommandHeal>()
+      combatCmp.learn<CommandFirebolt>()
       with<CombatAIComponent> { treeFilePath = "ai/big_demon.tree" }
       with {
         stats[StatsType.LIFE] = 50f
+        stats[StatsType.MANA] = 10f
         stats[StatsType.AGILITY] = 11f
         stats[StatsType.PHYSICAL_DAMAGE] = 7f
         stats[StatsType.MAGIC_DAMAGE] = 6f
