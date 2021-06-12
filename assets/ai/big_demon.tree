@@ -4,9 +4,11 @@ import supportiveAbility:"com.github.quillraven.quillycrawler.ai.task.Supportive
 import attack:"com.github.quillraven.quillycrawler.ai.task.AttackTask"
 import defend:"com.github.quillraven.quillycrawler.ai.task.DefendTask"
 import die:"com.github.quillraven.quillycrawler.ai.task.DieTask"
+import transform:"com.github.quillraven.quillycrawler.ai.task.TransformTask"
 import hasOffensiveAbility?:"com.github.quillraven.quillycrawler.ai.task.HasOffensiveAbility"
 import hasDefensiveAbility?:"com.github.quillraven.quillycrawler.ai.task.HasDefensiveAbility"
 import hasSupportiveAbility?:"com.github.quillraven.quillycrawler.ai.task.HasSupportiveAbility"
+import canTransform?:"com.github.quillraven.quillycrawler.ai.task.CanTransform"
 import isDead?:"com.github.quillraven.quillycrawler.ai.task.IsDead"
 
 root
