@@ -343,4 +343,8 @@ data class InventoryViewModel(
       update(0f)
     }
   }
+
+  fun gold(): Int {
+    return playerEntity.bagCmp.gold
+  }
 }

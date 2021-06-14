@@ -25,6 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
 class InventoryView(private val viewModel: InventoryViewModel, private val bundle: I18NBundle) : View(),
   InventoryListener {
   // item details
+  private val goldLabel: Label
   private val bagItems: GdxList<String>
   private val itemImage: Image
   private val itemDescriptionLabel: Label
@@ -67,6 +68,22 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
       background = skin.getDrawable(SkinImages.FRAME_1.regionKey)
       defaults().expand().fill()
 
+      // gold info
+      table { tableCell ->
+        background = skin.getDrawable(SkinImages.FRAME_2.regionKey)
+
+        image(SkinImages.GOLD.regionKey)
+        this@InventoryView.goldLabel = label("", SkinLabelStyle.DEFAULT.name) { labelCell ->
+          labelCell.padLeft(3f)
+        }
+
+        tableCell.expand(false, false)
+          .padTop(3f)
+          .height(15f).width(65f)
+          .row()
+      }
+
+      // items
       this@InventoryView.bagItems =
         listWidget<String>(SkinListStyle.DEFAULT.name).cell(padTop = 3f, padLeft = 2f, padRight = 2f)
 
@@ -171,6 +188,11 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
   override fun onShow() {
     viewModel.addInventoryListener(this)
 
+    with(goldLabel) {
+      text.setLength(0)
+      text.append(viewModel.gold())
+      invalidateHierarchy()
+    }
     bagItems.run {
       clearItems()
       viewModel.load()

@@ -34,6 +34,7 @@ enum class SkinImages(val regionKey: String) {
   KEY_BOARD_DOWN("button-down"),
   KEY_BOARD_ESCAPE("button-esc"),
   SELECTION("selection"),
+  GOLD("gold"),
 }
 
 enum class SkinFontStyle(val fntFilePath: String, val regionKey: String, val scale: Float) {
