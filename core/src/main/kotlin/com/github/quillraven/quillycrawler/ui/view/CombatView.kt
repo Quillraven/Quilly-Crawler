@@ -554,8 +554,17 @@ class CombatView(
   }
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
+    if (waitForTurn) {
+      return false
+    }
+
     when (buttonCode) {
-      XboxInputProcessor.BUTTON_B -> viewModel.returnToGame()
+      XboxInputProcessor.BUTTON_B -> navigateBackwards()
+      XboxInputProcessor.BUTTON_UP -> navigateUp()
+      XboxInputProcessor.BUTTON_DOWN -> navigateDown()
+      XboxInputProcessor.BUTTON_LEFT -> selectTarget(currentSelectionTarget - 1)
+      XboxInputProcessor.BUTTON_RIGHT -> selectTarget(currentSelectionTarget + 1)
+      XboxInputProcessor.BUTTON_A -> doSelection()
       else -> return false
     }
 
