@@ -3,9 +3,15 @@ package com.github.quillraven.quillycrawler.screen
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.PooledEngine
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.glutils.FrameBuffer
+import com.badlogic.gdx.graphics.glutils.HdpiUtils
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.ObjectMap
+import com.badlogic.gdx.utils.ScreenUtils
 import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.component.tiledCmp
@@ -67,11 +73,17 @@ class CombatScreen(
     this["SKELET"] = gdxArrayOf("SKELET", "GOBLIN")
   }
   private val viewModel =
-    CombatViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, game)
+    CombatViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, game, ::onReturnToGame)
   private val view = CombatView(viewModel)
+  private var gameFbo = FrameBuffer(Pixmap.Format.RGB888, Gdx.graphics.width, Gdx.graphics.height, false)
+  private var gameTransitionAlpha = 0f
+  private val gameColor = Color(1f, 1f, 1f, 1f)
+  private var blurRadius = 0f
+  private var returnToGame = false
 
   override fun show() {
     super.show()
+    returnToGame = false
 
     // remember previous game music
     gameMusic = audioService.currentMusicFilePath
@@ -82,6 +94,10 @@ class CombatScreen(
     spawnEnemies()
 
     // setup UI stuff
+    gameColor.a = 1f
+    blurRadius = 0f
+    gameTransitionAlpha = 0f
+
     viewModel.combatState = CombatState.RUNNING
     with(gameEventDispatcher) {
       addListener<CombatVictoryEvent>(viewModel)
@@ -100,15 +116,6 @@ class CombatScreen(
 
   override fun hide() {
     super.hide()
-
-    // return to previous game music
-    audioService.playMusic(gameMusic)
-
-    // update player entity after combat
-    updatePlayerItemsAfterCombat()
-
-    // cleanup combat engine
-    engine.removeAllEntities()
 
     if (viewModel.combatState == CombatState.VICTORY) {
       // remove enemy entity from original game screen
@@ -189,7 +196,62 @@ class CombatScreen(
     }
   }
 
+  override fun resize(width: Int, height: Int) {
+    super.resize(width, height)
+    if (gameFbo.width != width || gameFbo.height != height) {
+      gameFbo.dispose()
+      gameFbo = FrameBuffer(Pixmap.Format.RGB888, width, height, false)
+    }
+
+    // resize is called when the screen gets active or the resolution changes
+    // -> render GameScreen scene to a separate fbo to render it as a background for the combat
+    gameFbo.bind()
+    ScreenUtils.clear(0f, 0f, 0f, 0f, false)
+    HdpiUtils.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
+    gameEngine.getSystem<RenderSystem>().update(0f)
+    FrameBuffer.unbind()
+  }
+
+  private fun onReturnToGame() {
+    returnToGame = true
+    gameTransitionAlpha = 0f
+    stage.clear()
+
+    // return to previous game music
+    audioService.playMusic(gameMusic)
+
+    // update player entity after combat
+    updatePlayerItemsAfterCombat()
+
+    // cleanup combat engine
+    engine.removeAllEntities()
+  }
+
   override fun render(delta: Float) {
+    if (gameTransitionAlpha < 1f) {
+      gameTransitionAlpha = (gameTransitionAlpha + delta).coerceAtMost(1f)
+      if (returnToGame) {
+        blurRadius = MathUtils.lerp(TARGET_BLUR_RADIUS, 0f, gameTransitionAlpha)
+        gameColor.a = MathUtils.lerp(TARGET_ALPHA, 1f, gameTransitionAlpha)
+        if (gameTransitionAlpha >= 1f) {
+          game.setScreen<GameScreen>()
+        }
+      } else {
+        blurRadius = MathUtils.lerp(0f, TARGET_BLUR_RADIUS, gameTransitionAlpha)
+        gameColor.a = MathUtils.lerp(1f, TARGET_ALPHA, gameTransitionAlpha)
+      }
+    }
+
+    game.shaderService.renderTextureBlurred(gameFbo.colorBufferTexture, blurRadius, gameColor)
     engine.update(delta)
+  }
+
+  override fun dispose() {
+    gameFbo.dispose()
+  }
+
+  companion object {
+    private const val TARGET_BLUR_RADIUS = 6f
+    private const val TARGET_ALPHA = 0.7f
   }
 }

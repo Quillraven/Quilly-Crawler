@@ -111,6 +111,7 @@ precision mediump float;
 #endif
 
 varying vec2 v_texCoords;
+varying vec4 v_color;
 
 uniform sampler2D u_texture;
 uniform vec2 u_direction;
@@ -135,6 +136,6 @@ void main() {
   sum += texture2D(u_texture, v_texCoords + 3.0 * blur * u_direction) * 0.044;
   sum += texture2D(u_texture, v_texCoords + 4.0 * blur * u_direction) * 0.006;
 
-  gl_FragColor = sum;
+  gl_FragColor = v_color * sum;
 }
 """

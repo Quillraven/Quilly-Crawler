@@ -10,8 +10,10 @@ import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.commons.audio.DefaultAudioService
 import com.github.quillraven.commons.audio.QueueAudioService
 import com.github.quillraven.commons.game.AbstractGame
+import com.github.quillraven.commons.shader.ShaderService
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import com.github.quillraven.quillycrawler.screen.StartUpScreen
+import com.github.quillraven.quillycrawler.shader.DefaultShaderService
 
 class QuillyCrawler : AbstractGame() {
   override val uiViewport: Viewport = FitViewport(320f, 180f)
@@ -25,6 +27,7 @@ class QuillyCrawler : AbstractGame() {
   }
   private val gameProperties = ObjectMap<String, String>()
   val gameEventDispatcher = GameEventDispatcher()
+  val shaderService: ShaderService by lazy { DefaultShaderService(assetStorage, batch) }
 
   fun b2dDebug(): Boolean = gameProperties.get("b2d-debug", "false").toBoolean()
 

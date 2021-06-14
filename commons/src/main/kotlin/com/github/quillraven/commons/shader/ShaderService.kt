@@ -2,6 +2,8 @@ package com.github.quillraven.commons.shader
 
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.utils.ImmutableArray
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.github.quillraven.commons.ashley.system.RenderSystem
@@ -22,6 +24,8 @@ interface ShaderService {
   fun postRenderEntities(entities: ImmutableArray<Entity>)
 
   fun postRender()
+
+  fun renderTextureBlurred(texture: Texture, blurRadius: Float, color: Color = batch.color)
 }
 
 /**
@@ -39,4 +43,6 @@ class DefaultShaderService(
   override fun postRenderEntities(entities: ImmutableArray<Entity>) = Unit
 
   override fun postRender() = Unit
+
+  override fun renderTextureBlurred(texture: Texture, blurRadius: Float, color: Color) = Unit
 }

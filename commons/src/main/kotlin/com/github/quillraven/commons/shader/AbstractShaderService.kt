@@ -3,6 +3,7 @@ package com.github.quillraven.commons.shader
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
@@ -152,41 +153,55 @@ abstract class AbstractShaderService(
   override fun postRender() {
     if (blurActive) {
       blurActive = false
-
-      // blur was specified -> apply horizontal blur to FrameBuffer A by rendering it to FrameBuffer B
-      frameBufferB.bind()
-      val blurShader = shader(ShaderDefinition.BLUR_SHADER)
-
-      // viewport is the entire screen since we render the frame buffer texture pixel perfect 1:1
-      ScreenUtils.clear(0f, 0f, 0f, 1f, false)
-      HdpiUtils.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
-
-      // use identity matrix to render pixel perfect
-      batch.use(batch.projectionMatrix.idt()) {
-        batch.shader = blurShader.apply {
-          setUniformf(directionLocation, 1f, 0f)
-          setUniformf(radiusLocation, blurRadius)
-        }
-
-        batch.draw(frameBufferA.colorBufferTexture, -1f, 1f, 2f, -2f)
-      }
-
-      // render to screen by applying vertical blur
-      // viewport and matrix are the same as before. Therefore, no need to set them again
-      FrameBuffer.unbind()
-      ScreenUtils.clear(0f, 0f, 0f, 1f, false)
-      batch.use {
-        batch.shader.apply {
-          setUniformf(directionLocation, 0f, 1f)
-          setUniformf(radiusLocation, blurRadius)
-        }
-
-        batch.draw(frameBufferB.colorBufferTexture, -1f, 1f, 2f, -2f)
-      }
-
-      // reset shader
-      batch.shader = activeShader
+      renderTextureBlurred(frameBufferA.colorBufferTexture, blurRadius)
     }
+  }
+
+  /**
+   * Applies a two pass blur effect to the given [texture] with a blur radius of [blurRadius].
+   * Calls [Batch.setColor] with the given [color] before the rendering process and restores the color at the end.
+   */
+  override fun renderTextureBlurred(texture: Texture, blurRadius: Float, color: Color) {
+    // in case this method gets called separately without the RenderSystem then
+    // we need to create the frame buffer first
+    createUpdateFbos(Gdx.graphics.width, Gdx.graphics.height)
+
+    // apply horizontal blur to texture by rendering it to FrameBuffer B
+    frameBufferB.bind()
+    val blurShader = shader(ShaderDefinition.BLUR_SHADER)
+
+    // viewport is the entire screen since we render the frame buffer texture pixel perfect 1:1
+    ScreenUtils.clear(0f, 0f, 0f, 1f, false)
+    HdpiUtils.glViewport(0, 0, Gdx.graphics.width, Gdx.graphics.height)
+    TMP_COLOR.set(batch.color)
+
+    // use identity matrix to render pixel perfect
+    batch.color = color
+    batch.use(batch.projectionMatrix.idt()) {
+      batch.shader = blurShader.apply {
+        setUniformf(directionLocation, 1f, 0f)
+        setUniformf(radiusLocation, blurRadius)
+      }
+
+      batch.draw(texture, -1f, 1f, 2f, -2f)
+    }
+
+    // render to screen by applying vertical blur
+    // viewport and matrix are the same as before. Therefore, no need to set them again
+    FrameBuffer.unbind()
+    ScreenUtils.clear(0f, 0f, 0f, 1f, false)
+    batch.use {
+      batch.shader.apply {
+        setUniformf(directionLocation, 0f, 1f)
+        setUniformf(radiusLocation, blurRadius)
+      }
+
+      batch.draw(frameBufferB.colorBufferTexture, -1f, 1f, 2f, -2f)
+    }
+
+    // reset shader and color
+    batch.color = TMP_COLOR
+    batch.shader = activeShader
   }
 
   companion object {

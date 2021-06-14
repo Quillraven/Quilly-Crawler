@@ -9,7 +9,6 @@ import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.commons.map.TiledMapService
-import com.github.quillraven.commons.shader.ShaderService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
@@ -46,7 +45,6 @@ class GameScreen(
       EngineEntity::configureTiledMapEntity
     )
   private val engine = PooledEngine()
-  private val shaderService: ShaderService = DefaultShaderService(assetStorage, batch, engine)
   private val viewModel = GameViewModel(assetStorage[I18NAssets.DEFAULT.descriptor])
   private val view = GameView(viewModel)
 
@@ -70,7 +68,7 @@ class GameScreen(
           batch,
           game.gameViewport,
           mapService = mapService,
-          shaderService = shaderService
+          shaderService = game.shaderService
         )
       )
       if (game.b2dDebug()) {
@@ -89,6 +87,9 @@ class GameScreen(
 
   override fun show() {
     super.show()
+    if (game.shaderService is DefaultShaderService) {
+      (game.shaderService as DefaultShaderService).activeEngine = engine
+    }
     gameEventDispatcher.addListener<MapChangeEvent>(viewModel)
     stage.addActor(view)
     engine.getSystem<AmbientSoundSystem>().setProcessing(true)
@@ -97,6 +98,9 @@ class GameScreen(
 
   override fun hide() {
     super.hide()
+    if (game.shaderService is DefaultShaderService) {
+      (game.shaderService as DefaultShaderService).activeEngine = null
+    }
     gameEventDispatcher.removeListener(viewModel)
     engine.getSystem<AmbientSoundSystem>().setProcessing(false)
     engine.getSystem<PlayerControlSystem>().setProcessing(false)

@@ -17,7 +17,6 @@ import com.github.quillraven.quillycrawler.assets.MusicAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.command.*
 import com.github.quillraven.quillycrawler.event.*
-import com.github.quillraven.quillycrawler.screen.GameScreen
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
@@ -70,6 +69,7 @@ data class CombatViewModel(
   val bundle: I18NBundle,
   val engine: Engine,
   val game: QuillyCrawler,
+  val returnToGameScreen: () -> Unit,
   val gameViewport: Viewport = game.gameViewport,
   val uiViewport: Viewport = game.uiViewport,
   val audioService: AudioService = game.audioService
@@ -165,7 +165,7 @@ data class CombatViewModel(
   }
 
   fun returnToGame() {
-    game.setScreen<GameScreen>()
+    returnToGameScreen()
   }
 
   private fun entityUiPosition(transformCmp: TransformComponent, offsetX: Float = 0f, offsetY: Float = 0f): Vector2 {

@@ -17,17 +17,21 @@ import ktx.assets.async.AssetStorage
 
 class DefaultShaderService(
   assetStorage: AssetStorage,
-  batch: Batch,
-  engine: Engine
+  batch: Batch
 ) : AbstractShaderService(assetStorage, batch) {
-  private val interactPlayerEntities =
-    engine.getEntitiesFor(allOf(PlayerComponent::class, InteractComponent::class).get())
-
+  var activeEngine: Engine? = null
+    set(value) {
+      interactPlayerEntities = value?.getEntitiesFor(allOf(PlayerComponent::class, InteractComponent::class).get())
+      field = value
+    }
+  private var interactPlayerEntities: ImmutableArray<Entity>? = null
   private val outlineShader = shader(ShaderDefinition.OUTLINE_SHADER)
 
   override fun postRenderEntities(entities: ImmutableArray<Entity>) {
+    val interactEntities = interactPlayerEntities ?: return
+
     // draw outlines for actionable entities
-    interactPlayerEntities.forEach { player ->
+    interactEntities.forEach { player ->
       val entitiesInRange = player.interactCmp.entitiesInRange
       if (entitiesInRange.isEmpty) {
         return@forEach
