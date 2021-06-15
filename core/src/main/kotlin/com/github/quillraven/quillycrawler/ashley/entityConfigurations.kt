@@ -192,6 +192,7 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
       learn<CommandProtect>()
       learn<CommandFirebolt>()
       learn<CommandExplosion>()
+      learn<CommandHeal>()
     }
   }
 }

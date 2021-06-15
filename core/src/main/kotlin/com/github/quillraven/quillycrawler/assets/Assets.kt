@@ -12,6 +12,7 @@ enum class TextureAtlasAssets(
   val descriptor: AssetDescriptor<TextureAtlas> = AssetDescriptor(filePath, TextureAtlas::class.java)
 ) {
   ENTITIES("graphics/entities.atlas"),
+  EFFECTS("graphics/effects.atlas"),
   UI("graphics/ui.atlas")
 }
 
@@ -57,6 +58,7 @@ enum class SoundAssets(
   PROTECT_CAST("audio/sounds/sfx_protect_cast.wav"),
   DEATH("audio/sounds/sfx_death.wav"),
   TRANSFORM_DEMON("audio/sounds/sfx_transform_demon.mp3"),
+  HEAL("audio/sounds/sfx_heal.wav"),
 }
 
 fun AudioService.play(asset: SoundAssets, volume: Float = 1f, loop: Boolean = false) =

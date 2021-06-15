@@ -31,3 +31,4 @@ TBD
 - OmegaPixelArt: [Gameboy Sfx Pack #1](https://omegaosg.itch.io/gameboy-sfx-pack)
 - SubspaceAudio: [512 Sound Effects (8-Bit Style)](https://opengameart.org/content/512-sound-effects-8-bit-style)
 - Little Robot Sound Factory: [Fantasy Sound Effects Library](https://opengameart.org/content/fantasy-sound-effects-library)
+- Soluna Software: [Effects](https://opengameart.org/content/explosion-effects-and-more)
