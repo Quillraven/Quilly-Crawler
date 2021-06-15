@@ -47,7 +47,7 @@ class ConsumeSystem(private val eventDispatcher: GameEventDispatcher) :
 
         eventDispatcher.dispatchEvent<CombatConsumeItemEvent> {
           this.entity = consumerEntity
-          this.itemStats = itemStatsCmp.stats
+          this.statsCmp = itemStatsCmp
         }
 
         // reduce amount and remove the item if necessary

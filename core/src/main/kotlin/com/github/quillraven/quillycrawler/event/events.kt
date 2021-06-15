@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.ReflectionPool
 import com.github.quillraven.quillycrawler.ashley.component.DamageEmitterComponent
 import com.github.quillraven.quillycrawler.ashley.component.HealEmitterComponent
-import com.github.quillraven.quillycrawler.ashley.component.StatsType
+import com.github.quillraven.quillycrawler.ashley.component.StatsComponent
 import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.combat.command.Command
 import ktx.collections.GdxArray
@@ -53,7 +53,7 @@ class CombatPostHealEvent : GameEvent() {
 
 class CombatConsumeItemEvent : GameEvent() {
   lateinit var entity: Entity
-  lateinit var itemStats: ObjectMap<StatsType, Float>
+  lateinit var statsCmp: StatsComponent
 }
 
 object CombatVictoryEvent : GameEvent()

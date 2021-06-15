@@ -14,6 +14,7 @@ import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.MusicAssets
+import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.command.*
 import com.github.quillraven.quillycrawler.event.*
@@ -92,6 +93,12 @@ data class CombatViewModel(
   fun addCombatListener(listener: CombatUiListener) = listeners.add(listener)
 
   fun removeCombatListener(listener: CombatUiListener) = listeners.remove(listener)
+
+  fun navigate() = audioService.play(SoundAssets.MENU_SELECT)
+
+  fun select() = audioService.play(SoundAssets.MENU_SELECT_2)
+
+  fun navigateBack() = audioService.play(SoundAssets.MENU_BACK)
 
   fun selectTarget(targetKey: Vector2) {
     selectedTarget = targets[targetKey]
@@ -236,8 +243,8 @@ data class CombatViewModel(
         }
       }
       is CombatConsumeItemEvent -> onHealEvent(
-        event.itemStats[StatsType.LIFE],
-        event.itemStats[StatsType.MANA],
+        event.statsCmp[StatsType.LIFE],
+        event.statsCmp[StatsType.MANA],
         event.entity
       )
       is CombatPostHealEvent -> onHealEvent(

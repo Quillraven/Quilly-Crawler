@@ -45,6 +45,7 @@ enum class SoundAssets(
   DROP("audio/sounds/drop.mp3"),
   MENU_SELECT("audio/sounds/menu_select.mp3"),
   MENU_SELECT_2("audio/sounds/menu_select_2.mp3"),
+  MENU_BACK("audio/sounds/menu_back.mp3"),
   POWER_UP_12("audio/sounds/power_up_12.wav"),
   AMBIENCE_CAVE("audio/sounds/ambience_cave.mp3"),
   DRAGON_GROWL_00("audio/sounds/Dragon_Growl_00.mp3"),

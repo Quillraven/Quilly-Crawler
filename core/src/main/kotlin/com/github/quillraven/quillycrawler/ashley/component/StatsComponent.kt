@@ -67,7 +67,7 @@ fun Entity.totalStatValue(type: StatsType): Float {
 }
 
 val Entity.isDead: Boolean
-  get() = this.statsCmp[StatsType.LIFE] < Float.MIN_VALUE
+  get() = this.statsCmp[StatsType.LIFE] < 1f
 
 val Entity.isAlive: Boolean
-  get() = this.statsCmp[StatsType.LIFE] >= Float.MIN_VALUE
+  get() = this.statsCmp[StatsType.LIFE] >= 1f

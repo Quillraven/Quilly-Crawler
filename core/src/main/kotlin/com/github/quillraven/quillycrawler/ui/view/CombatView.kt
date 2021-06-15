@@ -150,7 +150,7 @@ class CombatView(
     // debugAll()
   }
 
-  private fun selectButton(idx: Int) {
+  private fun selectCmdButton(idx: Int) {
     // move previous button to origin position
     val oldBtn = orderButtons[activeOrderIdx]
     oldBtn.clearActions()
@@ -211,7 +211,7 @@ class CombatView(
       it.label.invalidateHierarchy()
     }
     activeOrderIdx = IDX_ATTACK
-    selectButton(activeOrderIdx)
+    selectCmdButton(activeOrderIdx)
   }
 
   override fun onHide() {
@@ -417,39 +417,26 @@ class CombatView(
     viewModel.selectItem(itemList.selected.itemName)
   }
 
-  private fun navigateUp() {
+  private fun navigate(incIdx: Int) {
     if (btnVictory.isVisible || btnDefeat.isVisible) {
       return
     }
 
     when {
       selection.isVisible -> return
-      abilityList.isVisible -> selectAbility(abilityList.selectedIndex - 1)
-      itemList.isVisible -> selectItem(itemList.selectedIndex - 1)
-      else -> selectButton(activeOrderIdx - 1)
+      abilityList.isVisible -> {
+        viewModel.navigate()
+        selectAbility(abilityList.selectedIndex + incIdx)
+      }
+      itemList.isVisible -> {
+        viewModel.navigate()
+        selectItem(itemList.selectedIndex + incIdx)
+      }
+      else -> {
+        viewModel.navigate()
+        selectCmdButton(activeOrderIdx + incIdx)
+      }
     }
-  }
-
-  private fun navigateDown() {
-    if (btnVictory.isVisible || btnDefeat.isVisible) {
-      return
-    }
-
-    when {
-      selection.isVisible -> return
-      abilityList.isVisible -> selectAbility(abilityList.selectedIndex + 1)
-      itemList.isVisible -> selectItem(itemList.selectedIndex + 1)
-      else -> selectButton(activeOrderIdx + 1)
-    }
-  }
-
-  private fun executeSelection() {
-    waitForTurn = true
-    selection.isVisible = false
-    abilityItemTable.isVisible = false
-    abilityList.isVisible = false
-    itemList.isVisible = false
-    viewModel.executeOrder()
   }
 
   private fun navigateBackwards() {
@@ -459,15 +446,18 @@ class CombatView(
 
     when {
       selection.isVisible -> {
+        viewModel.navigateBack()
         selection.isVisible = false
         selectTarget(0)
       }
       abilityList.isVisible -> {
+        viewModel.navigateBack()
         selectAbility(0)
         abilityList.isVisible = false
         abilityItemTable.isVisible = false
       }
       itemList.isVisible -> {
+        viewModel.navigateBack()
         selectItem(0)
         itemList.isVisible = false
         abilityItemTable.isVisible = false
@@ -475,10 +465,23 @@ class CombatView(
     }
   }
 
+  private fun executeSelection() {
+    waitForTurn = true
+    selection.isVisible = false
+    abilityItemTable.isVisible = false
+    abilityList.isVisible = false
+    itemList.isVisible = false
+    viewModel.select()
+    viewModel.executeOrder()
+  }
+
   private fun doSelection() {
     when {
       btnVictory.isVisible || btnDefeat.isVisible -> viewModel.returnToGame()
-      selection.isVisible -> executeSelection()
+      selection.isVisible -> {
+        viewModel.select()
+        executeSelection()
+      }
       abilityList.isVisible -> {
         when {
           abilityList.selectedIndex == -1 -> {
@@ -505,6 +508,7 @@ class CombatView(
         }
       }
       else -> {
+        viewModel.select()
         when (activeOrderIdx) {
           IDX_ABILITY -> {
             // ability command selection
@@ -542,10 +546,16 @@ class CombatView(
 
     when (keycode) {
       Input.Keys.ESCAPE -> navigateBackwards()
-      Input.Keys.UP -> navigateUp()
-      Input.Keys.DOWN -> navigateDown()
-      Input.Keys.LEFT -> selectTarget(currentSelectionTarget - 1)
-      Input.Keys.RIGHT -> selectTarget(currentSelectionTarget + 1)
+      Input.Keys.UP -> navigate(-1)
+      Input.Keys.DOWN -> navigate(1)
+      Input.Keys.LEFT -> {
+        viewModel.navigate()
+        selectTarget(currentSelectionTarget - 1)
+      }
+      Input.Keys.RIGHT -> {
+        viewModel.navigate()
+        selectTarget(currentSelectionTarget + 1)
+      }
       Input.Keys.SPACE -> doSelection()
       else -> return false
     }
@@ -560,10 +570,16 @@ class CombatView(
 
     when (buttonCode) {
       XboxInputProcessor.BUTTON_B -> navigateBackwards()
-      XboxInputProcessor.BUTTON_UP -> navigateUp()
-      XboxInputProcessor.BUTTON_DOWN -> navigateDown()
-      XboxInputProcessor.BUTTON_LEFT -> selectTarget(currentSelectionTarget - 1)
-      XboxInputProcessor.BUTTON_RIGHT -> selectTarget(currentSelectionTarget + 1)
+      XboxInputProcessor.BUTTON_UP -> navigate(-1)
+      XboxInputProcessor.BUTTON_DOWN -> navigate(1)
+      XboxInputProcessor.BUTTON_LEFT -> {
+        viewModel.navigate()
+        selectTarget(currentSelectionTarget - 1)
+      }
+      XboxInputProcessor.BUTTON_RIGHT -> {
+        viewModel.navigate()
+        selectTarget(currentSelectionTarget + 1)
+      }
       XboxInputProcessor.BUTTON_A -> doSelection()
       else -> return false
     }

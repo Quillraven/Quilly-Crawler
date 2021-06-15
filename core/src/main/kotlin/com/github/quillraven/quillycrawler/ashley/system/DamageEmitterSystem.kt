@@ -51,7 +51,7 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
 
       targetStatsCmp[StatsType.LIFE] = targetLife
       gameEventDispatcher.dispatchEvent<CombatPostDamageEvent> { this.damageEmitterComponent = damageEmitterCmp }
-      if (targetLife < Float.MIN_VALUE) {
+      if (targetLife < 1f) {
         // if it is an AI then step its tree to either handle death or a boss transformation
         damageEmitterCmp.target[CombatAIComponent.MAPPER]?.behaviorTree?.step()
 
