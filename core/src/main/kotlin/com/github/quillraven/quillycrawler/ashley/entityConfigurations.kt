@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.ashley.component.Box2DComponent.Companion.TMP_VECTOR2
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ai.BigDemonState
@@ -55,7 +56,7 @@ private fun EngineEntity.withBox2DComponents(
       box(
         transformCmp.size.x,
         boundingBoxHeight,
-        Box2DComponent.TMP_VECTOR2.set(0f, -transformCmp.size.y * 0.5f + boundingBoxHeight * 0.5f)
+        TMP_VECTOR2.set(0f, -transformCmp.size.y * 0.5f + boundingBoxHeight * 0.5f)
       ) {
         friction = 0f
         isSensor = onlySensor
@@ -138,7 +139,12 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
     }
     layer.name == "enemies" -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, name)
-      withBox2DComponents(world, BodyType.StaticBody, x - 0.5f, y)
+      when (name) {
+        "BIG_DEMON" -> TMP_VECTOR2.set(2f, 2.25f)
+        "CHORT" -> TMP_VECTOR2.set(1f, 1.5f)
+        else -> TMP_VECTOR2.set(1f, 1f)
+      }
+      withBox2DComponents(world, BodyType.StaticBody, x - 0.5f, y, TMP_VECTOR2.x, TMP_VECTOR2.y, 0.25f)
       with<StateComponent> { state = BigDemonState.RUN }
       with<ActionableComponent> { type = ActionType.ENEMY }
     }
@@ -154,7 +160,7 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
 fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
   return this.entity {
     withAnimationComponents(TextureAtlasAssets.ENTITIES, "wizard-m")
-    withBox2DComponents(world, BodyType.DynamicBody, x, y, boundingBoxHeightPercentage = 0.2f) {
+    withBox2DComponents(world, BodyType.DynamicBody, x, y, 1f, 1.75f, 0.2f) {
       circle(1f) {
         isSensor = true
       }

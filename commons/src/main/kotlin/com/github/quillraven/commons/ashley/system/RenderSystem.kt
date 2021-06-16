@@ -99,30 +99,24 @@ class RenderSystem(
     }
 
     renderCmp.sprite.run {
-      // scale sprite by the entity's size
-      setScale(transformCmp.size.x, transformCmp.size.y)
+      // normalize sprite to to size (1,1) and scale sprite by the entity's size
+      setScale(1 / width * transformCmp.size.x, 1 / height * transformCmp.size.y)
 
-      // update sprite position according to the physic's interpolated position
-      // or normal transform position
-      //
-      // some explanation to the calculations below
-      // transformCmp.position is the bottom left corner of an entity transform rectangle
-      // origin is half the width and height of the sprite itself
-      // -> [origin * (1 - scale)]: puts the sprite correctly to the bottom left corner if scaling is applied
-      // -> [(1 - width * scale) * 0.5]: centers the sprite horizontally within its transform's bounding rectangle
-      // -> [(scale - width * scale) * 0.5]: centers the sprite horizontally within its bounding rectangle of the box2d body
-      // -> [(1 - scale) * 0.5]: moves the sprite to the bottom edge of the box2d body
+      // update sprite position according to the physic's interpolated position or normal transform position
+      // which represents the bottom left corner of the bounding rectangle
       if (box2dCmp == null) {
-        setPosition(
-          transformCmp.position.x - originX * (1f - scaleX) + (1f - width * scaleX) * 0.5f + renderCmp.offset.x,
-          transformCmp.position.y - originY * (1f - scaleY) + renderCmp.offset.y
-        )
+        setPosition(transformCmp.position.x, transformCmp.position.y)
       } else {
-        setPosition(
-          box2dCmp.renderPosition.x - originX * (1f - scaleX) + (scaleX - width * scaleX) * 0.5f + renderCmp.offset.x,
-          box2dCmp.renderPosition.y - originY * (1f - scaleY) - (1f - scaleY) * 0.5f + renderCmp.offset.y
-        )
+        setPosition(box2dCmp.renderPosition.x, box2dCmp.renderPosition.y)
       }
+
+      // some explanation to the calculations below
+      // origin is half the width and height of the sprite itself
+      //
+      // -> [origin * (1 - scale)]: puts the sprite correctly to the bottom left corner if scaling is applied
+      // -> [(transformSizeX - width * scaleX) * 0.5]: centers the sprite horizontally within its bounding rectangle
+      x -= originX * (1f - scaleX) + (transformCmp.size.x - width * scaleX) * 0.5f + renderCmp.offset.x
+      y -= originY * (1f - scaleY) + renderCmp.offset.y
 
       // render entity
       draw(batch, batch.color.a)

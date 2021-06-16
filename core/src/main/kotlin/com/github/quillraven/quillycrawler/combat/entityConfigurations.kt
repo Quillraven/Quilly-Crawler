@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.commons.ashley.component.AnimationComponent
+import com.github.quillraven.commons.ashley.component.Box2DComponent.Companion.TMP_VECTOR2
 import com.github.quillraven.commons.ashley.component.RenderComponent
 import com.github.quillraven.commons.ashley.component.TransformComponent
 import com.github.quillraven.commons.ashley.component.animationCmp
@@ -18,11 +19,12 @@ import kotlin.math.floor
 
 private fun EngineEntity.withTransformAndAnimation(
   regionKey: String,
-  size: Float,
+  w: Float,
+  h: Float,
   setPos: TransformComponent.() -> Unit
 ) {
   with<TransformComponent> {
-    this.size.set(size, size)
+    this.size.set(w, h)
     this.apply(setPos)
   }
   with<AnimationComponent> {
@@ -35,7 +37,7 @@ private fun EngineEntity.withTransformAndAnimation(
 }
 
 fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Viewport) {
-  withTransformAndAnimation(playerEntity.animationCmp.regionKey, 1.5f) {
+  withTransformAndAnimation(playerEntity.animationCmp.regionKey, 1f * 1.5f, 1.75f * 1.5f) {
     position.set(
       viewport.camera.position.x - size.x * 0.5f + 1f,
       viewport.camera.position.y - viewport.worldHeight * 0.5f + 1f,
@@ -57,7 +59,12 @@ fun EngineEntity.configureEnemyCombatEntity(
   enemyIndex: Int,
   numEntities: Int
 ) {
-  withTransformAndAnimation(name, 1.25f) {
+  when (name) {
+    "BIG_DEMON" -> TMP_VECTOR2.set(2f, 2.25f)
+    "CHORT" -> TMP_VECTOR2.set(1f, 1.5f)
+    else -> TMP_VECTOR2.set(1f, 1f)
+  }
+  withTransformAndAnimation(name, TMP_VECTOR2.x * 1.25f, TMP_VECTOR2.y * 1.25f) {
     val leftX = viewport.camera.position.x - viewport.worldWidth * 0.5f
     position.set(
       // -1f at the end is used to move the entities to the left because there is an UI element that is on the right edge

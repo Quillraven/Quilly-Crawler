@@ -36,8 +36,14 @@ class StartUpScreen(private val game: QuillyCrawler) : AbstractScreen(game) {
     KtxAsync.launch {
       assets.joinAll()
       LOG.debug { "Took '${(System.currentTimeMillis() - timeForAssets)}' ms to load remaining assets" }
-      game.addScreen(GameScreen(game))
-      game.setScreen<GameScreen>()
+
+      if (game.renderDebug()) {
+        game.addScreen(DebugRenderScreen(game))
+        game.setScreen<DebugRenderScreen>()
+      } else {
+        game.addScreen(GameScreen(game))
+        game.setScreen<GameScreen>()
+      }
     }
   }
 

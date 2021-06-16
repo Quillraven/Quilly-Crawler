@@ -13,7 +13,7 @@ import ktx.ashley.with
 class CommandHeal(context: CombatContext) : Command(context) {
   override val aiType = CommandAiType.SUPPORTIVE
 
-  override val manaCost: Int = 0//3
+  override val manaCost: Int = 3
 
   override val targetType = CommandTargetType.SINGLE_TARGET
 
@@ -25,9 +25,6 @@ class CommandHeal(context: CombatContext) : Command(context) {
 
     targets.forEach { target ->
       engine.entity {
-        // TODO create a "SfxComponent" and "SfxSystem" that does the calculation
-        // for the correct positioning of an effect. Needs to run AFTER RenderSystem to
-        // have the sprite data available
         with<AnimationComponent> {
           atlasFilePath = TextureAtlasAssets.EFFECTS.descriptor.fileName
           regionKey = "HEAL"
@@ -36,12 +33,9 @@ class CommandHeal(context: CombatContext) : Command(context) {
         }
         with<RenderComponent>()
         with<TransformComponent> {
-          // 1 / sprite w/h
-          val scaleToBaseY = (1 / 2f) * target.renderCmp.sprite.height * target.renderCmp.sprite.scaleY
-          position.set(target.transformCmp.position).run {
-            z = -1f
-          }
-          size.set(scaleToBaseY, scaleToBaseY)
+          val transformCmp = target.transformCmp
+          position.set(transformCmp.position).run { z = 1f }
+          size.set(transformCmp.size.x, transformCmp.size.y)
         }
         with<RemoveComponent> {
           delay = 1.75f

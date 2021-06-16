@@ -64,6 +64,9 @@ class CombatScreen(
     addSystem(ConsumeSystem(gameEventDispatcher))
     addSystem(HealEmitterSystem(gameEventDispatcher))
     addSystem(DamageEmitterSystem(gameEventDispatcher))
+    if(game.renderDebug()){
+      addSystem(DebugBoundingAreaSystem(assetStorage, gameViewport))
+    }
   }
   private var playerCombatEntity = playerEntity
   private var gameMusic = ""

@@ -31,6 +31,8 @@ class QuillyCrawler : AbstractGame() {
 
   fun b2dDebug(): Boolean = gameProperties.get("b2d-debug", "false").toBoolean()
 
+  fun renderDebug(): Boolean = gameProperties.get("render-debug", "false").toBoolean()
+
   override fun resize(width: Int, height: Int) {
     // resize the game viewport first in case we want to render
     // the current scene to a custom framebuffer like we do it in the CombatScreen
