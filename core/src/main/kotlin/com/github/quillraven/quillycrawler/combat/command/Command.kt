@@ -27,7 +27,7 @@ sealed class Command(
   context: CombatContext,
   val engine: Engine = context.engine,
   val audioService: AudioService = context.audioService,
-  val eventDispatcher: GameEventDispatcher = context.eventDispatcher,
+  private val eventDispatcher: GameEventDispatcher = context.eventDispatcher,
 ) : Pool.Poolable {
   abstract val manaCost: Int
   abstract val aiType: CommandAiType

@@ -35,7 +35,7 @@ class DebugRenderScreen(private val game: QuillyCrawler) : AbstractScreen(game) 
     addSystem(Box2DDebugRenderSystem(world, viewport, b2dRenderer))
     addSystem(DebugBoundingAreaSystem(assetStorage, viewport))
   }
-  val baseTexture: Texture by lazy {
+  private val baseTexture: Texture by lazy {
     val pixmap = Pixmap(
       (1 / QuillyCrawler.UNIT_SCALE).toInt(),
       (1 / QuillyCrawler.UNIT_SCALE).toInt(),
@@ -46,7 +46,7 @@ class DebugRenderScreen(private val game: QuillyCrawler) : AbstractScreen(game) 
     }
     Texture(pixmap)
   }
-  val smallTexture: Texture by lazy {
+  private val smallTexture: Texture by lazy {
     val pixmap = Pixmap(
       (1 / QuillyCrawler.UNIT_SCALE * 0.5f).toInt(),
       (1 / QuillyCrawler.UNIT_SCALE * 0.5f).toInt(),
@@ -57,7 +57,7 @@ class DebugRenderScreen(private val game: QuillyCrawler) : AbstractScreen(game) 
     }
     Texture(pixmap)
   }
-  val bigTexture: Texture by lazy {
+  private val bigTexture: Texture by lazy {
     val pixmap = Pixmap(
       (1 / QuillyCrawler.UNIT_SCALE * 2f).toInt(),
       (1 / QuillyCrawler.UNIT_SCALE * 2f).toInt(),

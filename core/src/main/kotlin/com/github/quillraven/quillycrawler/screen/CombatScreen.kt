@@ -64,7 +64,7 @@ class CombatScreen(
     addSystem(ConsumeSystem(gameEventDispatcher))
     addSystem(HealEmitterSystem(gameEventDispatcher))
     addSystem(DamageEmitterSystem(gameEventDispatcher))
-    if(game.renderDebug()){
+    if (game.renderDebug()) {
       addSystem(DebugBoundingAreaSystem(assetStorage, gameViewport))
     }
   }
