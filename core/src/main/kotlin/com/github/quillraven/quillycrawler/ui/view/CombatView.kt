@@ -185,8 +185,8 @@ class CombatView(
     }
 
     selection.setPosition(
-      selectionTargets[currentSelectionTarget].x - selection.imageWidth * 0.5f,
-      selectionTargets[currentSelectionTarget].y - 15f
+      selectionTargets[currentSelectionTarget].x - selection.width * 0.5f,
+      selectionTargets[currentSelectionTarget].y - selection.height,
     )
 
     viewModel.selectTarget(selectionTargets[currentSelectionTarget])
@@ -196,7 +196,7 @@ class CombatView(
     stage.addActor(selection)
     stage.addActor(btnDefeat)
     stage.addActor(btnVictory)
-    selection.isVisible = false
+    hideSelection()
     abilityList.isVisible = false
     itemList.isVisible = false
     btnDefeat.isVisible = false
@@ -257,8 +257,7 @@ class CombatView(
     turn: Int,
     entityImages: GdxArray<Image>,
     abilities: GdxArray<String>,
-    items: GdxArray<ItemViewModel>,
-    targets: GdxArray<Vector2>
+    items: GdxArray<ItemViewModel>
   ) {
     // activate player input
     waitForTurn = false
@@ -285,12 +284,6 @@ class CombatView(
       setItems(items)
       selectedIndex = if (items.isEmpty) -1 else 0
     }
-
-    // update selection targets
-    selectionTargets.clear()
-    selectionTargets.addAll(targets)
-    selectTarget(0)
-    currentSelectionTarget = 0
   }
 
   override fun onLifeChange(life: Float, maxLife: Float) = updateLifeInfo(life, maxLife)
@@ -447,8 +440,7 @@ class CombatView(
     when {
       selection.isVisible -> {
         viewModel.navigateBack()
-        selection.isVisible = false
-        selectTarget(0)
+        hideSelection()
       }
       abilityList.isVisible -> {
         viewModel.navigateBack()
@@ -467,7 +459,7 @@ class CombatView(
 
   private fun executeSelection() {
     waitForTurn = true
-    selection.isVisible = false
+    hideSelection()
     abilityItemTable.isVisible = false
     abilityList.isVisible = false
     itemList.isVisible = false
@@ -475,13 +467,30 @@ class CombatView(
     viewModel.executeOrder()
   }
 
+  private fun updateSelectionTargets(targets: GdxArray<Vector2>) {
+    selectionTargets.clear()
+    selectionTargets.addAll(targets)
+    selectTarget(0)
+    currentSelectionTarget = 0
+  }
+
+  private fun showSelection() {
+    selection.isVisible = true
+    selection.color.a = 1f
+    selection.clearActions()
+    selection += forever(sequence(fadeOut(0.25f), fadeIn(0.25f)))
+  }
+
+  private fun hideSelection() {
+    selection.isVisible = false
+    selection.color.a = 1f
+    selection.clearActions()
+  }
+
   private fun doSelection() {
     when {
       btnVictory.isVisible || btnDefeat.isVisible -> viewModel.returnToGame()
-      selection.isVisible -> {
-        viewModel.select()
-        executeSelection()
-      }
+      selection.isVisible -> executeSelection()
       abilityList.isVisible -> {
         when {
           abilityList.selectedIndex == -1 -> {
@@ -490,8 +499,9 @@ class CombatView(
           }
           viewModel.isSingleTargetCommand() -> {
             // single target command -> choose target
-            selection.isVisible = true
-            selectTarget(0)
+            showSelection()
+            updateSelectionTargets(viewModel.commandTargets())
+            viewModel.select()
           }
           else -> {
             // no target or all target command -> execute it
@@ -530,9 +540,9 @@ class CombatView(
             abilityItemTable.isVisible = false
             abilityList.isVisible = false
             itemList.isVisible = false
-            selection.isVisible = true
-            selectTarget(0)
+            showSelection()
             viewModel.selectAttackCommand()
+            updateSelectionTargets(viewModel.commandTargets())
           }
         }
       }

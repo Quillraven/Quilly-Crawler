@@ -31,14 +31,7 @@ import java.util.*
 import kotlin.reflect.KClass
 
 interface CombatUiListener {
-  fun onNextTurn(
-    turn: Int,
-    entityImages: GdxArray<Image>,
-    abilities: GdxArray<String>,
-    items: GdxArray<ItemViewModel>,
-    targets: GdxArray<Vector2>
-  )
-
+  fun onNextTurn(turn: Int, entityImages: GdxArray<Image>, abilities: GdxArray<String>, items: GdxArray<ItemViewModel>)
   fun onVictory() = Unit
   fun onDefeat() = Unit
   fun onCombatStart(life: Float, maxLife: Float, mana: Float, maxMana: Float) = Unit
@@ -80,6 +73,8 @@ data class CombatViewModel(
   private lateinit var playerEntity: Entity
   private val enemyEntities =
     engine.getEntitiesFor(allOf(CombatComponent::class, StatsComponent::class).exclude(PlayerComponent::class).get())
+  private val playerEntities =
+    engine.getEntitiesFor(allOf(CombatComponent::class, StatsComponent::class, PlayerComponent::class).get())
   private val playerCommands = ObjectMap<String, KClass<out Command>>()
   private var selectedCommand: KClass<out Command> = CommandUnknown::class
   private val playerItems = ObjectMap<String, Entity>()
@@ -165,6 +160,39 @@ data class CombatViewModel(
       }
     }
     return TMP_ENTITY_ARRAY
+  }
+
+  private fun allPlayers(): GdxArray<Entity> {
+    TMP_ENTITY_ARRAY.clear()
+    playerEntities.forEach {
+      if (it.isAlive) {
+        TMP_ENTITY_ARRAY.add(it)
+      }
+    }
+    return TMP_ENTITY_ARRAY
+  }
+
+  fun commandTargets(): GdxArray<Vector2> {
+    // clear previous targets
+    targets.clear()
+    TARGET_POSITION_ARRAY.iterate { vec2, iterator ->
+      positionPool.free(vec2)
+      iterator.remove()
+    }
+
+    // get new targets
+    val targetEntities = when (currentPlayerCommand().aiType) {
+      CommandAiType.SUPPORTIVE, CommandAiType.DEFENSIVE -> allPlayers()
+      else -> allEnemies()
+    }
+    targetEntities.forEach { entity ->
+      val transformCmp = entity.transformCmp
+      val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f)
+      targets[uiPosition] = entity
+      TARGET_POSITION_ARRAY.add(uiPosition)
+    }
+
+    return TARGET_POSITION_ARRAY
   }
 
   fun isSingleTargetCommand(): Boolean {
@@ -365,30 +393,15 @@ data class CombatViewModel(
       ITEM_ARRAY.add(ItemViewModel(itemName, itemCmp.amount))
     }
 
-    // update possible targets for next turn
-    targets.clear()
-    ENEMY_POSITION_ARRAY.iterate { vec2, iterator ->
-      positionPool.free(vec2)
-      iterator.remove()
-    }
-    event.turnEntities.forEach { entity ->
-      if (!entity.isPlayer) {
-        val transformCmp = entity.transformCmp
-        val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f)
-        targets[uiPosition] = entity
-        ENEMY_POSITION_ARRAY.add(uiPosition)
-      }
-    }
-
     // notify view
-    listeners.forEach { it.onNextTurn(event.turn, turnEntityImgs, TMP_STRING_ARRAY, ITEM_ARRAY, ENEMY_POSITION_ARRAY) }
+    listeners.forEach { it.onNextTurn(event.turn, turnEntityImgs, TMP_STRING_ARRAY, ITEM_ARRAY) }
   }
 
   companion object {
     private val LOG = logger<CombatViewModel>()
     private val TMP_STRING_ARRAY = GdxArray<String>()
     private val ITEM_ARRAY = GdxArray<ItemViewModel>()
-    private val ENEMY_POSITION_ARRAY = GdxArray<Vector2>()
+    private val TARGET_POSITION_ARRAY = GdxArray<Vector2>()
     private val TMP_ENTITY_ARRAY = GdxArray<Entity>()
     const val DISABLED_COMMAND = "[#cc2222]"
   }
