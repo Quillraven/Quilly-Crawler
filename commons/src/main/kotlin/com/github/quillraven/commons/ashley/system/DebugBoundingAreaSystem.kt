@@ -24,9 +24,11 @@ class DebugBoundingAreaSystem(
   private val shapeRenderer: ShapeRenderer = ShapeRenderer()
 
   init {
-    KtxAsync.launch {
-      // add ShapeRenderer to dispose it at the end of the game
-      assetStorage.add("debugShapeRenderer", shapeRenderer)
+    if (!assetStorage.isLoaded<ShapeRenderer>("debugShapeRenderer")) {
+      KtxAsync.launch {
+        // add ShapeRenderer to dispose it at the end of the game
+        assetStorage.add("debugShapeRenderer", shapeRenderer)
+      }
     }
   }
 
