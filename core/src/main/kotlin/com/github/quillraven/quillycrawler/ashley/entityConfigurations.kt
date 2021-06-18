@@ -6,13 +6,14 @@ import com.badlogic.gdx.maps.MapLayer
 import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.World
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.component.*
 import com.github.quillraven.commons.ashley.component.Box2DComponent.Companion.TMP_VECTOR2
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.quillycrawler.QuillyCrawler
-import com.github.quillraven.quillycrawler.ai.BigDemonState
 import com.github.quillraven.quillycrawler.ai.ChestState
+import com.github.quillraven.quillycrawler.ai.EnemyState
 import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
@@ -26,6 +27,7 @@ import ktx.collections.set
 import ktx.log.error
 import ktx.tiled.x
 import ktx.tiled.y
+import kotlin.math.min
 
 private val playerFamily = allOf(PlayerComponent::class).exclude(RemoveComponent::class).get()
 
@@ -145,7 +147,12 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
         else -> TMP_VECTOR2.set(1f, 1f)
       }
       withBox2DComponents(world, BodyType.StaticBody, x - 0.5f, y, TMP_VECTOR2.x, TMP_VECTOR2.y, 0.25f)
-      with<StateComponent> { state = BigDemonState.RUN }
+      with<StateComponent> {
+        state = when (name) {
+          "DUMMY" -> EnemyState.IDLE
+          else -> EnemyState.RUN
+        }
+      }
       with<ActionableComponent> { type = ActionType.ENEMY }
     }
     else -> {
@@ -269,6 +276,47 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
         }
       }
       ItemType.UNDEFINED -> {
+      }
+    }
+  }
+}
+
+fun Engine.createEffectEntity(
+  targetEntity: Entity,
+  region: String,
+  align: Int,
+  removeDelay: Float,
+  speed: Float = 1f,
+  scaling: Float = 1f,
+  offsetX: Float = 0f,
+  offsetY: Float = 0f
+): Entity {
+  return this.entity {
+    with<TransformComponent> {
+      val targetTransform = targetEntity.transformCmp
+      val effectSize = min(targetTransform.width, targetTransform.height) * scaling
+      val wDiff = targetTransform.width - effectSize
+      val hDiff = targetTransform.height - effectSize
+      position.x = targetTransform.position.x + wDiff * 0.5f + offsetX
+      position.y = targetTransform.position.y + offsetY
+      position.z = 1f
+      position.y += when (align) {
+        Align.top -> targetTransform.height - effectSize
+        Align.center -> hDiff * 0.5f
+        else -> 0f
+      }
+      size.set(effectSize, effectSize)
+    }
+    with<RenderComponent>()
+    with<AnimationComponent> {
+      atlasFilePath = TextureAtlasAssets.EFFECTS.descriptor.fileName
+      regionKey = region
+      stateKey = "frame"
+      animationSpeed = speed
+    }
+    if (removeDelay > 0f) {
+      with<RemoveComponent> {
+        delay = removeDelay
       }
     }
   }

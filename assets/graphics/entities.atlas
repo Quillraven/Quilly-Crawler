@@ -13,25 +13,25 @@ BIG_DEMON/idle
   index: 3
 BIG_DEMON/idle
   rotate: false
-  xy: 104, 26
+  xy: 70, 26
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
-  index: 0
+  index: 2
 BIG_DEMON/idle
   rotate: false
   xy: 138, 26
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
-  index: 1
+  index: 0
 BIG_DEMON/idle
   rotate: false
   xy: 172, 26
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
-  index: 2
+  index: 1
 BIG_DEMON/run
   rotate: false
   xy: 36, 26
@@ -41,7 +41,7 @@ BIG_DEMON/run
   index: 0
 BIG_DEMON/run
   rotate: false
-  xy: 70, 26
+  xy: 104, 26
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
@@ -66,28 +66,28 @@ CHORT/idle
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
-  index: 1
+  index: 2
 CHORT/idle
   rotate: false
   xy: 436, 38
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
-  index: 2
+  index: 3
 CHORT/idle
   rotate: false
   xy: 454, 38
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
-  index: 3
+  index: 4
 CHORT/idle
   rotate: false
   xy: 472, 38
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
-  index: 4
+  index: 1
 CHORT/run
   rotate: false
   xy: 490, 38
@@ -97,49 +97,56 @@ CHORT/run
   index: 1
 CHORT/run
   rotate: false
-  xy: 292, 8
-  size: 16, 24
-  orig: 16, 24
-  offset: 0, 0
-  index: 3
-CHORT/run
-  rotate: false
   xy: 310, 8
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
-  index: 4
+  index: 3
 CHORT/run
   rotate: false
   xy: 328, 8
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
-  index: 2
-GOBLIN/idle
+  index: 4
+CHORT/run
   rotate: false
-  xy: 56, 8
+  xy: 346, 8
+  size: 16, 24
+  orig: 16, 24
+  offset: 0, 0
+  index: 2
+DUMMY/idle
+  rotate: false
+  xy: 292, 16
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 1
+  index: 0
 GOBLIN/idle
   rotate: false
   xy: 74, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 2
+  index: 1
 GOBLIN/idle
   rotate: false
   xy: 92, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 3
+  index: 2
 GOBLIN/idle
   rotate: false
   xy: 110, 8
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 3
+GOBLIN/idle
+  rotate: false
+  xy: 146, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -153,117 +160,103 @@ GOBLIN/run
   index: 3
 GOBLIN/run
   rotate: false
-  xy: 236, 8
+  xy: 254, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 4
 GOBLIN/run
-  rotate: false
-  xy: 382, 16
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 1
-GOBLIN/run
-  rotate: false
-  xy: 400, 16
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 2
-IMP/idle
-  rotate: false
-  xy: 274, 16
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 2
-IMP/idle
-  rotate: false
-  xy: 346, 16
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 3
-IMP/idle
-  rotate: false
-  xy: 364, 16
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 4
-IMP/idle
-  rotate: false
-  xy: 418, 20
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 1
-IMP/run
   rotate: false
   xy: 418, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
-IMP/run
+GOBLIN/run
   rotate: false
-  xy: 454, 20
+  xy: 436, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
-IMP/run
+IMP/idle
   rotate: false
-  xy: 454, 2
+  xy: 364, 16
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 1
+IMP/idle
+  rotate: false
+  xy: 382, 16
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 2
+IMP/idle
+  rotate: false
+  xy: 400, 16
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 3
+IMP/idle
+  rotate: false
+  xy: 418, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 4
+IMP/run
+  rotate: false
+  xy: 436, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 1
 IMP/run
   rotate: false
   xy: 472, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 4
-SKELET/idle
+  index: 2
+IMP/run
   rotate: false
-  xy: 146, 8
+  xy: 472, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 1
+  index: 3
+IMP/run
+  rotate: false
+  xy: 490, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 4
 SKELET/idle
   rotate: false
   xy: 164, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 2
+  index: 1
 SKELET/idle
   rotate: false
   xy: 182, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 3
+  index: 2
 SKELET/idle
   rotate: false
   xy: 200, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 4
-SKELET/run
-  rotate: false
-  xy: 38, 8
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
   index: 3
-SKELET/run
+SKELET/idle
   rotate: false
   xy: 218, 8
   size: 16, 16
@@ -272,21 +265,35 @@ SKELET/run
   index: 4
 SKELET/run
   rotate: false
-  xy: 436, 20
+  xy: 56, 8
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 3
+SKELET/run
+  rotate: false
+  xy: 236, 8
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 4
+SKELET/run
+  rotate: false
+  xy: 454, 20
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 SKELET/run
   rotate: false
-  xy: 436, 2
+  xy: 454, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
 chest/idle
   rotate: false
-  xy: 254, 8
+  xy: 274, 16
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -307,7 +314,7 @@ chest/open
   index: 1
 chest/open
   rotate: false
-  xy: 472, 2
+  xy: 38, 8
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

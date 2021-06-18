@@ -1,14 +1,12 @@
 package com.github.quillraven.quillycrawler.combat.command
 
-import com.badlogic.gdx.graphics.g2d.Animation
-import com.github.quillraven.commons.ashley.component.*
+import com.badlogic.gdx.utils.Align
+import com.github.quillraven.commons.ashley.component.playAnimation
 import com.github.quillraven.quillycrawler.ashley.component.heal
+import com.github.quillraven.quillycrawler.ashley.createEffectEntity
 import com.github.quillraven.quillycrawler.assets.SoundAssets
-import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.combat.CombatContext
-import ktx.ashley.entity
-import ktx.ashley.with
 
 class CommandHeal(context: CombatContext) : Command(context) {
   override val aiType = CommandAiType.SUPPORTIVE
@@ -23,26 +21,8 @@ class CommandHeal(context: CombatContext) : Command(context) {
 
     audioService.play(SoundAssets.HEAL)
 
-    targets.forEach { target ->
-      engine.entity {
-        with<AnimationComponent> {
-          atlasFilePath = TextureAtlasAssets.EFFECTS.descriptor.fileName
-          regionKey = "HEAL"
-          stateKey = "frame"
-          playMode = Animation.PlayMode.NORMAL
-        }
-        with<RenderComponent>()
-        with<TransformComponent> {
-          val transformCmp = target.transformCmp
-          position.set(transformCmp.position).run { z = 1f }
-          size.set(transformCmp.size.x, transformCmp.size.y)
-        }
-        with<RemoveComponent> {
-          delay = 1.75f
-        }
-      }
-    }
+    targets.forEach { engine.createEffectEntity(it, "HEAL", Align.top, 1.5f) }
   }
 
-  override fun isFinished(): Boolean = totalTime >= 1.5f
+  override fun isFinished(): Boolean = totalTime >= 1.25f
 }

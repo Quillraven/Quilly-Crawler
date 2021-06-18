@@ -38,13 +38,12 @@ class DebugBoundingAreaSystem(
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val transformCmp = entity.transformCmp
     val pos = transformCmp.position
-    val size = transformCmp.size
 
     viewport.apply()
     shapeRenderer.use(ShapeRenderer.ShapeType.Line, viewport.camera) {
       it.color = Color.CYAN
       it.projectionMatrix = viewport.camera.combined
-      it.rect(pos.x, pos.y, size.x, size.y)
+      it.rect(pos.x, pos.y, transformCmp.width, transformCmp.height)
     }
   }
 }

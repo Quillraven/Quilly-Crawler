@@ -187,7 +187,7 @@ data class CombatViewModel(
     }
     targetEntities.forEach { entity ->
       val transformCmp = entity.transformCmp
-      val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f)
+      val uiPosition = entityUiPosition(transformCmp, transformCmp.width * 0.5f)
       targets[uiPosition] = entity
       TARGET_POSITION_ARRAY.add(uiPosition)
     }
@@ -241,7 +241,7 @@ data class CombatViewModel(
 
         // show damage floating text
         val transformCmp = damEmitCmp.target.transformCmp
-        val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f, transformCmp.size.y * 0.8f)
+        val uiPosition = entityUiPosition(transformCmp, transformCmp.width * 0.5f, transformCmp.height * 0.8f)
         listeners.forEach { it.onDamage(uiPosition, damEmitCmp.physicalDamage + damEmitCmp.magicDamage) }
         positionPool.free(uiPosition)
 
@@ -261,7 +261,7 @@ data class CombatViewModel(
             listeners.forEach {
               // show floating text for lost mana
               val transformCmp = playerEntity.transformCmp
-              val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f, transformCmp.size.y * 0.8f)
+              val uiPosition = entityUiPosition(transformCmp, transformCmp.width * 0.5f, transformCmp.height * 0.8f)
               it.onHeal(uiPosition, 0f, -event.command.manaCost.toFloat())
               positionPool.free(uiPosition)
 
@@ -305,7 +305,7 @@ data class CombatViewModel(
 
     // show healing floating text
     val transformCmp = entity.transformCmp
-    val uiPosition = entityUiPosition(transformCmp, transformCmp.size.x * 0.5f, transformCmp.size.y * 0.8f)
+    val uiPosition = entityUiPosition(transformCmp, transformCmp.width * 0.5f, transformCmp.height * 0.8f)
     listeners.forEach { it.onHeal(uiPosition, life, mana) }
     positionPool.free(uiPosition)
 

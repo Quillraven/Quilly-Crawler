@@ -9,6 +9,7 @@ import com.github.quillraven.commons.ashley.component.Box2DComponent.Companion.T
 import com.github.quillraven.commons.ashley.component.RenderComponent
 import com.github.quillraven.commons.ashley.component.TransformComponent
 import com.github.quillraven.commons.ashley.component.animationCmp
+import com.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import com.github.quillraven.quillycrawler.combat.command.*
@@ -43,6 +44,10 @@ fun EngineEntity.configurePlayerCombatEntity(playerEntity: Entity, viewport: Vie
       viewport.camera.position.y - viewport.worldHeight * 0.5f + 1f,
       position.z
     )
+    // wizard graphic has 9 pixels of empty space at the top and therefore some effects which are aligned top
+    // go into the "void".
+    // To fix that, we adjust the bounding box by those 9 pixels
+    boundingBoxOffset.y = -(9f * UNIT_SCALE * 1.5f)
   }
   with<PlayerComponent>()
   with<BagComponent> { playerEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value } }
@@ -133,6 +138,10 @@ fun EngineEntity.configureEnemyCombatEntity(
         stats[StatsType.PHYSICAL_ARMOR] = 4f
         stats[StatsType.MAGIC_ARMOR] = 4f
       }
+    }
+    "DUMMY" -> {
+      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
+      with { stats[StatsType.LIFE] = 20000f }
     }
     else -> {
       throw GdxRuntimeException("Unsupported enemy combat name: $name")

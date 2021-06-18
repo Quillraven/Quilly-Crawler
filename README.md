@@ -32,3 +32,4 @@ TBD
 - SubspaceAudio: [512 Sound Effects (8-Bit Style)](https://opengameart.org/content/512-sound-effects-8-bit-style)
 - Little Robot Sound Factory: [Fantasy Sound Effects Library](https://opengameart.org/content/fantasy-sound-effects-library)
 - Soluna Software: [Effects](https://opengameart.org/content/explosion-effects-and-more)
+- ppeldo: [2D Pixel Art Game Spellmagic FX](https://ppeldo.itch.io/2d-pixel-art-game-spellmagic-fx)

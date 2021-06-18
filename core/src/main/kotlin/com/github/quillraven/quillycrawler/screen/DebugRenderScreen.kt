@@ -11,11 +11,16 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
-import com.github.quillraven.commons.ashley.component.*
+import com.github.quillraven.commons.ashley.component.Box2DComponent
+import com.github.quillraven.commons.ashley.component.RenderComponent
+import com.github.quillraven.commons.ashley.component.TransformComponent
+import com.github.quillraven.commons.ashley.component.Z_DEFAULT
 import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
+import com.github.quillraven.quillycrawler.ashley.createEffectEntity
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
 import ktx.ashley.entity
 import ktx.ashley.with
@@ -138,7 +143,7 @@ class DebugRenderScreen(private val game: QuillyCrawler) : AbstractScreen(game) 
     nonB2dEntity(10f, 1f, 2f, 2f, smallTexture)
 
     // entity with a non-squared texture
-    engine.entity {
+    val demon = engine.entity {
       with<TransformComponent> {
         position.set(13f, 1f, Z_DEFAULT.toFloat())
         size.set(2f, 2.25f)
@@ -151,20 +156,8 @@ class DebugRenderScreen(private val game: QuillyCrawler) : AbstractScreen(game) 
         )
       }
     }
-
-    // animation that should be centered inside the entity from above
-    engine.entity {
-      with<TransformComponent> {
-        position.set(13f, 1f, Z_DEFAULT.toFloat())
-        size.set(2f, 2.25f)
-      }
-      with<AnimationComponent> {
-        atlasFilePath = TextureAtlasAssets.EFFECTS.descriptor.fileName
-        regionKey = "HEAL"
-        stateKey = "frame"
-      }
-      with<RenderComponent>()
-    }
+    engine.createEffectEntity(demon, "HEAL", Align.center, 0f)
+    engine.createEffectEntity(demon, "FIRE_RING", Align.bottom, 0f, 2f, offsetY = -0.2f)
 
     // box2d entity without scaling = 1:1 with UNIT_SCALE
     b2dEntity(1f, 4f, 1f, 1f, baseTexture)
@@ -180,6 +173,22 @@ class DebugRenderScreen(private val game: QuillyCrawler) : AbstractScreen(game) 
     b2dEntity(9f, 4f, 1f, 1f, smallTexture)
     // box2d entity with a texture half the size of UNIT_SCALE with scaling
     b2dEntity(10f, 4f, 2f, 2f, smallTexture)
+
+    // entity with a squared texture
+    val goblin = engine.entity {
+      with<TransformComponent> {
+        position.set(13f, 4f, Z_DEFAULT.toFloat())
+        size.set(1f, 1f)
+      }
+      with<RenderComponent> {
+        sprite.initializeWithRegion(
+          assetStorage[TextureAtlasAssets.ENTITIES.descriptor].findRegion(
+            "GOBLIN/idle", 1
+          )
+        )
+      }
+    }
+    engine.createEffectEntity(goblin, "FLAME", Align.bottom, 0f, 2f, offsetY = -0.2f)
   }
 
   override fun hide() {

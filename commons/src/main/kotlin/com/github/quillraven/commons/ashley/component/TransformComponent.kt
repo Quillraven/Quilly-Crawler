@@ -24,14 +24,23 @@ const val Z_DEFAULT = 0
  *
  * Use [transformCmp] to easily access the [TransformComponent] of an [Entity]. Only use it if you are sure that
  * the component is not null. Otherwise, it will throw a [GdxRuntimeException].
+ *
+ * Use [boundingBoxOffset] to modify the bounding box area of an [Entity]. The [width] and [height] return
+ * the width and height of the bounding box.
  */
 class TransformComponent : Component, Pool.Poolable, Comparable<TransformComponent> {
   val position = Vector3()
   val size = Vector2(1f, 1f)
+  val boundingBoxOffset = Vector2(0f, 0f)
+  val width: Float
+    get() = size.x + boundingBoxOffset.x
+  val height: Float
+    get() = size.y + boundingBoxOffset.y
 
   override fun reset() {
     position.set(0f, 0f, Z_DEFAULT.toFloat())
     size.set(1f, 1f)
+    boundingBoxOffset.set(0f, 0f)
   }
 
   override fun compareTo(other: TransformComponent): Int {
@@ -66,8 +75,8 @@ fun Entity.withinRange(entity: Entity): Boolean {
     return false
   }
 
-  TransformComponent.TMP_RECT_1.set(transformA.position.x, transformA.position.y, transformA.size.x, transformA.size.y)
-  TransformComponent.TMP_RECT_2.set(transformB.position.x, transformB.position.y, transformB.size.x, transformB.size.y)
+  TransformComponent.TMP_RECT_1.set(transformA.position.x, transformA.position.y, transformA.width, transformA.height)
+  TransformComponent.TMP_RECT_2.set(transformB.position.x, transformB.position.y, transformB.width, transformB.height)
 
   return TransformComponent.TMP_RECT_1.overlaps(TransformComponent.TMP_RECT_2)
 }
