@@ -7,10 +7,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.actions.Actions.*
-import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Table
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton
+import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.utils.I18NBundle
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.commons.ui.widget.Bar
@@ -25,7 +22,10 @@ import ktx.actors.plus
 import ktx.actors.plusAssign
 import ktx.collections.GdxArray
 import ktx.collections.iterate
-import ktx.scene2d.*
+import ktx.scene2d.label
+import ktx.scene2d.scrollPane
+import ktx.scene2d.table
+import ktx.scene2d.textButton
 import kotlin.math.roundToInt
 import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
 
@@ -40,7 +40,7 @@ class CombatView(
   private var activeOrderIdx = IDX_ATTACK
   private val abilityList: GdxList<String>
   private val itemList: GdxList<ItemViewModel>
-  private val abilityItemTable: Table
+  private val abilityItemScrollPane: ScrollPane
   private val lifeLabel: Label
   private val lifeBar: Bar
   private val manaLabel: Label
@@ -72,7 +72,7 @@ class CombatView(
     // !!! Make sure that this is the last child to be rendered because it is using
     // !!! the normal entity atlas instead of the UI atlas to render the entity's textures.
     // !!! If it is not the last child then there are additional texture bindings
-    // !!! refer to the call below 'sp.zIndex = children.size - 1
+    // !!! refer to the call at the end of init: 'sp.zIndex = children.size - 1
     turnOrderTable = Table(skin).apply { top() }
     val sp = scrollPane(SkinScrollPaneStyle.DEFAULT.name) { cell ->
       setScrollingDisabled(true, false)
@@ -109,14 +109,20 @@ class CombatView(
     //
     // Ability / Item selection
     //
-    abilityItemTable = table { cell ->
-      background = skin.getDrawable(SkinImages.BUTTON_2.regionKey)
+    val abilityItemTable = Table(skin).apply {
       defaults().expand().fill()
 
-      stack {
-        this@CombatView.abilityList = listWidget(SkinListStyle.LARGE.name)
-        this@CombatView.itemList = listWidget(SkinListStyle.LARGE.name)
-      }
+      this@CombatView.abilityList = GdxList<String>(skin, SkinListStyle.LARGE.name)
+      this@CombatView.itemList = GdxList<ItemViewModel>(skin, SkinListStyle.LARGE.name)
+      this.add(Stack(abilityList, itemList))
+
+      this.left().bottom()
+    }
+    abilityItemScrollPane = scrollPane(SkinScrollPaneStyle.BRIGHT.name) { cell ->
+      setScrollingDisabled(true, false)
+      setScrollbarsVisible(false)
+
+      actor = abilityItemTable
 
       cell.expand().left().bottom()
         .padBottom(3f)
@@ -394,6 +400,7 @@ class CombatView(
       goToNextValidAbility(if (direction == 0) 1 else direction)
     }
 
+    abilityItemScrollPane.scrollPercentY = abilityList.selectedIndex.toFloat() / abilityList.items.size
     viewModel.selectCommand(abilityList.selected)
   }
 
@@ -407,6 +414,8 @@ class CombatView(
       idx >= itemList.items.size -> 0
       else -> idx
     }
+
+    abilityItemScrollPane.scrollPercentY = itemList.selectedIndex.toFloat() / itemList.items.size
     viewModel.selectItem(itemList.selected.itemName)
   }
 
@@ -446,13 +455,13 @@ class CombatView(
         viewModel.navigateBack()
         selectAbility(0)
         abilityList.isVisible = false
-        abilityItemTable.isVisible = false
+        abilityItemScrollPane.isVisible = false
       }
       itemList.isVisible -> {
         viewModel.navigateBack()
         selectItem(0)
         itemList.isVisible = false
-        abilityItemTable.isVisible = false
+        abilityItemScrollPane.isVisible = false
       }
     }
   }
@@ -460,7 +469,7 @@ class CombatView(
   private fun executeSelection() {
     waitForTurn = true
     hideSelection()
-    abilityItemTable.isVisible = false
+    abilityItemScrollPane.isVisible = false
     abilityList.isVisible = false
     itemList.isVisible = false
     viewModel.select()
@@ -522,14 +531,14 @@ class CombatView(
         when (activeOrderIdx) {
           IDX_ABILITY -> {
             // ability command selection
-            abilityItemTable.isVisible = true
+            abilityItemScrollPane.isVisible = true
             abilityList.isVisible = true
             itemList.isVisible = false
             selectAbility(0)
           }
           IDX_ITEM -> {
             // item command selection
-            abilityItemTable.isVisible = true
+            abilityItemScrollPane.isVisible = true
             abilityList.isVisible = false
             itemList.isVisible = true
             selectItem(0)
@@ -537,7 +546,7 @@ class CombatView(
           }
           else -> {
             // attack selection
-            abilityItemTable.isVisible = false
+            abilityItemScrollPane.isVisible = false
             abilityList.isVisible = false
             itemList.isVisible = false
             showSelection()

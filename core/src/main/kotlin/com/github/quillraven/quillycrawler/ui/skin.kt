@@ -56,7 +56,7 @@ enum class SkinListStyle {
 }
 
 enum class SkinScrollPaneStyle {
-  DEFAULT
+  DEFAULT, BRIGHT
 }
 
 enum class SkinBarStyle {
@@ -163,6 +163,12 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
     skin.scrollPane(SkinScrollPaneStyle.DEFAULT.name) {
       background = skin.newDrawable(SkinImages.FRAME_3.regionKey).apply {
         bottomHeight = 6f
+      }
+    }
+    skin.scrollPane(SkinScrollPaneStyle.BRIGHT.name) {
+      background = skin.newDrawable(SkinImages.BUTTON_2.regionKey).apply {
+        topHeight = 1f
+        bottomHeight = 1f
       }
     }
 
