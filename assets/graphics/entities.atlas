@@ -1,376 +1,425 @@
 
 entities.png
-size: 512,64
+size: 1024,64
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
 BIG_DEMON/idle
   rotate: false
-  xy: 2, 26
+  xy: 274, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
-  index: 3
+  index: 1
 BIG_DEMON/idle
   rotate: false
-  xy: 70, 26
-  size: 32, 36
-  orig: 32, 36
-  offset: 0, 0
-  index: 2
-BIG_DEMON/idle
-  rotate: false
-  xy: 138, 26
+  xy: 308, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 0
 BIG_DEMON/idle
   rotate: false
-  xy: 172, 26
+  xy: 342, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
-  index: 1
+  index: 2
+BIG_DEMON/idle
+  rotate: false
+  xy: 376, 20
+  size: 32, 36
+  orig: 32, 36
+  offset: 0, 0
+  index: 3
 BIG_DEMON/run
   rotate: false
-  xy: 36, 26
+  xy: 206, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 0
 BIG_DEMON/run
   rotate: false
-  xy: 104, 26
+  xy: 240, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
   index: 2
 BIG_DEMON/run
   rotate: false
-  xy: 206, 26
+  xy: 410, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
-  index: 3
+  index: 1
 BIG_DEMON/run
   rotate: false
-  xy: 240, 26
+  xy: 444, 20
   size: 32, 36
   orig: 32, 36
   offset: 0, 0
+  index: 3
+CHORT/idle
+  rotate: false
+  xy: 656, 32
+  size: 16, 24
+  orig: 16, 24
+  offset: 0, 0
   index: 1
 CHORT/idle
   rotate: false
-  xy: 418, 38
+  xy: 674, 32
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
   index: 2
 CHORT/idle
   rotate: false
-  xy: 436, 38
+  xy: 692, 32
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
   index: 3
 CHORT/idle
   rotate: false
-  xy: 454, 38
-  size: 16, 24
-  orig: 16, 24
-  offset: 0, 0
-  index: 4
-CHORT/idle
-  rotate: false
-  xy: 472, 38
-  size: 16, 24
-  orig: 16, 24
-  offset: 0, 0
-  index: 1
-CHORT/run
-  rotate: false
-  xy: 490, 38
-  size: 16, 24
-  orig: 16, 24
-  offset: 0, 0
-  index: 1
-CHORT/run
-  rotate: false
-  xy: 310, 8
-  size: 16, 24
-  orig: 16, 24
-  offset: 0, 0
-  index: 3
-CHORT/run
-  rotate: false
-  xy: 328, 8
+  xy: 710, 32
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
   index: 4
 CHORT/run
   rotate: false
-  xy: 346, 8
+  xy: 728, 32
+  size: 16, 24
+  orig: 16, 24
+  offset: 0, 0
+  index: 1
+CHORT/run
+  rotate: false
+  xy: 746, 32
   size: 16, 24
   orig: 16, 24
   offset: 0, 0
   index: 2
+CHORT/run
+  rotate: false
+  xy: 764, 32
+  size: 16, 24
+  orig: 16, 24
+  offset: 0, 0
+  index: 3
+CHORT/run
+  rotate: false
+  xy: 782, 32
+  size: 16, 24
+  orig: 16, 24
+  offset: 0, 0
+  index: 4
 DUMMY/idle
   rotate: false
-  xy: 292, 16
+  xy: 228, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
 GOBLIN/idle
   rotate: false
-  xy: 74, 8
+  xy: 854, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 GOBLIN/idle
   rotate: false
-  xy: 92, 8
+  xy: 872, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
 GOBLIN/idle
   rotate: false
-  xy: 110, 8
+  xy: 890, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 3
 GOBLIN/idle
   rotate: false
-  xy: 146, 8
+  xy: 908, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 4
 GOBLIN/run
   rotate: false
-  xy: 128, 8
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 3
-GOBLIN/run
-  rotate: false
-  xy: 254, 8
+  xy: 174, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 4
 GOBLIN/run
   rotate: false
-  xy: 418, 2
+  xy: 282, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 GOBLIN/run
   rotate: false
-  xy: 436, 20
+  xy: 300, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
-IMP/idle
+GOBLIN/run
   rotate: false
-  xy: 364, 16
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 1
-IMP/idle
-  rotate: false
-  xy: 382, 16
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 2
-IMP/idle
-  rotate: false
-  xy: 400, 16
+  xy: 318, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 3
 IMP/idle
   rotate: false
-  xy: 418, 20
+  xy: 944, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 3
+IMP/idle
+  rotate: false
+  xy: 192, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 2
+IMP/idle
+  rotate: false
+  xy: 246, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 1
+IMP/idle
+  rotate: false
+  xy: 264, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 4
 IMP/run
   rotate: false
-  xy: 436, 2
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 1
-IMP/run
-  rotate: false
-  xy: 472, 20
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 2
-IMP/run
-  rotate: false
-  xy: 472, 2
+  xy: 926, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 3
 IMP/run
   rotate: false
-  xy: 490, 20
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 4
-SKELET/idle
-  rotate: false
-  xy: 164, 8
+  xy: 336, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
-SKELET/idle
+IMP/run
   rotate: false
-  xy: 182, 8
+  xy: 390, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
-SKELET/idle
+IMP/run
   rotate: false
-  xy: 200, 8
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 3
-SKELET/idle
-  rotate: false
-  xy: 218, 8
+  xy: 408, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 4
-SKELET/run
+REAPER/idle
   rotate: false
-  xy: 56, 8
-  size: 16, 16
-  orig: 16, 16
+  xy: 138, 20
+  size: 32, 36
+  orig: 32, 36
   offset: 0, 0
-  index: 3
-SKELET/run
+  index: 2
+REAPER/idle
   rotate: false
-  xy: 236, 8
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 4
-SKELET/run
-  rotate: false
-  xy: 454, 20
-  size: 16, 16
-  orig: 16, 16
+  xy: 172, 20
+  size: 32, 36
+  orig: 32, 36
   offset: 0, 0
   index: 1
-SKELET/run
+REAPER/idle
   rotate: false
-  xy: 454, 2
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 2
-chest/idle
-  rotate: false
-  xy: 274, 16
-  size: 16, 16
-  orig: 16, 16
+  xy: 478, 20
+  size: 32, 36
+  orig: 32, 36
   offset: 0, 0
   index: 0
-chest/open
+SKELET/idle
+  rotate: false
+  xy: 962, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 2
+SKELET/idle
+  rotate: false
+  xy: 980, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 3
+SKELET/idle
+  rotate: false
+  xy: 998, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 4
+SKELET/idle
+  rotate: false
+  xy: 156, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 1
+SKELET/run
+  rotate: false
+  xy: 836, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 3
+SKELET/run
+  rotate: false
+  xy: 138, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 4
+SKELET/run
+  rotate: false
+  xy: 354, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 1
+SKELET/run
+  rotate: false
+  xy: 372, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 2
+WITCH/idle
   rotate: false
   xy: 2, 8
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 1
+WITCH/idle
+  rotate: false
+  xy: 36, 8
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 2
+WITCH/idle
+  rotate: false
+  xy: 70, 8
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 3
+WITCH/idle
+  rotate: false
+  xy: 104, 8
+  size: 32, 48
+  orig: 32, 48
+  offset: 0, 0
+  index: 4
+chest/idle
+  rotate: false
+  xy: 210, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
 chest/open
   rotate: false
-  xy: 20, 8
+  xy: 800, 40
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: 0
+chest/open
+  rotate: false
+  xy: 818, 40
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 chest/open
   rotate: false
-  xy: 38, 8
+  xy: 426, 2
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
 wizard-m/idle
   rotate: false
-  xy: 346, 34
+  xy: 584, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 0
 wizard-m/idle
   rotate: false
-  xy: 364, 34
+  xy: 602, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 1
 wizard-m/idle
   rotate: false
-  xy: 382, 34
+  xy: 620, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 2
 wizard-m/idle
   rotate: false
-  xy: 400, 34
+  xy: 638, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 3
 wizard-m/run
   rotate: false
-  xy: 274, 34
-  size: 16, 28
-  orig: 16, 28
-  offset: 0, 0
-  index: 0
-wizard-m/run
-  rotate: false
-  xy: 292, 34
+  xy: 512, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 1
 wizard-m/run
   rotate: false
-  xy: 310, 34
+  xy: 530, 28
+  size: 16, 28
+  orig: 16, 28
+  offset: 0, 0
+  index: 0
+wizard-m/run
+  rotate: false
+  xy: 548, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0
   index: 2
 wizard-m/run
   rotate: false
-  xy: 328, 34
+  xy: 566, 28
   size: 16, 28
   orig: 16, 28
   offset: 0, 0

@@ -15,6 +15,7 @@ import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
 import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.event.GameInteractReaperEvent
 import com.github.quillraven.quillycrawler.event.MapChangeEvent
 import com.github.quillraven.quillycrawler.shader.DefaultShaderService
 import com.github.quillraven.quillycrawler.ui.model.GameViewModel
@@ -45,13 +46,13 @@ class GameScreen(
       EngineEntity::configureTiledMapEntity
     )
   private val engine = PooledEngine()
-  private val viewModel = GameViewModel(assetStorage[I18NAssets.DEFAULT.descriptor])
+  private val viewModel = GameViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine)
   private val view = GameView(viewModel)
 
   init {
     engine.run {
       addSystem(PlayerControlSystem())
-      addSystem(InteractSystem(messageManager, audioService))
+      addSystem(InteractSystem(messageManager, audioService, gameEventDispatcher))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
       addSystem(LootSystem())
       addSystem(GearSystem())
@@ -91,6 +92,7 @@ class GameScreen(
       (game.shaderService as DefaultShaderService).activeEngine = engine
     }
     gameEventDispatcher.addListener<MapChangeEvent>(viewModel)
+    gameEventDispatcher.addListener<GameInteractReaperEvent>(viewModel)
     stage.addActor(view)
     engine.getSystem<AmbientSoundSystem>().setProcessing(true)
     engine.getSystem<PlayerControlSystem>().setProcessing(true)

@@ -12,6 +12,8 @@ import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.assets.play
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.event.GameInteractReaperEvent
 import com.github.quillraven.quillycrawler.screen.CombatScreen
 import ktx.ashley.*
 import ktx.collections.isNotEmpty
@@ -20,7 +22,8 @@ import ktx.log.logger
 
 class InteractSystem(
   private val messageManager: MessageManager,
-  private val audioService: AudioService
+  private val audioService: AudioService,
+  private val gameEventDispatcher: GameEventDispatcher,
 ) : EntityListener,
   IteratingSystem(allOf(PlayerComponent::class, InteractComponent::class).exclude(RemoveComponent::class).get()) {
   private val actionableFamily = allOf(ActionableComponent::class).get()
@@ -61,7 +64,11 @@ class InteractSystem(
   private fun doEntityAction(player: Entity, entity: Entity) {
     when (entity.actionableCmp.type) {
       ActionType.EXIT -> {
-        player.add(engine.createComponent(GoToNextLevelComponent::class.java))
+        engine.configureEntity(player) {
+          with<GoToLevel> {
+            targetLevel = player.playerCmp.dungeonLevel + 1
+          }
+        }
         audioService.play(SoundAssets.POWER_UP_12)
       }
       ActionType.CHEST -> {
@@ -73,8 +80,15 @@ class InteractSystem(
       ActionType.ENEMY -> {
         engine.configureEntity(player) {
           with<SetScreenComponent> { screenType = CombatScreen::class }
-
         }
+      }
+      ActionType.REAPER -> {
+        gameEventDispatcher.dispatchEvent<GameInteractReaperEvent> {
+          this.entity = player
+        }
+      }
+      ActionType.SHOP -> {
+        // TODO change screen to shop screen
       }
       else -> {
         LOG.error { "Undefined ActionType '${entity.actionableCmp.type}'" }

@@ -9,7 +9,7 @@ import ktx.ashley.get
 import ktx.ashley.mapperFor
 
 enum class ActionType {
-  UNDEFINED, EXIT, CHEST, ENEMY
+  UNDEFINED, EXIT, CHEST, ENEMY, SHOP, REAPER
 }
 
 class ActionableComponent : Component, Pool.Poolable {
