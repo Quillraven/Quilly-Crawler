@@ -109,6 +109,7 @@ class GameView(private val viewModel: GameViewModel, bundle: I18NBundle = viewMo
       btnNo.label.removeSelectionEffect()
       btnYes.label.addSelectionEffect()
     }
+    viewModel.switchSelection()
   }
 
   private fun confirmDungeonReset(resetDungeon: Boolean) {

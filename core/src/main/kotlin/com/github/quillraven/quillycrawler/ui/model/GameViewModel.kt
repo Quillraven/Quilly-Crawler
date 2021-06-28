@@ -4,10 +4,13 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.StringBuilder
+import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.GoToLevel
 import com.github.quillraven.quillycrawler.ashley.component.bagCmp
 import com.github.quillraven.quillycrawler.ashley.component.playerCmp
 import com.github.quillraven.quillycrawler.ashley.system.PlayerControlSystem
+import com.github.quillraven.quillycrawler.assets.SoundAssets
+import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.event.GameEvent
 import com.github.quillraven.quillycrawler.event.GameEventListener
 import com.github.quillraven.quillycrawler.event.GameInteractReaperEvent
@@ -23,7 +26,8 @@ interface GameUiListener {
   fun onDungeonReset(goldLoss: Int, newLevel: Int) = Unit
 }
 
-data class GameViewModel(val bundle: I18NBundle, val engine: Engine) : GameEventListener {
+data class GameViewModel(val bundle: I18NBundle, val engine: Engine, private val audioService: AudioService) :
+  GameEventListener {
   private val uiListeners = GdxSet<GameUiListener>()
   private val mapNameBuilder = StringBuilder()
   private lateinit var playerEntity: Entity
@@ -45,7 +49,14 @@ data class GameViewModel(val bundle: I18NBundle, val engine: Engine) : GameEvent
           targetLevel = targetDungeonLvl
         }
       }
+      audioService.play(SoundAssets.POWER_UP_12)
+    } else {
+      audioService.play(SoundAssets.MENU_BACK)
     }
+  }
+
+  fun switchSelection() {
+    audioService.play(SoundAssets.MENU_SELECT)
   }
 
   override fun onEvent(event: GameEvent) {

@@ -46,7 +46,7 @@ class GameScreen(
       EngineEntity::configureTiledMapEntity
     )
   private val engine = PooledEngine()
-  private val viewModel = GameViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine)
+  private val viewModel = GameViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, audioService)
   private val view = GameView(viewModel)
 
   init {
