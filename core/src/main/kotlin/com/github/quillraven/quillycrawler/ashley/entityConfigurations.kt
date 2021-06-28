@@ -135,6 +135,16 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
         }
       }
     }
+    name == "SHOP" -> {
+      withAnimationComponents(TextureAtlasAssets.ENTITIES, "WITCH", "idle", 0.35f)
+      withBox2DComponents(world, BodyType.StaticBody, x, y, 1.25f, 1.875f, 0.35f)
+      with<ActionableComponent> { type = ActionType.SHOP }
+    }
+    name == "REAPER" -> {
+      withAnimationComponents(TextureAtlasAssets.ENTITIES, "REAPER", "idle", 0.4f)
+      withBox2DComponents(world, BodyType.StaticBody, x, y, 1.25f, 1.40625f, 0.35f)
+      with<ActionableComponent> { type = ActionType.REAPER }
+    }
     name == "EXIT" -> {
       withBox2DComponents(world, BodyType.StaticBody, x, y, onlySensor = true)
       with<ActionableComponent> { type = ActionType.EXIT }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-up" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="4">
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-up" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="6">
  <tileset firstgid="1" source="../tileset1.tsx"/>
  <layer id="1" name="Kachelebene 1" width="8" height="8">
   <data encoding="base64" compression="zlib">
@@ -11,5 +11,11 @@
    <point/>
   </object>
   <object id="3" name="EXIT" x="97.695" y="98.2366" width="13.4304" height="11.6974"/>
+  <object id="4" name="SHOP" x="89.4545" y="32.1591">
+   <point/>
+  </object>
+  <object id="5" name="REAPER" x="115.455" y="34.9091">
+   <point/>
+  </object>
  </objectgroup>
 </map>

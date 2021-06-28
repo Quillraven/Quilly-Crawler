@@ -89,6 +89,10 @@ class CombatClearCommandsEvent : GameEvent() {
   lateinit var entity: Entity
 }
 
+class GameInteractReaperEvent : GameEvent() {
+  lateinit var entity: Entity
+}
+
 interface GameEventListener {
   fun onEvent(event: GameEvent)
 }

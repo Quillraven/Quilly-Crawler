@@ -18,17 +18,25 @@ abstract class View(private val inputView: Boolean = true) : Table(Scene2DSkin.d
     if (stage == null) {
       initialized = false
       if (inputView) {
-        removeXboxControllerListener()
-        Gdx.input.inputProcessor = null
+        removeInputControl()
       }
       onHide()
     } else {
       if (inputView) {
-        addXboxControllerListener()
-        Gdx.input.inputProcessor = this
+        setInputControl()
       }
     }
     super.setStage(stage)
+  }
+
+  fun setInputControl() {
+    addXboxControllerListener()
+    Gdx.input.inputProcessor = this
+  }
+
+  fun removeInputControl() {
+    removeXboxControllerListener()
+    Gdx.input.inputProcessor = null
   }
 
   override fun draw(batch: Batch?, parentAlpha: Float) {

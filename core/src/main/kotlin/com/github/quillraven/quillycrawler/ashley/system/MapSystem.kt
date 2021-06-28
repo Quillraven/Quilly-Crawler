@@ -7,8 +7,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.map.MapService
-import com.github.quillraven.quillycrawler.ashley.component.GoToNextLevelComponent
+import com.github.quillraven.quillycrawler.ashley.component.GoToLevel
 import com.github.quillraven.quillycrawler.ashley.component.PlayerComponent
+import com.github.quillraven.quillycrawler.ashley.component.goToLevelCmp
 import com.github.quillraven.quillycrawler.ashley.component.playerCmp
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import com.github.quillraven.quillycrawler.event.MapChangeEvent
@@ -22,7 +23,7 @@ class MapSystem(
   private val mapService: MapService,
   private val gameEventDispatcher: GameEventDispatcher
 ) : IteratingSystem(
-  allOf(PlayerComponent::class, GoToNextLevelComponent::class).exclude(RemoveComponent::class).get()
+  allOf(PlayerComponent::class, GoToLevel::class).exclude(RemoveComponent::class).get()
 ) {
   private var currentMapFolder: FileHandle = FileHandle("")
 
@@ -33,7 +34,7 @@ class MapSystem(
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val playerCmp = entity.playerCmp
-    playerCmp.dungeonLevel++
+    playerCmp.dungeonLevel = entity.goToLevelCmp.targetLevel
     LOG.debug { "Moving to dungeon level ${playerCmp.dungeonLevel}" }
 
     val nextMapFilePath = nextMap(playerCmp.dungeonLevel)
@@ -45,7 +46,7 @@ class MapSystem(
       this.level = playerCmp.dungeonLevel
     }
 
-    entity.remove(GoToNextLevelComponent::class.java)
+    entity.remove(GoToLevel::class.java)
   }
 
   private fun nextMap(dungeonLevel: Int): String {
