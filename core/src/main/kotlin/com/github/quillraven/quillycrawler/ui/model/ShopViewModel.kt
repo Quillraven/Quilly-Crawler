@@ -12,52 +12,60 @@ import com.github.quillraven.quillycrawler.screen.GameScreen
 import com.github.quillraven.quillycrawler.ui.SkinImages
 import ktx.ashley.configureEntity
 import ktx.ashley.contains
-import ktx.ashley.get
 import ktx.ashley.with
 import ktx.collections.GdxArray
 import ktx.collections.GdxSet
 import ktx.collections.contains
 import ktx.collections.gdxArrayOf
-import java.util.*
 
-interface InventoryListener {
+interface ShopListener {
   fun onSelectionChange(newIndex: Int, regionKey: String, description: String) = Unit
 
-  fun onStatsUpdated(statsInfo: EnumMap<StatsType, StringBuilder>) = Unit
-
-  fun onGearUpdated(gearInfo: EnumMap<GearType, StringBuilder>) = Unit
-
-  fun onBagUpdated(items: GdxArray<String>, selectionIndex: Int) = Unit
+  fun onItemsUpdated(items: GdxArray<String>, selectionIndex: Int) = Unit
 }
 
-data class InventoryViewModel(
+data class ShopViewModel(
   val bundle: I18NBundle,
   val engine: Engine,
   var playerEntity: Entity,
   val audioService: AudioService
 ) {
+  // TODO
+  //  switch SELL/BUY mode
+  //  add info to bottom of UI to indicate how to switch betweeen SELL/BUY (L/R keys?)
+  //  when switching mode then update UI with new items
+  //  whenever buying/selling an item then open a popup to ask for confirmation like we do it in reset dungeon
+  //  item sell price is 75% of its original cost
+  //  attribute tomes get more expensive every time you buy them (maybe separate component that stores the amount data? or compare current stats to base stats?)
+  //  ability tomes are removed/filtered if player already knows that ability
+  //  maybe we need to keep the stats table in the UI to show if an item increases/decreases the stats when the player wants to buy it
+  //  make items scrollable
   private var selectedItemIndex = -1
   private val itemStrings = gdxArrayOf<String>()
   private val itemEntities = gdxArrayOf<Entity>()
-  private val statsInfo = EnumMap<StatsType, StringBuilder>(StatsType::class.java)
-  private val gearInfo = EnumMap<GearType, StringBuilder>(GearType::class.java)
-  private val listeners = GdxSet<InventoryListener>()
+  private val listeners = GdxSet<ShopListener>()
 
-  fun addInventoryListener(listener: InventoryListener) = listeners.add(listener)
+  fun addShopListener(listener: ShopListener) = listeners.add(listener)
 
-  fun removeInventoryListener(listener: InventoryListener) = listeners.remove(listener)
+  fun removeShopListener(listener: ShopListener) = listeners.remove(listener)
 
   private fun GdxSet<InventoryListener>.dispatchBagUpdate() {
     this.forEach {
       it.onBagUpdated(itemStrings, selectedItemIndex)
       if (hasValidIndex()) {
         val itemCmp = itemEntities[selectedItemIndex].itemCmp
-        it.onSelectionChange(selectedItemIndex, itemCmp.regionKey(bundle), itemCmp.description(bundle))
+        it.onSelectionChange(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp))
       } else {
         it.onSelectionChange(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "")
       }
     }
   }
+
+  private fun itemName(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.name"]
+
+  private fun itemDescription(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.description"]
+
+  private fun itemRegionKey(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.skinRegionKey"]
 
   private fun hasValidIndex() = selectedItemIndex >= 0 && selectedItemIndex < itemEntities.size
 
@@ -68,15 +76,15 @@ data class InventoryViewModel(
       items.values().forEach { item ->
         itemEntities.add(item)
         item.itemCmp.also { itemCmp ->
-          itemStrings.add("${itemCmp.amount}x ${itemCmp.name(bundle)}")
+          itemStrings.add("${itemCmp.amount}x ${itemName(itemCmp)}")
         }
       }
 
       selectedItemIndex = if (items.isEmpty) -1 else 0
     }
 
-    listeners.dispatchBagUpdate()
-    statsAndGearInfo()
+    // listeners.dispatchBagUpdate()
+    // statsAndGearInfo()
   }
 
   fun moveItemSelectionIndex(indicesToMove: Int) {
@@ -99,17 +107,11 @@ data class InventoryViewModel(
 
     if (hasValidIndex()) {
       val itemCmp = itemEntities[selectedItemIndex].itemCmp
-      listeners.forEach {
-        it.onSelectionChange(
-          selectedItemIndex,
-          itemCmp.regionKey(bundle),
-          itemCmp.description(bundle)
-        )
-      }
+      listeners.forEach { it.onSelectionChange(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp)) }
     } else {
       listeners.forEach { it.onSelectionChange(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "") }
     }
-    statsAndGearInfo()
+    // statsAndGearInfo()
   }
 
   private fun StringBuilder.appendStatusValue(value: Float) {
@@ -128,76 +130,6 @@ data class InventoryViewModel(
       // bonus /malus stats
       appendStatusValue(totalValue - baseValue)
     }
-  }
-
-  private fun statsAndGearInfo() {
-    updateStatsInfo()
-    updateGearInfo()
-  }
-
-  private fun updateGearInfo() {
-    with(playerEntity.gearCmp.gear) {
-      GearType.VALUES.forEach { type ->
-        if (type == GearType.UNDEFINED) {
-          return@forEach
-        }
-
-        val stringBuilder = gearInfo.getOrPut(type) { StringBuilder(20) }
-        stringBuilder.clear()
-
-        stringBuilder.append(bundle[type.name]).append(": ")
-
-        if (type in this) {
-          stringBuilder.append(this[type].itemCmp.name(bundle))
-        } else {
-          stringBuilder.append("-")
-        }
-
-        if (stringBuilder.length > 21) {
-          stringBuilder.setLength(20)
-          stringBuilder.append(".")
-        }
-      }
-    }
-
-    listeners.forEach { it.onGearUpdated(gearInfo) }
-  }
-
-  private fun updateStatsInfo() {
-    val playerStatsCmp = playerEntity.statsCmp
-    val selectedItem: Entity? = if (hasValidIndex()) {
-      itemEntities[selectedItemIndex]
-    } else {
-      null
-    }
-
-    StatsType.VALUES.forEach { type ->
-      if (type == StatsType.MAX_LIFE || type == StatsType.MAX_MANA) {
-        return@forEach
-      }
-
-      val strBuilder = statsInfo.getOrPut(type) { StringBuilder(20) }
-      strBuilder.clear()
-
-      // build basic stat information (=base stats + current gear)
-      basicStatsInfo(type, strBuilder, playerStatsCmp)
-
-      // append stat manipulation of currently selected item
-      if (selectedItem != null) {
-        val itemCmp = selectedItem.itemCmp
-        val itemStatsCmp = selectedItem[StatsComponent.MAPPER] ?: return@forEach
-
-        if (itemCmp.gearType == GearType.UNDEFINED) {
-          // no gear -> if it is a consumable then show how it will manipulate the stats
-          consumableInfo(type, itemStatsCmp, strBuilder)
-        } else {
-          // gear -> compare with current gear
-          gearComparisonInfo(itemCmp, type, itemStatsCmp, strBuilder)
-        }
-      }
-    }
-
-    listeners.forEach { it.onStatsUpdated(statsInfo) }
   }
 
   private fun gearComparisonInfo(
@@ -326,13 +258,13 @@ data class InventoryViewModel(
           }
         } else {
           // update remaining amount of item
-          itemStrings[idxOf] = "${itemCmp.amount}x ${itemCmp.name(bundle)}"
+          itemStrings[idxOf] = "${itemCmp.amount}x ${itemName(itemCmp)}"
         }
-        listeners.dispatchBagUpdate()
+        // listeners.dispatchBagUpdate()
       }
     }
 
-    statsAndGearInfo()
+    // statsAndGearInfo()
   }
 
   fun returnToGame() {

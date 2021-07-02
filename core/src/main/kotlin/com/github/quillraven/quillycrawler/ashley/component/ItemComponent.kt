@@ -3,6 +3,7 @@ package com.github.quillraven.quillycrawler.ashley.component
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.GdxRuntimeException
+import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.Pool
 import ktx.ashley.get
 import ktx.ashley.mapperFor
@@ -30,6 +31,12 @@ class ItemComponent : Component, Pool.Poolable {
   var itemType = ItemType.UNDEFINED
   var gearType = GearType.UNDEFINED
   var amount = 1
+
+  fun name(bundle: I18NBundle): String = bundle["Item.${this.itemType.name}.name"]
+
+  fun description(bundle: I18NBundle): String = bundle["Item.${this.itemType.name}.description"]
+
+  fun regionKey(bundle: I18NBundle): String = bundle["Item.${this.itemType.name}.skinRegionKey"]
 
   override fun reset() {
     gearType = GearType.UNDEFINED

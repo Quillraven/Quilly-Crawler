@@ -27,7 +27,6 @@ import ktx.collections.iterate
 import ktx.collections.set
 import ktx.log.error
 import ktx.log.logger
-import java.util.*
 import kotlin.reflect.KClass
 
 interface CombatUiListener {
@@ -327,11 +326,9 @@ data class CombatViewModel(
   private fun onEntityBuffsUpdated(entity: Entity) {
     TMP_STRING_ARRAY.clear()
     playerEntity.buffCmp.buffs.values().forEach { buff ->
-      val buffRegionKey = try {
-        bundle["Buff.${buff::class.simpleName}.skinRegionKey"]
-      } catch (e: MissingResourceException) {
-        LOG.error { "Buff ${buff::class.simpleName} has no skin region key" }
-        "undefined"
+      var buffRegionKey = bundle["Buff.${buff::class.simpleName}.skinRegionKey"]
+      if (buffRegionKey.startsWith("???")) {
+        buffRegionKey = "undefined"
       }
       TMP_STRING_ARRAY.add(buffRegionKey)
     }
@@ -365,12 +362,7 @@ data class CombatViewModel(
         return@forEach
       }
 
-      var abilityName = try {
-        bundle["Ability.${commandClass.simpleName}.name"]
-      } catch (e: MissingResourceException) {
-        LOG.error { "Ability ${commandClass.simpleName} has no name i18n property" }
-        "UNKNOWN"
-      }
+      var abilityName = bundle["Ability.${commandClass.simpleName}.name"]
 
       if (!combatCmp.availableCommands[commandClass].hasSufficientMana()) {
         abilityName = "$DISABLED_COMMAND$abilityName[]"

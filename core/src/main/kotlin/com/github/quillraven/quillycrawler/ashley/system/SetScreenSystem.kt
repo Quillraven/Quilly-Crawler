@@ -10,6 +10,7 @@ import com.github.quillraven.quillycrawler.ashley.component.interactCmp
 import com.github.quillraven.quillycrawler.ashley.component.setScreenCmp
 import com.github.quillraven.quillycrawler.screen.CombatScreen
 import com.github.quillraven.quillycrawler.screen.InventoryScreen
+import com.github.quillraven.quillycrawler.screen.ShopScreen
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.log.debug
@@ -32,6 +33,7 @@ class SetScreenSystem(private val game: QuillyCrawler) :
       when (nextScreenType) {
         InventoryScreen::class -> game.addScreen(InventoryScreen(game, engine, entity))
         CombatScreen::class -> game.addScreen(CombatScreen(game, engine, entity, entity.interactCmp.lastInteractEntity))
+        ShopScreen::class -> game.addScreen(ShopScreen(game, engine, entity))
         else -> {
           LOG.error { "Unsupported screen type '${nextScreenType.simpleName}'" }
           return
@@ -47,6 +49,7 @@ class SetScreenSystem(private val game: QuillyCrawler) :
             enemyEntity = entity.interactCmp.lastInteractEntity
           }
         }
+        ShopScreen::class -> game.getScreen<ShopScreen>().viewModel.playerEntity = entity
       }
     }
 

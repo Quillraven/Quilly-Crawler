@@ -15,6 +15,7 @@ import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import com.github.quillraven.quillycrawler.event.GameInteractReaperEvent
 import com.github.quillraven.quillycrawler.screen.CombatScreen
+import com.github.quillraven.quillycrawler.screen.ShopScreen
 import ktx.ashley.*
 import ktx.collections.isNotEmpty
 import ktx.log.error
@@ -88,7 +89,9 @@ class InteractSystem(
         }
       }
       ActionType.SHOP -> {
-        // TODO change screen to shop screen
+        engine.configureEntity(player) {
+          with<SetScreenComponent> { screenType = ShopScreen::class }
+        }
       }
       else -> {
         LOG.error { "Undefined ActionType '${entity.actionableCmp.type}'" }
