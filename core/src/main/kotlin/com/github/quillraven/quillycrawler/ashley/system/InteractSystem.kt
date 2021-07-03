@@ -90,7 +90,10 @@ class InteractSystem(
       }
       ActionType.SHOP -> {
         engine.configureEntity(player) {
-          with<SetScreenComponent> { screenType = ShopScreen::class }
+          with<SetScreenComponent> {
+            screenType = ShopScreen::class
+            screenData = entity
+          }
         }
       }
       else -> {

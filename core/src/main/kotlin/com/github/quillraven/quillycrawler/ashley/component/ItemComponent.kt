@@ -31,17 +31,26 @@ class ItemComponent : Component, Pool.Poolable {
   var itemType = ItemType.UNDEFINED
   var gearType = GearType.UNDEFINED
   var amount = 1
+  var cost = 0
 
   fun name(bundle: I18NBundle): String = bundle["Item.${this.itemType.name}.name"]
 
   fun description(bundle: I18NBundle): String = bundle["Item.${this.itemType.name}.description"]
 
-  fun regionKey(bundle: I18NBundle): String = bundle["Item.${this.itemType.name}.skinRegionKey"]
+  fun regionKey(bundle: I18NBundle): String {
+    val regionKey = bundle["Item.${this.itemType.name}.skinRegionKey"]
+    if (regionKey.startsWith("???")) {
+      // regionKey not defined in bundle -> return undefined region which represents a fallback region in the atlas
+      return "undefined"
+    }
+    return regionKey
+  }
 
   override fun reset() {
     gearType = GearType.UNDEFINED
     itemType = ItemType.UNDEFINED
     amount = 1
+    cost = 0
   }
 
   companion object {

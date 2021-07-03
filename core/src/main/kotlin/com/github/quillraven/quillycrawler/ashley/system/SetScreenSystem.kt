@@ -20,7 +20,8 @@ import ktx.log.logger
 class SetScreenSystem(private val game: QuillyCrawler) :
   IteratingSystem(allOf(SetScreenComponent::class).exclude(RemoveComponent::class).get()) {
   override fun processEntity(entity: Entity, deltaTime: Float) {
-    val nextScreenType = entity.setScreenCmp.screenType
+    val screenCmp = entity.setScreenCmp
+    val nextScreenType = screenCmp.screenType
 
     if (nextScreenType == AbstractScreen::class) {
       LOG.error { "Cannot set AbstractScreen as a screen" }
@@ -33,7 +34,7 @@ class SetScreenSystem(private val game: QuillyCrawler) :
       when (nextScreenType) {
         InventoryScreen::class -> game.addScreen(InventoryScreen(game, engine, entity))
         CombatScreen::class -> game.addScreen(CombatScreen(game, engine, entity, entity.interactCmp.lastInteractEntity))
-        ShopScreen::class -> game.addScreen(ShopScreen(game, engine, entity))
+        ShopScreen::class -> game.addScreen(ShopScreen(game, engine, entity, screenCmp.screenData as Entity))
         else -> {
           LOG.error { "Unsupported screen type '${nextScreenType.simpleName}'" }
           return
@@ -49,7 +50,10 @@ class SetScreenSystem(private val game: QuillyCrawler) :
             enemyEntity = entity.interactCmp.lastInteractEntity
           }
         }
-        ShopScreen::class -> game.getScreen<ShopScreen>().viewModel.playerEntity = entity
+        ShopScreen::class -> game.getScreen<ShopScreen>().viewModel.run {
+          playerEntity = entity
+          shopEntity = screenCmp.screenData as Entity
+        }
       }
     }
 

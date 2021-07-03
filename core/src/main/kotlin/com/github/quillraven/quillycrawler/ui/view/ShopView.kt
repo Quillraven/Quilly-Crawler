@@ -2,59 +2,52 @@ package com.github.quillraven.quillycrawler.ui.view
 
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.controllers.Controller
-import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.Scaling
 import com.github.quillraven.commons.input.XboxInputProcessor
-import com.github.quillraven.quillycrawler.ui.SkinImages
-import com.github.quillraven.quillycrawler.ui.SkinLabelStyle
-import com.github.quillraven.quillycrawler.ui.SkinListStyle
-import com.github.quillraven.quillycrawler.ui.SkinTextButtonStyle
+import com.github.quillraven.quillycrawler.ashley.component.StatsType
+import com.github.quillraven.quillycrawler.ui.*
+import com.github.quillraven.quillycrawler.ui.model.ShopItemViewModel
 import com.github.quillraven.quillycrawler.ui.model.ShopListener
 import com.github.quillraven.quillycrawler.ui.model.ShopViewModel
 import ktx.scene2d.*
+import java.util.*
 import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
 
 class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBundle = viewModel.bundle) : View(),
   ShopListener {
+  // sell / buy mode buttons
+  private val btnSell: TextButton
+  private val btnBuy: TextButton
+
   // item details
   private val goldLabel: Label
-  private val bagItems: GdxList<String>
+  private val itemsScrollPane: ScrollPane
+  private val itemsToSellBuy: GdxList<ShopItemViewModel>
   private val itemImage: Image
   private val itemDescriptionLabel: Label
 
-  // gear labels
-  private val helmetLabel: Label
-  private val amuletLabel: Label
-  private val armorLabel: Label
-  private val weaponLabel: Label
-  private val shieldLabel: Label
-  private val glovesLabel: Label
-  private val bootsLabel: Label
-
   // stats labels
-  private val lifeLabel: Label
-  private val manaLabel: Label
-  private val strengthLabel: Label
-  private val agilityLabel: Label
-  private val intelligenceLabel: Label
-  private val physDamageLabel: Label
-  private val physArmorLabel: Label
-  private val magicDamageLabel: Label
-  private val magicArmorLabel: Label
+  private val statsLabels = EnumMap<StatsType, Label>(StatsType::class.java)
 
   init {
     setFillParent(true)
     background = skin.getDrawable(SkinImages.WINDOW.regionKey)
 
     // header
-    textButton(bundle["InventoryView.title"], SkinTextButtonStyle.TITLE.name) { cell ->
+    table {
+      this@ShopView.btnSell = textButton(this@ShopView.bundle["ShopView.sell"], SkinTextButtonStyle.BRIGHT.name) { c ->
+        c.padRight(5f)
+      }
+      this@ShopView.btnBuy = textButton(this@ShopView.bundle["ShopView.buy"], SkinTextButtonStyle.BRIGHT.name)
+    }
+
+    textButton(bundle["ShopView.title"], SkinTextButtonStyle.TITLE.name) { cell ->
       cell.expand()
         .top().padTop(8f)
         .height(25f).width(95f)
-        .colspan(2)
         .row()
     }
 
@@ -79,8 +72,20 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
       }
 
       // items
-      this@ShopView.bagItems =
-        listWidget<String>(SkinListStyle.DEFAULT.name).cell(padTop = 3f, padLeft = 2f, padRight = 2f)
+      val itemTable = Table(skin).apply {
+        defaults().expand().fill().pad(3f, 2f, 0f, 2f)
+        this@ShopView.itemsToSellBuy = GdxList<ShopItemViewModel>(skin, SkinListStyle.DEFAULT.name)
+        this.add(this@ShopView.itemsToSellBuy)
+      }
+      this@ShopView.itemsScrollPane = scrollPane(SkinScrollPaneStyle.NO_BGD.name) { spCell ->
+        setScrollingDisabled(true, false)
+        setScrollbarsVisible(false)
+
+        actor = itemTable
+
+        spCell.expand()
+          .padBottom(3f)
+      }
 
       cell.expand()
         .padBottom(3f)
@@ -105,41 +110,26 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
           .row()
       }
 
-      // gear
-      table { gearTableCell ->
-        background = skin.getDrawable(SkinImages.FRAME_2.regionKey)
-        defaults().width(40f).expandX().fill().left()
-
-        this@ShopView.helmetLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-        this@ShopView.amuletLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
-        this@ShopView.armorLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-        this@ShopView.shieldLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
-        this@ShopView.bootsLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-        this@ShopView.glovesLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
-        this@ShopView.weaponLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-
-        gearTableCell.expand().fill().colspan(2)
-          .padTop(2f)
-          .width(176f).height(34f)
-          .row()
-      }
+      // filler cell to move item info to top and stats to bottom
+      table { tCell -> tCell.fill().expand().colspan(2).row() }
 
       // stats
       table { statsTableCell ->
         background = skin.getDrawable(SkinImages.FRAME_2.regionKey)
         defaults().width(86f).fill().left()
 
-        this@ShopView.lifeLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-        this@ShopView.physDamageLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
-        this@ShopView.manaLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-        this@ShopView.magicDamageLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
-        this@ShopView.physArmorLabel = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
-        this@ShopView.magicArmorLabel = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
+        this@ShopView.statsLabels[StatsType.LIFE] = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+        this@ShopView.statsLabels[StatsType.PHYSICAL_DAMAGE] = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
+        this@ShopView.statsLabels[StatsType.MANA] = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+        this@ShopView.statsLabels[StatsType.MAGIC_DAMAGE] = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
+        this@ShopView.statsLabels[StatsType.PHYSICAL_ARMOR] = label("", SkinLabelStyle.DEFAULT.name) { it.padLeft(8f) }
+        this@ShopView.statsLabels[StatsType.MAGIC_ARMOR] = label("", SkinLabelStyle.DEFAULT.name) { it.row() }
 
-        this@ShopView.strengthLabel = label("", SkinLabelStyle.DEFAULT.name) { it.colspan(2).padLeft(8f).row() }
-        this@ShopView.intelligenceLabel =
+        this@ShopView.statsLabels[StatsType.STRENGTH] =
           label("", SkinLabelStyle.DEFAULT.name) { it.colspan(2).padLeft(8f).row() }
-        this@ShopView.agilityLabel =
+        this@ShopView.statsLabels[StatsType.INTELLIGENCE] =
+          label("", SkinLabelStyle.DEFAULT.name) { it.colspan(2).padLeft(8f).row() }
+        this@ShopView.statsLabels[StatsType.AGILITY] =
           label("", SkinLabelStyle.DEFAULT.name) { it.colspan(2).padLeft(8f).padBottom(3f) }
 
         statsTableCell.expandX().fillX()
@@ -149,6 +139,7 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
       }
 
       tableCell.expand()
+        .top()
         .padBottom(3f)
         .width(180f).height(120f)
         .row()
@@ -158,19 +149,33 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
     table { cell ->
       defaults().padRight(2f)
 
-      image(skin.getDrawable(SkinImages.GAME_PAD_DOWN.regionKey))
-      image(skin.getDrawable(SkinImages.GAME_PAD_UP.regionKey))
-      image(skin.getDrawable(SkinImages.KEY_BOARD_DOWN.regionKey))
-      image(skin.getDrawable(SkinImages.KEY_BOARD_UP.regionKey))
-      label(this@ShopView.bundle["InventoryView.navigateInfo1"], SkinLabelStyle.DEFAULT.name)
+      table { tCell ->
+        defaults().padRight(2f)
 
-      image(skin.getDrawable(SkinImages.GAME_PAD_A.regionKey)) { it.padLeft(20f) }
+        image(skin.getDrawable(SkinImages.GAME_PAD_DOWN.regionKey))
+        image(skin.getDrawable(SkinImages.GAME_PAD_UP.regionKey))
+        image(skin.getDrawable(SkinImages.KEY_BOARD_DOWN.regionKey))
+        image(skin.getDrawable(SkinImages.KEY_BOARD_UP.regionKey))
+        label(this@ShopView.bundle["ShopView.navigateInfo1"], SkinLabelStyle.DEFAULT.name) { lblCell ->
+          lblCell.row()
+        }
+
+        image(skin.getDrawable(SkinImages.GAME_PAD_LEFT.regionKey))
+        image(skin.getDrawable(SkinImages.GAME_PAD_RIGHT.regionKey))
+        image(skin.getDrawable(SkinImages.KEY_BOARD_LEFT.regionKey))
+        image(skin.getDrawable(SkinImages.KEY_BOARD_RIGHT.regionKey))
+        label(this@ShopView.bundle["ShopView.navigateInfo2"], SkinLabelStyle.DEFAULT.name)
+
+        tCell.expand().left()
+      }
+
+      image(skin.getDrawable(SkinImages.GAME_PAD_A.regionKey)) { it.padLeft(10f) }
       image(skin.getDrawable(SkinImages.KEY_BOARD_SPACE.regionKey))
-      label(this@ShopView.bundle["InventoryView.navigateInfo2"], SkinLabelStyle.DEFAULT.name)
+      label(this@ShopView.bundle["ShopView.navigateInfo3"], SkinLabelStyle.DEFAULT.name)
 
-      image(skin.getDrawable(SkinImages.GAME_PAD_B.regionKey)) { it.padLeft(20f) }
+      image(skin.getDrawable(SkinImages.GAME_PAD_B.regionKey)) { it.padLeft(10f) }
       image(skin.getDrawable(SkinImages.KEY_BOARD_ESCAPE.regionKey))
-      label(this@ShopView.bundle["InventoryView.navigateInfo3"], SkinLabelStyle.DEFAULT.name)
+      label(this@ShopView.bundle["ShopView.navigateInfo4"], SkinLabelStyle.DEFAULT.name)
 
       cell.expand().left()
         .colspan(2)
@@ -183,43 +188,84 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
   override fun onShow() {
     viewModel.addShopListener(this)
 
+    // update gold info
     with(goldLabel) {
       text.setLength(0)
       text.append(viewModel.gold())
       invalidateHierarchy()
     }
-    bagItems.run {
-      clearItems()
-      viewModel.load()
+
+    // update stats info
+    val playerStats = viewModel.playerStats()
+    playerStats.forEach { entry ->
+      statsLabels[entry.key]?.setText(entry.value)
     }
+
+    // set SELL mode as default
+    setSellMode()
   }
 
   override fun onHide() {
     viewModel.removeShopListener(this)
   }
 
-  override fun onSelectionChange(newIndex: Int, regionKey: String, description: String) {
-    bagItems.selectedIndex = newIndex
-
-    itemImage.drawable = skin.getDrawable(regionKey)
-    itemImage.isVisible = regionKey != SkinImages.UNDEFINED.regionKey
-
-    itemDescriptionLabel.setText(description)
+  private fun setSellMode() {
+    itemsToSellBuy.run {
+      clear()
+      setItems(viewModel.setSellMode())
+    }
+    selectItem(0)
+    btnBuy.label.removeSelectionEffect()
+    btnSell.label.addSelectionEffect()
   }
 
-  /*override fun onBagUpdated(items: GdxArray<String>, selectionIndex: Int) {
-    bagItems.run {
+  private fun setBuyMode() {
+    itemsToSellBuy.run {
       clear()
-      setItems(items)
-      selectedIndex = selectionIndex
+      setItems(viewModel.setBuyMode())
     }
-  }*/
+    selectItem(0)
+    btnSell.label.removeSelectionEffect()
+    btnBuy.label.addSelectionEffect()
+  }
+
+  private fun switchMode() {
+    if (btnSell.label.actions.isEmpty) {
+      setSellMode()
+    } else {
+      setBuyMode()
+    }
+  }
+
+  private fun selectItem(idx: Int) {
+    if (itemsToSellBuy.items.isEmpty) {
+      itemImage.isVisible = false
+      itemDescriptionLabel.setText("")
+      itemsToSellBuy.selectedIndex = -1
+      return
+    }
+
+    itemsToSellBuy.selectedIndex = when {
+      idx < 0 -> itemsToSellBuy.items.size - 1
+      idx >= itemsToSellBuy.items.size -> 0
+      else -> idx
+    }
+
+    // adjust scrolling
+    itemsScrollPane.scrollPercentY = itemsToSellBuy.selectedIndex.toFloat() / itemsToSellBuy.items.size
+
+    // update item info
+    itemDescriptionLabel.setText(itemsToSellBuy.selected.description)
+    itemImage.drawable = skin.getDrawable(itemsToSellBuy.selected.regionKey)
+    itemImage.isVisible = itemsToSellBuy.selected.regionKey != SkinImages.UNDEFINED.regionKey
+  }
 
   override fun keyDown(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.DOWN -> viewModel.moveItemSelectionIndex(1)
-      Input.Keys.UP -> viewModel.moveItemSelectionIndex(-1)
-      Input.Keys.SPACE -> viewModel.equipOrUseSelectedItem()
+      Input.Keys.DOWN -> selectItem(itemsToSellBuy.selectedIndex + 1)
+      Input.Keys.UP -> selectItem(itemsToSellBuy.selectedIndex - 1)
+      Input.Keys.LEFT, Input.Keys.RIGHT -> switchMode()
+//      Input.Keys.SPACE -> viewModel.equipOrUseSelectedItem()
       Input.Keys.ESCAPE -> viewModel.returnToGame()
       else -> return false
     }
@@ -229,9 +275,10 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
     when (buttonCode) {
-      XboxInputProcessor.BUTTON_DOWN -> viewModel.moveItemSelectionIndex(1)
-      XboxInputProcessor.BUTTON_UP -> viewModel.moveItemSelectionIndex(-1)
-      XboxInputProcessor.BUTTON_A -> viewModel.equipOrUseSelectedItem()
+      XboxInputProcessor.BUTTON_DOWN -> selectItem(itemsToSellBuy.selectedIndex + 1)
+      XboxInputProcessor.BUTTON_UP -> selectItem(itemsToSellBuy.selectedIndex - 1)
+      XboxInputProcessor.BUTTON_LEFT, XboxInputProcessor.BUTTON_RIGHT -> switchMode()
+//      XboxInputProcessor.BUTTON_A -> viewModel.equipOrUseSelectedItem()
       XboxInputProcessor.BUTTON_B -> viewModel.returnToGame()
       else -> return false
     }

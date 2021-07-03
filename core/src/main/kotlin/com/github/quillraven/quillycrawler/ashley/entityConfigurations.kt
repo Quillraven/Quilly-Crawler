@@ -139,6 +139,7 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "WITCH", "idle", 0.35f)
       withBox2DComponents(world, BodyType.StaticBody, x, y, 1.25f, 1.875f, 0.35f)
       with<ActionableComponent> { type = ActionType.SHOP }
+      with<BagComponent>()
     }
     name == "REAPER" -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "REAPER", "idle", 0.4f)
@@ -186,7 +187,6 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<PlayerComponent>()
     with<PlayerControlComponent>()
     with<BagComponent> {
-      // TODO remove debug stuff
       items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION, 5)
       items[ItemType.MANA_POTION] = createItemEntity(ItemType.MANA_POTION, 1)
     }

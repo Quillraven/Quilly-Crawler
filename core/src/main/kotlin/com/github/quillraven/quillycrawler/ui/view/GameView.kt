@@ -81,16 +81,6 @@ class GameView(private val viewModel: GameViewModel, bundle: I18NBundle = viewMo
     }
   }
 
-  private fun Label.addSelectionEffect() {
-    this.clearActions()
-    this += forever(sequence(fadeOut(0.5f), fadeIn(0.5f)))
-  }
-
-  private fun Label.removeSelectionEffect() {
-    this.clearActions()
-    this.color.a = 1f
-  }
-
   override fun onDungeonReset(goldLoss: Int, newLevel: Int) {
     setInputControl()
 
