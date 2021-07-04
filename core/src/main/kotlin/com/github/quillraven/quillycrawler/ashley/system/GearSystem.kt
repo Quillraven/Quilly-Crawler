@@ -20,6 +20,7 @@ class GearSystem :
   EntityListener,
   IteratingSystem(allOf(GearComponent::class, EquipComponent::class).exclude(RemoveComponent::class).get()) {
   private val itemFamily = allOf(ItemComponent::class).get()
+  private val gearFamily = allOf(GearComponent::class).get()
 
   override fun addedToEngine(engine: Engine) {
     super.addedToEngine(engine)
@@ -36,7 +37,7 @@ class GearSystem :
   override fun entityRemoved(itemEntity: Entity) {
     val itemCmp = itemEntity.itemCmp
 
-    entities.forEach { entity ->
+    engine.getEntitiesFor(gearFamily).forEach { entity ->
       val gearCmp = entity.gearCmp
       if (itemEntity == gearCmp.gear[itemCmp.gearType]) {
         // item gets removed from engine -> remove it from gear if it was equipped

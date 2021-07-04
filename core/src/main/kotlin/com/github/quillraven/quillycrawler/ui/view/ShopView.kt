@@ -12,6 +12,7 @@ import com.github.quillraven.quillycrawler.ui.*
 import com.github.quillraven.quillycrawler.ui.model.ShopItemViewModel
 import com.github.quillraven.quillycrawler.ui.model.ShopListener
 import com.github.quillraven.quillycrawler.ui.model.ShopViewModel
+import ktx.collections.GdxArray
 import ktx.scene2d.*
 import java.util.*
 import com.badlogic.gdx.scenes.scene2d.ui.List as GdxList
@@ -195,12 +196,6 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
       invalidateHierarchy()
     }
 
-    // update stats info
-    val playerStats = viewModel.playerStats()
-    playerStats.forEach { entry ->
-      statsLabels[entry.key]?.setText(entry.value)
-    }
-
     // set SELL mode as default
     setSellMode()
   }
@@ -210,20 +205,14 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
   }
 
   private fun setSellMode() {
-    itemsToSellBuy.run {
-      clear()
-      setItems(viewModel.setSellMode())
-    }
+    itemsToSellBuy.setItems(viewModel.setSellMode())
     selectItem(0)
     btnBuy.label.removeSelectionEffect()
     btnSell.label.addSelectionEffect()
   }
 
   private fun setBuyMode() {
-    itemsToSellBuy.run {
-      clear()
-      setItems(viewModel.setBuyMode())
-    }
+    itemsToSellBuy.setItems(viewModel.setBuyMode())
     selectItem(0)
     btnSell.label.removeSelectionEffect()
     btnBuy.label.addSelectionEffect()
@@ -242,6 +231,11 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
       itemImage.isVisible = false
       itemDescriptionLabel.setText("")
       itemsToSellBuy.selectedIndex = -1
+      // update stats info
+      val playerStats = viewModel.playerStats(-1)
+      playerStats.forEach { entry ->
+        statsLabels[entry.key]?.setText(entry.value)
+      }
       return
     }
 
@@ -258,14 +252,46 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
     itemDescriptionLabel.setText(itemsToSellBuy.selected.description)
     itemImage.drawable = skin.getDrawable(itemsToSellBuy.selected.regionKey)
     itemImage.isVisible = itemsToSellBuy.selected.regionKey != SkinImages.UNDEFINED.regionKey
+
+    // update stats info
+    val playerStats = viewModel.playerStats(itemsToSellBuy.selectedIndex)
+    playerStats.forEach { entry ->
+      statsLabels[entry.key]?.setText(entry.value)
+    }
+  }
+
+  override fun onGoldUpdated(gold: Int) {
+    with(goldLabel) {
+      text.setLength(0)
+      text.append(gold)
+      invalidateHierarchy()
+    }
+  }
+
+  override fun onItemsUpdated(items: GdxArray<ShopItemViewModel>) {
+    var newIdx = itemsToSellBuy.selectedIndex
+    itemsToSellBuy.setItems(items)
+    // need to set index to -1 because otherwise item is not correctly
+    // highlighted if the index doesn't change
+    itemsToSellBuy.selectedIndex = -1
+    if (newIdx >= items.size) {
+      newIdx = items.size - 1
+    }
+    selectItem(newIdx)
   }
 
   override fun keyDown(keycode: Int): Boolean {
     when (keycode) {
-      Input.Keys.DOWN -> selectItem(itemsToSellBuy.selectedIndex + 1)
-      Input.Keys.UP -> selectItem(itemsToSellBuy.selectedIndex - 1)
+      Input.Keys.DOWN -> {
+        selectItem(itemsToSellBuy.selectedIndex + 1)
+        viewModel.updateSelection()
+      }
+      Input.Keys.UP -> {
+        selectItem(itemsToSellBuy.selectedIndex - 1)
+        viewModel.updateSelection()
+      }
       Input.Keys.LEFT, Input.Keys.RIGHT -> switchMode()
-//      Input.Keys.SPACE -> viewModel.equipOrUseSelectedItem()
+      Input.Keys.SPACE -> viewModel.selectItem(itemsToSellBuy.selectedIndex)
       Input.Keys.ESCAPE -> viewModel.returnToGame()
       else -> return false
     }
@@ -275,10 +301,16 @@ class ShopView(private val viewModel: ShopViewModel, private val bundle: I18NBun
 
   override fun buttonDown(controller: Controller?, buttonCode: Int): Boolean {
     when (buttonCode) {
-      XboxInputProcessor.BUTTON_DOWN -> selectItem(itemsToSellBuy.selectedIndex + 1)
-      XboxInputProcessor.BUTTON_UP -> selectItem(itemsToSellBuy.selectedIndex - 1)
+      XboxInputProcessor.BUTTON_DOWN -> {
+        selectItem(itemsToSellBuy.selectedIndex + 1)
+        viewModel.updateSelection()
+      }
+      XboxInputProcessor.BUTTON_UP -> {
+        selectItem(itemsToSellBuy.selectedIndex - 1)
+        viewModel.updateSelection()
+      }
       XboxInputProcessor.BUTTON_LEFT, XboxInputProcessor.BUTTON_RIGHT -> switchMode()
-//      XboxInputProcessor.BUTTON_A -> viewModel.equipOrUseSelectedItem()
+      XboxInputProcessor.BUTTON_A -> viewModel.selectItem(itemsToSellBuy.selectedIndex)
       XboxInputProcessor.BUTTON_B -> viewModel.returnToGame()
       else -> return false
     }

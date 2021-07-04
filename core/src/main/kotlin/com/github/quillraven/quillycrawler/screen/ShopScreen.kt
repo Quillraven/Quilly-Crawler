@@ -24,6 +24,8 @@ class ShopScreen(game: QuillyCrawler, private val engine: Engine, playerEntity: 
 
   override fun show() {
     engine.getSystem<PlayerControlSystem>().setProcessing(false)
+
+    viewModel.setSellMode(false)
     stage.addActor(view)
 
     viewModel.shopEntity.bagCmp.run {
