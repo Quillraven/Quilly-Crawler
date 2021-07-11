@@ -17,7 +17,9 @@ import com.github.quillraven.quillycrawler.ai.EnemyState
 import com.github.quillraven.quillycrawler.ai.PlayerState
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.assets.TextureAtlasAssets
-import com.github.quillraven.quillycrawler.combat.command.*
+import com.github.quillraven.quillycrawler.combat.command.CommandAttack
+import com.github.quillraven.quillycrawler.combat.command.CommandDeath
+import com.github.quillraven.quillycrawler.combat.command.CommandUseItem
 import ktx.ashley.*
 import ktx.box2d.BodyDefinition
 import ktx.box2d.body
@@ -139,6 +141,7 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "WITCH", "idle", 0.35f)
       withBox2DComponents(world, BodyType.StaticBody, x, y, 1.25f, 1.875f, 0.35f)
       with<ActionableComponent> { type = ActionType.SHOP }
+      with<BagComponent>()
     }
     name == "REAPER" -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "REAPER", "idle", 0.4f)
@@ -186,7 +189,6 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<PlayerComponent>()
     with<PlayerControlComponent>()
     with<BagComponent> {
-      // TODO remove debug stuff
       items[ItemType.HEALTH_POTION] = createItemEntity(ItemType.HEALTH_POTION, 5)
       items[ItemType.MANA_POTION] = createItemEntity(ItemType.MANA_POTION, 1)
     }
@@ -195,13 +197,13 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<CameraLockComponent>()
     with<GearComponent>()
     with<StatsComponent> {
-      stats[StatsType.LIFE] = 10f
+      stats[StatsType.LIFE] = 30f
       stats[StatsType.MAX_LIFE] = 30f
       stats[StatsType.MANA] = 10f
       stats[StatsType.MAX_MANA] = 10f
-      stats[StatsType.STRENGTH] = 5f
-      stats[StatsType.AGILITY] = 5f
-      stats[StatsType.INTELLIGENCE] = 5f
+      stats[StatsType.STRENGTH] = StatsComponent.BASE_STRENGTH
+      stats[StatsType.AGILITY] = StatsComponent.BASE_AGILITY
+      stats[StatsType.INTELLIGENCE] = StatsComponent.BASE_INTELLIGENCE
       stats[StatsType.PHYSICAL_DAMAGE] = 7f
       stats[StatsType.MAGIC_DAMAGE] = 4f
       stats[StatsType.PHYSICAL_ARMOR] = 3f
@@ -211,82 +213,6 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
       learn<CommandAttack>()
       learn<CommandDeath>()
       learn<CommandUseItem>()
-      //TODO remove debug stuff
-      learn<CommandProtect>()
-      learn<CommandFirebolt>()
-      learn<CommandExplosion>()
-      learn<CommandHeal>()
-    }
-  }
-}
-
-fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
-  return this.entity {
-    with<ItemComponent> {
-      itemType = type
-      gearType = type.gearType
-      amount = numItems
-    }
-
-    when (type) {
-      ItemType.BUCKLER -> {
-        with<StatsComponent> {
-          stats[StatsType.PHYSICAL_ARMOR] = 2f
-        }
-      }
-      ItemType.CURSED_NECKLACE -> {
-        with<StatsComponent> {
-          stats[StatsType.MAX_MANA] = 35f
-          stats[StatsType.INTELLIGENCE] = 10f
-          stats[StatsType.MAGIC_DAMAGE] = 8f
-          stats[StatsType.PHYSICAL_DAMAGE] = -4f
-          stats[StatsType.PHYSICAL_ARMOR] = -3f
-        }
-      }
-      ItemType.HAT -> {
-        with<StatsComponent> {
-          stats[StatsType.PHYSICAL_ARMOR] = 1f
-          stats[StatsType.INTELLIGENCE] = 1f
-        }
-      }
-      ItemType.HEALTH_POTION -> {
-        with<ConsumableComponent>()
-        with<StatsComponent> {
-          stats[StatsType.LIFE] = 50f
-        }
-      }
-      ItemType.MANA_POTION -> {
-        with<ConsumableComponent>()
-        with<StatsComponent> {
-          stats[StatsType.MANA] = 10f
-        }
-      }
-      ItemType.LEATHER_BOOTS -> {
-        with<StatsComponent> {
-          stats[StatsType.PHYSICAL_ARMOR] = 1f
-          stats[StatsType.AGILITY] = 1f
-        }
-      }
-      ItemType.LEATHER_GLOVES -> {
-        with<StatsComponent> {
-          stats[StatsType.PHYSICAL_ARMOR] = 1f
-          stats[StatsType.STRENGTH] = 1f
-        }
-      }
-      ItemType.ROBE -> {
-        with<StatsComponent> {
-          stats[StatsType.PHYSICAL_ARMOR] = 2f
-          stats[StatsType.INTELLIGENCE] = 3f
-        }
-      }
-      ItemType.ROD -> {
-        with<StatsComponent> {
-          stats[StatsType.MAGIC_DAMAGE] = 3f
-          stats[StatsType.PHYSICAL_DAMAGE] = 1f
-        }
-      }
-      ItemType.UNDEFINED -> {
-      }
     }
   }
 }

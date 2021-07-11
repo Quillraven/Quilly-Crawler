@@ -23,6 +23,15 @@ class DamageEmitterSystem(private val gameEventDispatcher: GameEventDispatcher) 
 
     if (damageEmitterCmp.damageDelay <= 0f) {
       // deal damage
+      if (damageEmitterCmp.source.isPlayer) {
+        // player damage gets increased by strength and intelligence
+        val statsCmp = damageEmitterCmp.source.statsCmp
+        val physInc = statsCmp.totalStatValue(damageEmitterCmp.source, StatsType.STRENGTH) * 0.01f
+        val magInc = statsCmp.totalStatValue(damageEmitterCmp.source, StatsType.INTELLIGENCE) * 0.01f
+        damageEmitterCmp.physicalDamage *= (1f + physInc)
+        damageEmitterCmp.magicDamage *= (1f + magInc)
+      }
+
       // dispatch event so that the target could react e.g. via a buff that reduces the incoming damage by
       // modifying the emitter data
       val physicalDamageBefore = damageEmitterCmp.physicalDamage

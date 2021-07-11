@@ -52,18 +52,12 @@ data class InventoryViewModel(
       it.onBagUpdated(itemStrings, selectedItemIndex)
       if (hasValidIndex()) {
         val itemCmp = itemEntities[selectedItemIndex].itemCmp
-        it.onSelectionChange(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp))
+        it.onSelectionChange(selectedItemIndex, itemCmp.regionKey(bundle), itemCmp.description(bundle))
       } else {
         it.onSelectionChange(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "")
       }
     }
   }
-
-  private fun itemName(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.name"]
-
-  private fun itemDescription(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.description"]
-
-  private fun itemRegionKey(itemCmp: ItemComponent) = bundle["Item.${itemCmp.itemType.name}.skinRegionKey"]
 
   private fun hasValidIndex() = selectedItemIndex >= 0 && selectedItemIndex < itemEntities.size
 
@@ -74,7 +68,7 @@ data class InventoryViewModel(
       items.values().forEach { item ->
         itemEntities.add(item)
         item.itemCmp.also { itemCmp ->
-          itemStrings.add("${itemCmp.amount}x ${itemName(itemCmp)}")
+          itemStrings.add("${itemCmp.amount}x ${itemCmp.name(bundle)}")
         }
       }
 
@@ -105,7 +99,13 @@ data class InventoryViewModel(
 
     if (hasValidIndex()) {
       val itemCmp = itemEntities[selectedItemIndex].itemCmp
-      listeners.forEach { it.onSelectionChange(selectedItemIndex, itemRegionKey(itemCmp), itemDescription(itemCmp)) }
+      listeners.forEach {
+        it.onSelectionChange(
+          selectedItemIndex,
+          itemCmp.regionKey(bundle),
+          itemCmp.description(bundle)
+        )
+      }
     } else {
       listeners.forEach { it.onSelectionChange(selectedItemIndex, SkinImages.UNDEFINED.regionKey, "") }
     }
@@ -148,7 +148,7 @@ data class InventoryViewModel(
         stringBuilder.append(bundle[type.name]).append(": ")
 
         if (type in this) {
-          stringBuilder.append(itemName(this[type].itemCmp))
+          stringBuilder.append(this[type].itemCmp.name(bundle))
         } else {
           stringBuilder.append("-")
         }
@@ -326,7 +326,7 @@ data class InventoryViewModel(
           }
         } else {
           // update remaining amount of item
-          itemStrings[idxOf] = "${itemCmp.amount}x ${itemName(itemCmp)}"
+          itemStrings[idxOf] = "${itemCmp.amount}x ${itemCmp.name(bundle)}"
         }
         listeners.dispatchBagUpdate()
       }

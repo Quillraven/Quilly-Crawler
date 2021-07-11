@@ -4,6 +4,8 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.controllers.Controller
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
+import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.I18NBundle
 import com.badlogic.gdx.utils.Scaling
@@ -11,10 +13,7 @@ import com.badlogic.gdx.utils.StringBuilder
 import com.github.quillraven.commons.input.XboxInputProcessor
 import com.github.quillraven.quillycrawler.ashley.component.GearType
 import com.github.quillraven.quillycrawler.ashley.component.StatsType
-import com.github.quillraven.quillycrawler.ui.SkinImages
-import com.github.quillraven.quillycrawler.ui.SkinLabelStyle
-import com.github.quillraven.quillycrawler.ui.SkinListStyle
-import com.github.quillraven.quillycrawler.ui.SkinTextButtonStyle
+import com.github.quillraven.quillycrawler.ui.*
 import com.github.quillraven.quillycrawler.ui.model.InventoryListener
 import com.github.quillraven.quillycrawler.ui.model.InventoryViewModel
 import ktx.collections.GdxArray
@@ -26,6 +25,7 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
   InventoryListener {
   // item details
   private val goldLabel: Label
+  private val itemsScrollPane: ScrollPane
   private val bagItems: GdxList<String>
   private val itemImage: Image
   private val itemDescriptionLabel: Label
@@ -84,8 +84,17 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
       }
 
       // items
-      this@InventoryView.bagItems =
-        listWidget<String>(SkinListStyle.DEFAULT.name).cell(padTop = 3f, padLeft = 2f, padRight = 2f)
+      val itemTable = Table(skin).apply {
+        defaults().expand().fill().pad(3f, 2f, 0f, 2f)
+        this@InventoryView.bagItems = GdxList<String>(skin, SkinListStyle.DEFAULT.name)
+        this.add(this@InventoryView.bagItems)
+      }
+      this@InventoryView.itemsScrollPane = scrollPane(SkinScrollPaneStyle.NO_BGD.name) { spCell ->
+        setScrollingDisabled(true, false)
+        setScrollbarsVisible(false)
+        actor = itemTable
+        spCell.expand().padBottom(3f)
+      }
 
       cell.expand()
         .padBottom(3f)
@@ -210,6 +219,12 @@ class InventoryView(private val viewModel: InventoryViewModel, private val bundl
     itemImage.isVisible = regionKey != SkinImages.UNDEFINED.regionKey
 
     itemDescriptionLabel.setText(description)
+
+    if (bagItems.items.size > 0) {
+      itemsScrollPane.scrollPercentY = bagItems.selectedIndex.toFloat() / bagItems.items.size
+    } else {
+      itemsScrollPane.scrollPercentY = 0f
+    }
   }
 
   override fun onStatsUpdated(statsInfo: EnumMap<StatsType, StringBuilder>) {

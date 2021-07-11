@@ -27,11 +27,15 @@ enum class SkinImages(val regionKey: String) {
   FRAME_GREEN("frame-green"),
   GAME_PAD_DOWN("gamepad-down"),
   GAME_PAD_UP("gamepad-up"),
+  GAME_PAD_LEFT("gamepad-left"),
+  GAME_PAD_RIGHT("gamepad-right"),
   GAME_PAD_A("gamepad-a"),
   GAME_PAD_B("gamepad-b"),
   KEY_BOARD_SPACE("button-space"),
   KEY_BOARD_UP("button-up"),
   KEY_BOARD_DOWN("button-down"),
+  KEY_BOARD_LEFT("button-left"),
+  KEY_BOARD_RIGHT("button-right"),
   KEY_BOARD_ESCAPE("button-esc"),
   SELECTION("selection"),
   GOLD("gold"),
@@ -56,7 +60,7 @@ enum class SkinListStyle {
 }
 
 enum class SkinScrollPaneStyle {
-  DEFAULT, BRIGHT
+  DEFAULT, BRIGHT, NO_BGD
 }
 
 enum class SkinBarStyle {
@@ -171,6 +175,7 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
         bottomHeight = 1f
       }
     }
+    skin.scrollPane(SkinScrollPaneStyle.NO_BGD.name)
 
     // bar
     skin.bar(SkinBarStyle.LIFE.name, skin[SkinImages.BAR_FRAME.regionKey], skin[SkinImages.BAR_RED.regionKey]) {

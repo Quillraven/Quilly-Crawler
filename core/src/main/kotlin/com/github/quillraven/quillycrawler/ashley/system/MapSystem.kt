@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.utils.GdxRuntimeException
 import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.map.MapService
 import com.github.quillraven.quillycrawler.ashley.component.GoToLevel
@@ -34,7 +35,23 @@ class MapSystem(
 
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val playerCmp = entity.playerCmp
-    playerCmp.dungeonLevel = entity.goToLevelCmp.targetLevel
+    val goToLevelCmp = entity.goToLevelCmp
+    if (goToLevelCmp.targetLevel < playerCmp.dungeonLevel) {
+      // player used REAPER to go back in levels -> update currentMapFolder
+      var lvl = goToLevelCmp.targetLevel
+      var folderPath = "maps/level_${lvl}"
+      var mapFolder = Gdx.files.internal(folderPath)
+      while (!mapFolder.exists()) {
+        --lvl
+        folderPath = "maps/level_${lvl}"
+        mapFolder = Gdx.files.internal(folderPath)
+        if (lvl <= 0) {
+          throw GdxRuntimeException("There are maps defined for level ${goToLevelCmp.targetLevel} and above")
+        }
+      }
+      currentMapFolder = mapFolder
+    }
+    playerCmp.dungeonLevel = goToLevelCmp.targetLevel
     LOG.debug { "Moving to dungeon level ${playerCmp.dungeonLevel}" }
 
     val nextMapFilePath = nextMap(playerCmp.dungeonLevel)
@@ -53,7 +70,7 @@ class MapSystem(
     val folderPath = "maps/level_${dungeonLevel}"
     val mapFolder = Gdx.files.internal(folderPath)
     if (!mapFolder.exists()) {
-      LOG.debug { "Map folder '$folderPath' does not exist" }
+      LOG.debug { "Map folder '$folderPath' does not exist. Using ${currentMapFolder.path()} instead" }
       if (currentMapFolder.path().isBlank()) {
         return ""
       }

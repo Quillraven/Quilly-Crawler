@@ -42,11 +42,11 @@
   </object>
  </objectgroup>
  <objectgroup id="6" name="entities">
-  <object id="6" name="PLAYER" x="127" y="129">
+  <object id="6" name="PLAYER" x="152.25" y="240.25">
    <point/>
   </object>
   <object id="7" name="EXIT" x="144.535" y="17.1513" width="13.4304" height="11.6974"/>
-  <object id="8" name="CHEST_COMMON" x="230.5" y="176.75">
+  <object id="8" name="CHEST_COMMON" x="222.75" y="176.25">
    <point/>
   </object>
   <object id="9" name="CHEST_RARE" x="224.75" y="204.5">

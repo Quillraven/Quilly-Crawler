@@ -1,5 +1,6 @@
 package com.github.quillraven.quillycrawler.screen
 
+import com.badlogic.gdx.utils.I18NBundle
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.assets.I18NAssets
@@ -19,6 +20,7 @@ class StartUpScreen(private val game: QuillyCrawler) : AbstractScreen(game) {
   override fun show() {
     // load mandatory UI assets
     val timeForUI = measureTimeMillis {
+      I18NBundle.setExceptionOnMissingKey(false)
       assetStorage.loadSync(I18NAssets.DEFAULT.descriptor)
       configureSkin(assetStorage)
     }
