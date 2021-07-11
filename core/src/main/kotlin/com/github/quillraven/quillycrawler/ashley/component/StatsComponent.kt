@@ -55,6 +55,9 @@ class StatsComponent : Component, Pool.Poolable {
 
   companion object {
     val MAPPER = mapperFor<StatsComponent>()
+    const val BASE_STRENGTH = 5f
+    const val BASE_AGILITY = 5f
+    const val BASE_INTELLIGENCE = 5f
   }
 }
 

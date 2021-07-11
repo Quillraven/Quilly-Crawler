@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.StringBuilder
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.ashley.component.ItemType.*
 import com.github.quillraven.quillycrawler.ashley.createItemEntity
 import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.assets.play
@@ -34,7 +35,7 @@ data class ShopItemViewModel(
   val name: String,
   val description: String,
   val regionKey: String,
-  val cost: Int,
+  var cost: Int,
   val equipped: Boolean,
   var canBuy: Boolean,
 ) {
@@ -77,8 +78,6 @@ data class ShopViewModel(
   var shopEntity: Entity,
   val audioService: AudioService
 ) {
-  // TODO
-  //  attribute tomes get more expensive every time you buy them (maybe separate component that stores the amount data? or compare current stats to base stats?)
   private val listeners = GdxSet<ShopListener>()
   private val statsInfo = EnumMap<StatsType, StringBuilder>(StatsType::class.java)
   private var mode = ShopMode.SELL
@@ -109,9 +108,9 @@ data class ShopViewModel(
             itemCmp.name(bundle),
             itemCmp.description(bundle),
             itemCmp.regionKey(bundle),
-            if (mode == ShopMode.BUY) itemCmp.cost else (itemCmp.cost * SELL_RATIO).toInt(),
+            if (mode == ShopMode.BUY) itemCmp.baseCost else (itemCmp.baseCost * SELL_RATIO).toInt(),
             entity[GearComponent.MAPPER]?.gear?.containsKey(itemCmp.gearType) ?: false,
-            if (mode == ShopMode.BUY) itemCmp.cost <= gold else true,
+            if (mode == ShopMode.BUY) itemCmp.baseCost <= gold else true,
           )
         )
       }
@@ -164,18 +163,26 @@ data class ShopViewModel(
 
     // enough gold -> buy item
     val item = itemEntities[idx]
-    val selItemCmp = item.itemCmp
-    val selItemType = selItemCmp.itemType
+    val itemCmp = item.itemCmp
+    val selItemType = itemCmp.itemType
     val playerBagCmp = playerEntity.bagCmp
     if (selItemType in playerBagCmp.items) {
       playerBagCmp.items[selItemType].itemCmp.amount++
     } else {
       playerBagCmp.items[selItemType] = engine.createItemEntity(selItemType)
     }
-    playerBagCmp.gold -= item.itemCmp.cost
+    playerBagCmp.gold -= item.itemCmp.cost(playerEntity)
     engine.update(0f)
 
-    // update 'purchasable' info for UI items
+    // update 'purchasable' info for UI items and consume stat tomes to increase their cost
+    if (itemCmp.itemType == TOME_STRENGTH || itemCmp.itemType == TOME_AGILITY || itemCmp.itemType == TOME_INTELLIGENCE) {
+      engine.configureEntity(playerEntity) {
+        with<ConsumeComponent> { itemsToConsume.add(playerBagCmp.items[selItemType]) }
+      }
+      engine.update(0f)
+      uiItem.cost = itemCmp.cost(playerEntity)
+    }
+
     uiItems.forEach { it.canBuy = playerBagCmp.gold >= it.cost }
     listeners.forEach {
       it.onItemsUpdated(uiItems)
@@ -189,7 +196,7 @@ data class ShopViewModel(
     val item = itemEntities[idx]
     val itemCmp = item.itemCmp
     val playerBag = playerEntity.bagCmp
-    playerBag.gold += (itemCmp.cost * SELL_RATIO).toInt()
+    playerBag.gold += (itemCmp.baseCost * SELL_RATIO).toInt()
     listeners.forEach { it.onGoldUpdated(playerBag.gold) }
 
     if (itemCmp.amount > 1) {

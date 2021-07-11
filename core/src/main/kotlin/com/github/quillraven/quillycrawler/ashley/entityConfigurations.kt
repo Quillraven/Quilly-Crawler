@@ -201,9 +201,9 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
       stats[StatsType.MAX_LIFE] = 30f
       stats[StatsType.MANA] = 10f
       stats[StatsType.MAX_MANA] = 10f
-      stats[StatsType.STRENGTH] = 5f
-      stats[StatsType.AGILITY] = 5f
-      stats[StatsType.INTELLIGENCE] = 5f
+      stats[StatsType.STRENGTH] = StatsComponent.BASE_STRENGTH
+      stats[StatsType.AGILITY] = StatsComponent.BASE_AGILITY
+      stats[StatsType.INTELLIGENCE] = StatsComponent.BASE_INTELLIGENCE
       stats[StatsType.PHYSICAL_DAMAGE] = 7f
       stats[StatsType.MAGIC_DAMAGE] = 4f
       stats[StatsType.PHYSICAL_ARMOR] = 3f

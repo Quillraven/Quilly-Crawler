@@ -22,7 +22,10 @@ enum class ItemType(val gearType: GearType = GearType.UNDEFINED) {
   TOME_PROTECT,
   TOME_FIREBOLT,
   TOME_EXPLOSION,
-  TOME_HEAL;
+  TOME_HEAL,
+  TOME_STRENGTH,
+  TOME_AGILITY,
+  TOME_INTELLIGENCE;
 
   companion object {
     private val GEAR_ITEM_TYPES = values().filter { it.gearType != GearType.UNDEFINED }
@@ -35,7 +38,28 @@ class ItemComponent : Component, Pool.Poolable {
   var itemType = ItemType.UNDEFINED
   var gearType = GearType.UNDEFINED
   var amount = 1
-  var cost = 0
+  var baseCost: Int = 0
+
+  fun cost(entity: Entity): Int {
+    return when (itemType) {
+      ItemType.TOME_STRENGTH -> {
+        val currentStr = entity[StatsComponent.MAPPER]?.get(StatsType.STRENGTH) ?: 0f
+        val strDiff = if (currentStr > StatsComponent.BASE_STRENGTH) currentStr - StatsComponent.BASE_STRENGTH else 0f
+        baseCost + 100 * strDiff.toInt()
+      }
+      ItemType.TOME_AGILITY -> {
+        val currentAgi = entity[StatsComponent.MAPPER]?.get(StatsType.AGILITY) ?: 0f
+        val agiDiff = if (currentAgi > StatsComponent.BASE_AGILITY) currentAgi - StatsComponent.BASE_AGILITY else 0f
+        baseCost + 100 * agiDiff.toInt()
+      }
+      ItemType.TOME_INTELLIGENCE -> {
+        val crnInt = entity[StatsComponent.MAPPER]?.get(StatsType.INTELLIGENCE) ?: 0f
+        val intDiff = if (crnInt > StatsComponent.BASE_INTELLIGENCE) crnInt - StatsComponent.BASE_INTELLIGENCE else 0f
+        baseCost + 100 * intDiff.toInt()
+      }
+      else -> baseCost
+    }
+  }
 
   fun name(bundle: I18NBundle): String = bundle["Item.${this.itemType.name}.name"]
 
@@ -54,7 +78,7 @@ class ItemComponent : Component, Pool.Poolable {
     gearType = GearType.UNDEFINED
     itemType = ItemType.UNDEFINED
     amount = 1
-    cost = 0
+    baseCost = 0
   }
 
   companion object {

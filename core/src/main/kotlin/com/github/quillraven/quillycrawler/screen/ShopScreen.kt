@@ -2,8 +2,6 @@ package com.github.quillraven.quillycrawler.screen
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.ashley.component.ItemType
@@ -44,15 +42,5 @@ class ShopScreen(game: QuillyCrawler, private val engine: Engine, playerEntity: 
   override fun hide() {
     super.hide()
     engine.getSystem<PlayerControlSystem>().setProcessing(true)
-  }
-
-  override fun render(delta: Float) {
-    //TODO remove debug
-    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-      stage.clear()
-      stage.addActor(ShopView(viewModel))
-    }
-
-    super.render(delta)
   }
 }

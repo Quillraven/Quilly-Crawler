@@ -6,7 +6,7 @@ filter: Nearest,Nearest
 repeat: none
 bar_blue
   rotate: false
-  xy: 86, 257
+  xy: 86, 277
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -15,7 +15,7 @@ bar_blue
   index: -1
 bar_frame-1
   rotate: false
-  xy: 572, 769
+  xy: 572, 789
   size: 45, 7
   split: 1, 5, 2, 2
   pad: 0, 0, 0, 0
@@ -24,7 +24,7 @@ bar_frame-1
   index: -1
 bar_red
   rotate: false
-  xy: 572, 762
+  xy: 572, 782
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -33,7 +33,7 @@ bar_red
   index: -1
 bar_yellow
   rotate: false
-  xy: 520, 719
+  xy: 520, 739
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -42,14 +42,14 @@ bar_yellow
   index: -1
 buff-01
   rotate: false
-  xy: 540, 659
+  xy: 4, 124
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 button-1
   rotate: false
-  xy: 4, 164
+  xy: 4, 184
   size: 30, 14
   split: 10, 10, 4, 3
   pad: 0, 0, 0, 0
@@ -58,7 +58,7 @@ button-1
   index: -1
 button-2
   rotate: false
-  xy: 520, 726
+  xy: 520, 746
   size: 46, 14
   split: 15, 15, 4, 3
   pad: 0, 0, 0, 0
@@ -67,7 +67,7 @@ button-2
   index: -1
 button-down
   rotate: false
-  xy: 588, 746
+  xy: 588, 766
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
@@ -88,7 +88,7 @@ button-left
   index: -1
 button-right
   rotate: false
-  xy: 572, 746
+  xy: 572, 766
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
@@ -109,7 +109,7 @@ button-up
   index: -1
 frame-1
   rotate: false
-  xy: 4, 182
+  xy: 4, 202
   size: 30, 30
   split: 10, 10, 10, 10
   pad: 0, 0, 0, 0
@@ -118,7 +118,7 @@ frame-1
   index: -1
 frame-2
   rotate: false
-  xy: 52, 230
+  xy: 52, 250
   size: 30, 30
   split: 10, 10, 10, 10
   pad: 0, 0, 0, 0
@@ -127,7 +127,7 @@ frame-2
   index: -1
 frame-3
   rotate: false
-  xy: 4, 216
+  xy: 4, 236
   size: 44, 44
   split: 13, 13, 13, 13
   pad: 0, 0, 0, 0
@@ -168,14 +168,14 @@ gamepad-b
   index: -1
 gamepad-down
   rotate: false
-  xy: 24, 148
+  xy: 24, 168
   size: 8, 12
   orig: 8, 12
   offset: 0, 0
   index: -1
 gamepad-left
   rotate: false
-  xy: 52, 218
+  xy: 52, 238
   size: 12, 8
   orig: 12, 8
   offset: 0, 0
@@ -189,7 +189,7 @@ gamepad-right
   index: -1
 gamepad-up
   rotate: false
-  xy: 38, 200
+  xy: 38, 220
   size: 8, 12
   orig: 8, 12
   offset: 0, 0
@@ -210,21 +210,21 @@ gamepad-y
   index: -1
 gold
   rotate: false
-  xy: 621, 770
+  xy: 621, 790
   size: 5, 6
   orig: 5, 6
   offset: 0, 0
   index: -1
 immortal
   rotate: false
-  xy: 4, 264
+  xy: 4, 284
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 item-20
   rotate: false
-  xy: 520, 639
+  xy: 4, 104
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -238,28 +238,28 @@ item-24
   index: -1
 item-29
   rotate: false
-  xy: 540, 679
+  xy: 520, 659
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-31
   rotate: false
-  xy: 106, 237
+  xy: 520, 699
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-35
   rotate: false
-  xy: 4, 124
+  xy: 520, 679
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-51
   rotate: false
-  xy: 520, 679
+  xy: 540, 719
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -273,49 +273,70 @@ item-55
   index: -1
 item-56
   rotate: false
-  xy: 520, 699
+  xy: 520, 719
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-61
   rotate: false
-  xy: 4, 104
+  xy: 540, 679
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 selection
   rotate: false
-  xy: 604, 750
+  xy: 604, 770
   size: 6, 8
   orig: 6, 8
   offset: 0, 0
   index: -1
+tome-agility
+  rotate: false
+  xy: 4, 164
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 tome-explosion
   rotate: false
-  xy: 540, 699
+  xy: 4, 144
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-firebolt
   rotate: false
-  xy: 86, 237
+  xy: 86, 257
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-heal
   rotate: false
-  xy: 520, 659
+  xy: 540, 699
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tome-intelligence
+  rotate: false
+  xy: 520, 639
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-protect
   rotate: false
-  xy: 4, 144
+  xy: 106, 257
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+tome-strength
+  rotate: false
+  xy: 540, 659
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
@@ -329,7 +350,7 @@ undefined
   index: -1
 window-1
   rotate: false
-  xy: 520, 744
+  xy: 520, 764
   size: 48, 32
   split: 16, 16, 10, 11
   pad: 0, 0, 0, 0
