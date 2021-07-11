@@ -18,7 +18,11 @@ enum class ItemType(val gearType: GearType = GearType.UNDEFINED) {
   LEATHER_BOOTS(GearType.BOOTS),
   BUCKLER(GearType.SHIELD),
   HEALTH_POTION,
-  MANA_POTION;
+  MANA_POTION,
+  TOME_PROTECT,
+  TOME_FIREBOLT,
+  TOME_EXPLOSION,
+  TOME_HEAL;
 
   companion object {
     private val GEAR_ITEM_TYPES = values().filter { it.gearType != GearType.UNDEFINED }

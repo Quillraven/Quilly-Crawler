@@ -15,7 +15,7 @@ class CommandExplosion(context: CombatContext) : Command(context) {
 
   override fun onStart() {
     entity.playAnimation("idle")
-    entity.dealDamage(engine, targets, 0f, 100f, 0.75f)
+    entity.dealDamage(engine, targets, 0f, 30f, 0.75f)
     audioService.play(SoundAssets.EXPLOSION)
     targets.forEach {
       engine.createEffectEntity(it, "FIRE_RING", Align.center, 1.4f, speed = 2f, scaling = 1.5f)

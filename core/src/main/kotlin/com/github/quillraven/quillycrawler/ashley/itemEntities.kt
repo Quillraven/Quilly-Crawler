@@ -3,6 +3,10 @@ package com.github.quillraven.quillycrawler.ashley
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.github.quillraven.quillycrawler.ashley.component.*
+import com.github.quillraven.quillycrawler.combat.command.CommandExplosion
+import com.github.quillraven.quillycrawler.combat.command.CommandFirebolt
+import com.github.quillraven.quillycrawler.combat.command.CommandHeal
+import com.github.quillraven.quillycrawler.combat.command.CommandProtect
 import ktx.ashley.entity
 import ktx.ashley.with
 import ktx.collections.set
@@ -80,6 +84,22 @@ fun Engine.createItemEntity(type: ItemType, numItems: Int = 1): Entity {
           stats[StatsType.PHYSICAL_DAMAGE] = 1f
         }
         itemCmp.cost = 40
+      }
+      ItemType.TOME_EXPLOSION -> {
+        with<ConsumableComponent> { abilitiesToAdd.add(CommandExplosion::class) }
+        itemCmp.cost = 400
+      }
+      ItemType.TOME_FIREBOLT -> {
+        with<ConsumableComponent> { abilitiesToAdd.add(CommandFirebolt::class) }
+        itemCmp.cost = 100
+      }
+      ItemType.TOME_HEAL -> {
+        with<ConsumableComponent> { abilitiesToAdd.add(CommandHeal::class) }
+        itemCmp.cost = 200
+      }
+      ItemType.TOME_PROTECT -> {
+        with<ConsumableComponent> { abilitiesToAdd.add(CommandProtect::class) }
+        itemCmp.cost = 150
       }
       ItemType.UNDEFINED -> {
       }

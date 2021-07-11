@@ -11,7 +11,6 @@ import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
 import ktx.log.debug
-import ktx.log.error
 import ktx.log.logger
 
 class ConsumeSystem(private val eventDispatcher: GameEventDispatcher) :
@@ -19,36 +18,9 @@ class ConsumeSystem(private val eventDispatcher: GameEventDispatcher) :
   override fun processEntity(consumerEntity: Entity, deltaTime: Float) {
     with(consumerEntity.consumeCmp) {
       itemsToConsume.forEach { itemEntity ->
-        val itemStatsCmp = itemEntity[StatsComponent.MAPPER]
         val itemCmp = itemEntity.itemCmp
-        if (itemStatsCmp == null) {
-          LOG.error { "Trying to consume item '${itemCmp.itemType}' that does nothing" }
-          return@forEach
-        }
-
-        // consume item and add stats to entity which is consuming the item
-        consumerEntity[StatsComponent.MAPPER]?.let { consumerStatsCmp ->
-          itemStatsCmp.stats.forEach { itemStat ->
-            when (itemStat.key) {
-              StatsType.LIFE -> {
-                consumerStatsCmp[StatsType.LIFE] =
-                  (consumerStatsCmp[StatsType.LIFE] + itemStat.value).coerceAtMost(consumerStatsCmp[StatsType.MAX_LIFE])
-              }
-              StatsType.MANA -> {
-                consumerStatsCmp[StatsType.MANA] =
-                  (consumerStatsCmp[StatsType.MANA] + itemStat.value).coerceAtMost(consumerStatsCmp[StatsType.MAX_MANA])
-              }
-              else -> {
-                consumerStatsCmp[itemStat.key] = consumerStatsCmp[itemStat.key] + itemStat.value
-              }
-            }
-          }
-        }
-
-        eventDispatcher.dispatchEvent<CombatConsumeItemEvent> {
-          this.entity = consumerEntity
-          this.statsCmp = itemStatsCmp
-        }
+        consumeStats(consumerEntity, itemEntity, itemCmp)
+        consumeAbilitites(consumerEntity, itemEntity, itemCmp)
 
         // reduce amount and remove the item if necessary
         itemCmp.amount--
@@ -61,6 +33,51 @@ class ConsumeSystem(private val eventDispatcher: GameEventDispatcher) :
     }
 
     consumerEntity.remove(ConsumeComponent::class.java)
+  }
+
+  private fun consumeAbilitites(consumerEntity: Entity, itemEntity: Entity, itemCmp: ItemComponent) {
+    val consumableCmp = itemEntity[ConsumableComponent.MAPPER]
+    if (consumableCmp == null || consumableCmp.abilitiesToAdd.isEmpty) {
+      LOG.debug { "Item '${itemCmp.itemType}' does not add abilities" }
+      return
+    }
+
+    // learn abilities
+    consumerEntity[CombatComponent.MAPPER]?.let { combatCmp ->
+      consumableCmp.abilitiesToAdd.forEach { combatCmp.learn(it) }
+    }
+  }
+
+  private fun consumeStats(consumerEntity: Entity, itemEntity: Entity, itemCmp: ItemComponent) {
+    val itemStatsCmp = itemEntity[StatsComponent.MAPPER]
+    if (itemStatsCmp == null) {
+      LOG.debug { "Item '${itemCmp.itemType}' does not modify stats" }
+      return
+    }
+
+    // consume item and add stats to entity which is consuming the item
+    consumerEntity[StatsComponent.MAPPER]?.let { consumerStatsCmp ->
+      itemStatsCmp.stats.forEach { itemStat ->
+        when (itemStat.key) {
+          StatsType.LIFE -> {
+            consumerStatsCmp[StatsType.LIFE] =
+              (consumerStatsCmp[StatsType.LIFE] + itemStat.value).coerceAtMost(consumerStatsCmp[StatsType.MAX_LIFE])
+          }
+          StatsType.MANA -> {
+            consumerStatsCmp[StatsType.MANA] =
+              (consumerStatsCmp[StatsType.MANA] + itemStat.value).coerceAtMost(consumerStatsCmp[StatsType.MAX_MANA])
+          }
+          else -> {
+            consumerStatsCmp[itemStat.key] = consumerStatsCmp[itemStat.key] + itemStat.value
+          }
+        }
+      }
+    }
+
+    eventDispatcher.dispatchEvent<CombatConsumeItemEvent> {
+      this.entity = consumerEntity
+      this.statsCmp = itemStatsCmp
+    }
   }
 
   companion object {

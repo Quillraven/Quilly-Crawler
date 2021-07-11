@@ -89,6 +89,10 @@ class CombatComponent : Component, Pool.Poolable {
     commandsToLearn.add(T::class)
   }
 
+  fun learn(cmdType: KClass<out Command>) {
+    commandsToLearn.add(cmdType)
+  }
+
   override fun reset() {
     availableCommands.clear()
     commandsToLearn.clear()
