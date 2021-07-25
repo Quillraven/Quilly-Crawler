@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.I18NBundle
 import com.github.quillraven.commons.audio.AudioService
 import com.github.quillraven.quillycrawler.QuillyCrawler
 import com.github.quillraven.quillycrawler.QuillyCrawler.Companion.PREF_KEY_MUSIC
+import com.github.quillraven.quillycrawler.QuillyCrawler.Companion.PREF_KEY_SAVE_STATE
 import com.github.quillraven.quillycrawler.QuillyCrawler.Companion.PREF_KEY_SOUND
 import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.assets.play
@@ -30,7 +31,7 @@ class StartUpViewModel(
 
   fun soundVolume() = audioService.soundVolume
 
-  fun hasGameState(): Boolean = false
+  fun hasGameState(): Boolean = preferences.contains(PREF_KEY_SAVE_STATE)
 
   fun changeMusicVolume(amount: Float): Float {
     audioService.play(SoundAssets.MENU_SELECT_2)
@@ -49,6 +50,7 @@ class StartUpViewModel(
   }
 
   fun newGame() {
+    preferences.remove(PREF_KEY_SAVE_STATE)
     audioService.play(SoundAssets.MENU_SELECT)
     if (!game.containsScreen<GameScreen>()) {
       game.addScreen(GameScreen(game))
@@ -58,8 +60,11 @@ class StartUpViewModel(
 
   fun continueGame() {
     audioService.play(SoundAssets.MENU_SELECT)
-    // TODO
-    newGame()
+    if (!game.containsScreen<GameScreen>()) {
+      game.addScreen(GameScreen(game))
+    }
+    game.setScreen<GameScreen>()
+    game.getScreen<GameScreen>().loadSaveState()
   }
 
   fun quitGame() {

@@ -10,6 +10,7 @@ import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.ashley.createItemEntity
 import ktx.ashley.allOf
 import ktx.ashley.exclude
+import ktx.ashley.get
 import ktx.collections.contains
 import ktx.collections.set
 import ktx.log.debug
@@ -36,8 +37,10 @@ class LootSystem : EntityListener, IteratingSystem(
 
   override fun entityRemoved(entity: Entity) {
     // remove all item entities when an entity with a bag gets removed
-    entity.bagCmp.items.values().forEach { itemEntity ->
-      itemEntity.removeFromEngine(engine)
+    entity[BagComponent.MAPPER]?.let { bagCmp ->
+      bagCmp.items.values().forEach { itemEntity ->
+        itemEntity.removeFromEngine(engine)
+      }
     }
   }
 

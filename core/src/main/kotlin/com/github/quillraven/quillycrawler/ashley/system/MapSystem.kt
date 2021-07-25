@@ -37,7 +37,7 @@ class MapSystem(
     val playerCmp = entity.playerCmp
     val goToLevelCmp = entity.goToLevelCmp
     if (goToLevelCmp.targetLevel < playerCmp.dungeonLevel) {
-      // player used REAPER to go back in levels -> update currentMapFolder
+      // player used REAPER to go back in levels or save state is getting loaded -> update currentMapFolder
       var lvl = goToLevelCmp.targetLevel
       var folderPath = "maps/level_${lvl}"
       var mapFolder = Gdx.files.internal(folderPath)
