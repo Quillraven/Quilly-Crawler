@@ -27,6 +27,7 @@ ktx-box2d = { module = "io.github.libktx:ktx-box2d", version.ref = "ktxVersion" 
 ktx-collections = { module = "io.github.libktx:ktx-collections", version.ref = "ktxVersion" }
 ktx-graphics = { module = "io.github.libktx:ktx-graphics", version.ref = "ktxVersion" }
 ktx-log = { module = "io.github.libktx:ktx-log", version.ref = "ktxVersion" }
+ktx-preferences = { module = "io.github.libktx:ktx-preferences", version.ref = "ktxVersion" }
 ktx-scene2d = { module = "io.github.libktx:ktx-scene2d", version.ref = "ktxVersion" }
 ktx-style = { module = "io.github.libktx:ktx-style", version.ref = "ktxVersion" }
 ktx-tiled = { module = "io.github.libktx:ktx-tiled", version.ref = "ktxVersion" }

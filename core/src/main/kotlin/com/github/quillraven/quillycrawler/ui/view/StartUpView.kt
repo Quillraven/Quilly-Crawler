@@ -119,13 +119,18 @@ class StartUpView(
     currentOption = OPT_NEW
     menuOptions[currentOption].label.addSelectionEffect()
 
+    // add credits info to stage
+    stage.addActor(credits)
+    credits.centerPosition()
+    credits.alpha = 0f
+
+    // deactivate continue if there is no game state
     if (!viewModel.hasGameState()) {
       menuOptions[OPT_CONTINUE].isDisabled = true
     }
 
-    stage.addActor(credits)
-    credits.centerPosition()
-    credits.alpha = 0f
+    menuOptions[OPT_MUSIC].label.setText("${(viewModel.musicVolume() * 100).roundToInt()}")
+    menuOptions[OPT_SOUND].label.setText("${(viewModel.soundVolume() * 100).roundToInt()}")
   }
 
   override fun onHide() {

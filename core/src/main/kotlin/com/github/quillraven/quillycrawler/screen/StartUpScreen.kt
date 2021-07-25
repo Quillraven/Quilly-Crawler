@@ -52,7 +52,13 @@ class StartUpScreen(private val game: QuillyCrawler) : AbstractScreen(game) {
     }
   }
 
+  override fun hide() {
+    game.preferences.flush()
+    super.hide()
+  }
+
   override fun render(delta: Float) {
+    // TODO remove debug
     if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
       stage.clear()
       viewModel = StartUpViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], game)
