@@ -44,10 +44,10 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
   }
 
   override fun setProcessing(processing: Boolean) {
-    if (!checkProcessing() && processing) {
+    if (processing && Gdx.input.inputProcessor != this) {
       Gdx.input.inputProcessor = this
       addXboxControllerListener()
-    } else if (checkProcessing() && !processing) {
+    } else if (!processing && Gdx.input.inputProcessor == this) {
       Gdx.input.inputProcessor = null
       removeXboxControllerListener()
     }
