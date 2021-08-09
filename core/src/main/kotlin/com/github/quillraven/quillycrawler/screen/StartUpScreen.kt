@@ -1,7 +1,6 @@
 package com.github.quillraven.quillycrawler.screen
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.utils.I18NBundle
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
@@ -13,12 +12,14 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import ktx.async.KtxAsync
 import ktx.collections.gdxArrayOf
+import ktx.graphics.use
 import ktx.log.debug
 import ktx.log.logger
 import kotlin.system.measureTimeMillis
 
 class StartUpScreen(private val game: QuillyCrawler) : AbstractScreen(game) {
   private lateinit var viewModel: StartUpViewModel
+  private val background = Texture("graphics/title_splash.png")
 
   override fun show() {
     // load mandatory UI assets
@@ -54,18 +55,24 @@ class StartUpScreen(private val game: QuillyCrawler) : AbstractScreen(game) {
 
   override fun hide() {
     game.preferences.flush()
+    game.removeScreen<StartUpScreen>()
     super.hide()
+    dispose()
   }
 
   override fun render(delta: Float) {
-    // TODO remove debug
-    if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-      stage.clear()
-      viewModel = StartUpViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], game)
-      stage.addActor(StartUpView(viewModel))
+    game.uiViewport.apply()
+    game.batch.setColor(1f, 1f, 1f, 0.7f)
+    game.batch.use(game.uiViewport.camera) {
+      it.draw(background, 0f, 0f)
     }
-
+    game.batch.setColor(1f, 1f, 1f, 1f)
     super.render(delta)
+  }
+
+  override fun dispose() {
+    super.dispose()
+    background.dispose()
   }
 
   companion object {

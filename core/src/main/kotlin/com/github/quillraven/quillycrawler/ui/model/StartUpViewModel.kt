@@ -50,6 +50,7 @@ class StartUpViewModel(
   }
 
   fun newGame() {
+    // flush is not necessary because it happens in StartUpScreen.hide
     preferences.remove(PREF_KEY_SAVE_STATE)
     audioService.play(SoundAssets.MENU_SELECT)
     if (!game.containsScreen<GameScreen>()) {
