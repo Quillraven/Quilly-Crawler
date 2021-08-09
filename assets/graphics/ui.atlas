@@ -1,12 +1,12 @@
 
 ui.png
-size: 1024,1024
+size: 1024, 1024
 format: RGBA8888
-filter: Nearest,Nearest
+filter: Nearest, Nearest
 repeat: none
 bar_blue
   rotate: false
-  xy: 86, 277
+  xy: 520, 670
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -15,7 +15,7 @@ bar_blue
   index: -1
 bar_frame-1
   rotate: false
-  xy: 572, 789
+  xy: 52, 167
   size: 45, 7
   split: 1, 5, 2, 2
   pad: 0, 0, 0, 0
@@ -24,7 +24,7 @@ bar_frame-1
   index: -1
 bar_red
   rotate: false
-  xy: 572, 782
+  xy: 306, 235
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -33,7 +33,7 @@ bar_red
   index: -1
 bar_yellow
   rotate: false
-  xy: 520, 739
+  xy: 254, 199
   size: 42, 3
   split: 1, 3, 1, 1
   pad: 0, 0, 0, 0
@@ -42,14 +42,14 @@ bar_yellow
   index: -1
 buff-01
   rotate: false
-  xy: 4, 124
+  xy: 540, 650
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 button-1
   rotate: false
-  xy: 4, 184
+  xy: 570, 677
   size: 30, 14
   split: 10, 10, 4, 3
   pad: 0, 0, 0, 0
@@ -58,7 +58,7 @@ button-1
   index: -1
 button-2
   rotate: false
-  xy: 520, 746
+  xy: 520, 677
   size: 46, 14
   split: 15, 15, 4, 3
   pad: 0, 0, 0, 0
@@ -67,35 +67,35 @@ button-2
   index: -1
 button-down
   rotate: false
-  xy: 588, 766
+  xy: 540, 634
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 button-esc
   rotate: false
-  xy: 520, 587
+  xy: 4, 20
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 button-left
   rotate: false
-  xy: 540, 643
+  xy: 540, 618
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 button-right
   rotate: false
-  xy: 572, 766
+  xy: 636, 679
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 button-space
   rotate: false
-  xy: 4, 36
+  xy: 68, 131
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
@@ -107,9 +107,16 @@ button-up
   orig: 12, 12
   offset: 0, 0
   index: -1
+crawler
+  rotate: false
+  xy: 4, 178
+  size: 246, 60
+  orig: 246, 60
+  offset: 0, 0
+  index: -1
 frame-1
   rotate: false
-  xy: 4, 202
+  xy: 4, 96
   size: 30, 30
   split: 10, 10, 10, 10
   pad: 0, 0, 0, 0
@@ -118,7 +125,7 @@ frame-1
   index: -1
 frame-2
   rotate: false
-  xy: 52, 250
+  xy: 700, 724
   size: 30, 30
   split: 10, 10, 10, 10
   pad: 0, 0, 0, 0
@@ -127,7 +134,7 @@ frame-2
   index: -1
 frame-3
   rotate: false
-  xy: 4, 236
+  xy: 4, 130
   size: 44, 44
   split: 13, 13, 13, 13
   pad: 0, 0, 0, 0
@@ -136,7 +143,7 @@ frame-3
   index: -1
 frame-green
   rotate: false
-  xy: 4, 52
+  xy: 620, 679
   size: 12, 12
   split: 4, 4, 4, 4
   pad: 0, 0, 0, 0
@@ -145,7 +152,7 @@ frame-green
   index: -1
 frame-red
   rotate: false
-  xy: 4, 20
+  xy: 520, 578
   size: 12, 12
   split: 4, 4, 4, 4
   pad: 0, 0, 0, 0
@@ -154,203 +161,210 @@ frame-red
   index: -1
 gamepad-a
   rotate: false
-  xy: 540, 627
+  xy: 604, 679
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gamepad-b
   rotate: false
-  xy: 520, 555
+  xy: 520, 594
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gamepad-down
   rotate: false
-  xy: 24, 168
+  xy: 720, 708
   size: 8, 12
   orig: 8, 12
   offset: 0, 0
   index: -1
 gamepad-left
   rotate: false
-  xy: 52, 238
+  xy: 826, 746
   size: 12, 8
   orig: 12, 8
   offset: 0, 0
   index: -1
 gamepad-right
   rotate: false
-  xy: 520, 543
+  xy: 734, 726
   size: 12, 8
   orig: 12, 8
   offset: 0, 0
   index: -1
 gamepad-up
   rotate: false
-  xy: 38, 220
+  xy: 38, 114
   size: 8, 12
   orig: 8, 12
   offset: 0, 0
   index: -1
 gamepad-x
   rotate: false
-  xy: 4, 68
+  xy: 52, 131
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gamepad-y
   rotate: false
-  xy: 520, 571
+  xy: 810, 742
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 gold
   rotate: false
-  xy: 621, 790
+  xy: 101, 168
   size: 5, 6
   orig: 5, 6
   offset: 0, 0
   index: -1
 immortal
   rotate: false
-  xy: 4, 284
+  xy: 4, 242
   size: 512, 512
   orig: 512, 512
   offset: 0, 0
   index: -1
 item-20
   rotate: false
-  xy: 4, 104
+  xy: 734, 738
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-24
   rotate: false
-  xy: 4, 84
+  xy: 72, 147
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-29
   rotate: false
-  xy: 520, 659
+  xy: 774, 738
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-31
   rotate: false
-  xy: 520, 699
+  xy: 520, 610
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-35
   rotate: false
-  xy: 520, 679
+  xy: 520, 650
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-51
   rotate: false
-  xy: 540, 719
+  xy: 52, 147
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-55
   rotate: false
-  xy: 520, 619
+  xy: 520, 630
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-56
   rotate: false
-  xy: 520, 719
+  xy: 254, 179
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 item-61
   rotate: false
-  xy: 540, 679
+  xy: 754, 738
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+quilly
+  rotate: false
+  xy: 520, 695
+  size: 176, 59
+  orig: 176, 59
+  offset: 0, 0
+  index: -1
 selection
   rotate: false
-  xy: 604, 770
+  xy: 24, 84
   size: 6, 8
   orig: 6, 8
   offset: 0, 0
   index: -1
 tome-agility
   rotate: false
-  xy: 4, 164
+  xy: 306, 215
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-explosion
   rotate: false
-  xy: 4, 144
+  xy: 700, 704
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-firebolt
   rotate: false
-  xy: 86, 257
+  xy: 4, 36
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-heal
   rotate: false
-  xy: 540, 699
+  xy: 274, 179
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-intelligence
   rotate: false
-  xy: 520, 639
+  xy: 4, 56
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-protect
   rotate: false
-  xy: 106, 257
+  xy: 326, 215
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 tome-strength
   rotate: false
-  xy: 540, 659
+  xy: 4, 76
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 undefined
   rotate: false
-  xy: 520, 603
+  xy: 794, 742
   size: 12, 12
   orig: 12, 12
   offset: 0, 0
   index: -1
 window-1
   rotate: false
-  xy: 520, 764
+  xy: 254, 206
   size: 48, 32
   split: 16, 16, 10, 11
   pad: 0, 0, 0, 0

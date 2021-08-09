@@ -17,6 +17,8 @@ import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.event.GameEventDispatcher
 import com.github.quillraven.quillycrawler.event.GameInteractReaperEvent
 import com.github.quillraven.quillycrawler.event.MapChangeEvent
+import com.github.quillraven.quillycrawler.preferences.loadGameState
+import com.github.quillraven.quillycrawler.preferences.saveGameState
 import com.github.quillraven.quillycrawler.shader.DefaultShaderService
 import com.github.quillraven.quillycrawler.ui.model.GameViewModel
 import com.github.quillraven.quillycrawler.ui.view.GameView
@@ -48,6 +50,7 @@ class GameScreen(
   private val engine = PooledEngine()
   private val viewModel = GameViewModel(assetStorage[I18NAssets.DEFAULT.descriptor], engine, audioService)
   private val view = GameView(viewModel)
+  private var loadSaveState = false
 
   init {
     engine.run {
@@ -108,11 +111,23 @@ class GameScreen(
     engine.getSystem<PlayerControlSystem>().setProcessing(false)
   }
 
+  fun loadSaveState() {
+    loadSaveState = true
+  }
+
   override fun render(delta: Float) {
     engine.update(delta)
+
+    if (loadSaveState) {
+      // load state in render loop after engine.update is called
+      // otherwise the MapSystem and other things are not correctly initialized
+      loadSaveState = false
+      game.preferences.loadGameState(engine)
+    }
   }
 
   override fun dispose() {
+    game.preferences.saveGameState(engine)
     world.dispose()
     LOG.debug { "'${engine.entities.size()}' entities in engine" }
   }

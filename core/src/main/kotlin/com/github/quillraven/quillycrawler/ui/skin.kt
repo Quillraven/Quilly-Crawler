@@ -39,6 +39,8 @@ enum class SkinImages(val regionKey: String) {
   KEY_BOARD_ESCAPE("button-esc"),
   SELECTION("selection"),
   GOLD("gold"),
+  QUILLY("quilly"),
+  CRAWLER("crawler"),
 }
 
 enum class SkinFontStyle(val fntFilePath: String, val regionKey: String, val scale: Float) {
@@ -117,6 +119,7 @@ fun configureSkin(assetStorage: AssetStorage): Skin {
     skin.textButton(SkinTextButtonStyle.DEFAULT.name) {
       up = skin[SkinImages.BUTTON_1.regionKey]
       font = skin[SkinFontStyle.DEFAULT.name]
+      disabledFontColor = Color.GRAY
     }
     skin.textButton(SkinTextButtonStyle.BRIGHT.name) {
       up = skin[SkinImages.BUTTON_2.regionKey]

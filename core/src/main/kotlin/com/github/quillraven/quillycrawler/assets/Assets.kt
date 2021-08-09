@@ -33,6 +33,7 @@ enum class MusicAssets(
   LASER_QUEST("audio/music/Laser Quest Loop.ogg"),
   DEFEAT("audio/music/Defeat.mp3"),
   VICTORY("audio/music/Victory.mp3"),
+  MOUNTAINS("audio/music/The Mountains Loop.ogg"),
 }
 
 fun AudioService.play(asset: MusicAssets, volume: Float = 1f, loop: Boolean = true) =

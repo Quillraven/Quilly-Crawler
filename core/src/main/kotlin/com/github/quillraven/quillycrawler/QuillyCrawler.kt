@@ -2,6 +2,7 @@ package com.github.quillraven.quillycrawler
 
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Preferences
 import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.PropertiesUtils
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -28,6 +29,7 @@ class QuillyCrawler : AbstractGame() {
   private val gameProperties = ObjectMap<String, String>()
   val gameEventDispatcher = GameEventDispatcher()
   val shaderService: ShaderService by lazy { DefaultShaderService(assetStorage, batch) }
+  val preferences: Preferences by lazy { Gdx.app.getPreferences(PREF_NAME) }
 
   fun b2dDebug(): Boolean = gameProperties.get("b2d-debug", "false").toBoolean()
 
@@ -45,11 +47,18 @@ class QuillyCrawler : AbstractGame() {
 
     Gdx.app.logLevel = gameProperties.get("log-level", "${Application.LOG_ERROR}").toInt()
 
+    audioService.musicVolume = preferences.getFloat(PREF_KEY_MUSIC, 1f)
+    audioService.soundVolume = preferences.getFloat(PREF_KEY_SOUND, 1f)
+
     addScreen(StartUpScreen(this))
     setScreen<StartUpScreen>()
   }
 
   companion object {
     const val UNIT_SCALE = 1 / 16f // 16 pixels is one in game world unit
+    const val PREF_NAME = "quilly-crawler"
+    const val PREF_KEY_MUSIC = "music-volume"
+    const val PREF_KEY_SOUND = "sound-volume"
+    const val PREF_KEY_SAVE_STATE = "save-state"
   }
 }
