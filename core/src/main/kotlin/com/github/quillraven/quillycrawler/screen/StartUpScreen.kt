@@ -19,16 +19,15 @@ import kotlin.system.measureTimeMillis
 
 class StartUpScreen(private val game: QuillyCrawler) : AbstractScreen(game) {
   private lateinit var viewModel: StartUpViewModel
+  private lateinit var bundle: I18NBundle
   private val background = Texture("graphics/title_splash.png")
 
   override fun show() {
     // load mandatory UI assets
     val timeForUI = measureTimeMillis {
       I18NBundle.setExceptionOnMissingKey(false)
-      val bundle = assetStorage.loadSync(I18NAssets.DEFAULT.descriptor)
+      bundle = assetStorage.loadSync(I18NAssets.DEFAULT.descriptor)
       configureSkin(assetStorage)
-      viewModel = StartUpViewModel(bundle, game)
-      stage.addActor(StartUpView(viewModel))
     }
     LOG.debug { "Took '$timeForUI' ms to load UI assets" }
 
@@ -49,6 +48,8 @@ class StartUpScreen(private val game: QuillyCrawler) : AbstractScreen(game) {
         game.setScreen<DebugRenderScreen>()
       }
 
+      viewModel = StartUpViewModel(bundle, game)
+      stage.addActor(StartUpView(viewModel))
       audioService.play(MusicAssets.MOUNTAINS)
     }
   }
