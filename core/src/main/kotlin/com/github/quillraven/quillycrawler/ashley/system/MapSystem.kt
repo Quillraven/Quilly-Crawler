@@ -36,9 +36,10 @@ class MapSystem(
   override fun processEntity(entity: Entity, deltaTime: Float) {
     val playerCmp = entity.playerCmp
     val goToLevelCmp = entity.goToLevelCmp
-    if (goToLevelCmp.targetLevel < playerCmp.dungeonLevel) {
+    var lvl = goToLevelCmp.targetLevel
+
+    if (lvl > 0 && lvl < playerCmp.dungeonLevel) {
       // player used REAPER to go back in levels or save state is getting loaded -> update currentMapFolder
-      var lvl = goToLevelCmp.targetLevel
       var folderPath = "maps/level_${lvl}"
       var mapFolder = Gdx.files.internal(folderPath)
       while (!mapFolder.exists()) {
@@ -46,7 +47,7 @@ class MapSystem(
         folderPath = "maps/level_${lvl}"
         mapFolder = Gdx.files.internal(folderPath)
         if (lvl <= 0) {
-          throw GdxRuntimeException("There are maps defined for level ${goToLevelCmp.targetLevel} and above")
+          throw GdxRuntimeException("There are no maps defined for level ${goToLevelCmp.targetLevel} and above")
         }
       }
       currentMapFolder = mapFolder
@@ -54,9 +55,13 @@ class MapSystem(
     playerCmp.dungeonLevel = goToLevelCmp.targetLevel
     LOG.debug { "Moving to dungeon level ${playerCmp.dungeonLevel}" }
 
-    val nextMapFilePath = nextMap(playerCmp.dungeonLevel)
-    if (nextMapFilePath.isNotBlank()) {
-      mapService.setMap(engine, nextMapFilePath)
+    if (lvl == 0) {
+      mapService.setMap(engine, "maps/tutorial.tmx")
+    } else {
+      val nextMapFilePath = nextMap(playerCmp.dungeonLevel)
+      if (nextMapFilePath.isNotBlank()) {
+        mapService.setMap(engine, nextMapFilePath)
+      }
     }
     gameEventDispatcher.dispatchEvent<MapChangeEvent> {
       this.entity = entity
