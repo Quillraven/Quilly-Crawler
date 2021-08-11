@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="28">
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="30">
  <properties>
   <property name="musicFilePath" value="audio/music/Try and Solve This.ogg"/>
  </properties>
  <tileset firstgid="1" source="tileset1.tsx"/>
  <layer id="1" name="ground" width="20" height="20">
   <data encoding="base64" compression="zlib">
-   eJy9ktEJwCAMRP12CANFukb336oGKogkeomhB/chxuclmtK/ouarOX+OEHNKEKvzorNFMfPkCJa2tor7rBPvOeBJ+eiAszOqWzlfko+3YrAryEP7RPtGzkp5EU7/K9acaAbasMY3rI4s0p2emrFWm6VUT8P+as6e/2jRCxmTCUo=
+   eJy9lEEOwCAIBDn7CLmYfqP//1XLwYQQtCuQkuxJGBckEv0b/KopVYRwehFr8qq9VTEb1c3PMrJM6XMY3p3gef44wfkSGteivlOMt2OIBshD+0T7Rmo9vwhn7sqpT9SD/Wes9BuOgBfvzkiOzl3N0stndb6bc2QfT+IBjmQJMg==
   </data>
  </layer>
  <layer id="4" name="background" width="20" height="20">
@@ -45,7 +45,7 @@
   <object id="6" name="PLAYER" x="152.25" y="240.25">
    <point/>
   </object>
-  <object id="7" name="EXIT" x="144.535" y="17.1513" width="13.4304" height="11.6974"/>
+  <object id="7" name="EXIT" x="144" y="16" width="16.0678" height="16.0153"/>
   <object id="8" name="CHEST_COMMON" x="222.75" y="176.25">
    <point/>
   </object>
@@ -94,6 +94,9 @@
    <point/>
   </object>
   <object id="25" name="DUMMY" type="HARD" x="164.5" y="166.25">
+   <point/>
+  </object>
+  <object id="29" name="IMP" type="HARD" x="167.333" y="35.3333">
    <point/>
   </object>
  </objectgroup>
