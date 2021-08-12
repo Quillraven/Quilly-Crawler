@@ -15,6 +15,8 @@ import com.github.quillraven.quillycrawler.ashley.component.InteractComponent
 import com.github.quillraven.quillycrawler.ashley.component.PlayerControlComponent
 import com.github.quillraven.quillycrawler.ashley.component.SetScreenComponent
 import com.github.quillraven.quillycrawler.ashley.component.moveCmp
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.event.GameExitEvent
 import com.github.quillraven.quillycrawler.screen.InventoryScreen
 import ktx.ashley.*
 import kotlin.math.PI
@@ -22,7 +24,7 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.reflect.KClass
 
-class PlayerControlSystem : InputProcessor, XboxInputProcessor,
+class PlayerControlSystem(private val eventDispatcher: GameEventDispatcher) : InputProcessor, XboxInputProcessor,
   IteratingSystem(allOf(PlayerControlComponent::class).exclude(RemoveComponent::class).get()) {
   private var valueLeftX = 0f
   private var valueLeftY = 0f
@@ -65,6 +67,7 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
         updateMovementValues(0f, 0f)
         nextScreen = InventoryScreen::class
       }
+      Input.Keys.ESCAPE -> eventDispatcher.dispatchEvent<GameExitEvent>()
       else -> return false
     }
 
@@ -124,6 +127,7 @@ class PlayerControlSystem : InputProcessor, XboxInputProcessor,
     when (buttonCode) {
       XboxInputProcessor.BUTTON_A -> actionPressed = true
       XboxInputProcessor.BUTTON_Y -> nextScreen = InventoryScreen::class
+      XboxInputProcessor.BUTTON_START -> eventDispatcher.dispatchEvent<GameExitEvent>()
       else -> return false
     }
 

@@ -30,8 +30,10 @@ abstract class View(private val inputView: Boolean = true) : Table(Scene2DSkin.d
   }
 
   fun setInputControl() {
-    addXboxControllerListener()
-    Gdx.input.inputProcessor = this
+    if (Gdx.input.inputProcessor != this) {
+      addXboxControllerListener()
+      Gdx.input.inputProcessor = this
+    }
   }
 
   fun removeInputControl() {

@@ -93,6 +93,8 @@ class GameInteractReaperEvent : GameEvent() {
   lateinit var entity: Entity
 }
 
+object GameExitEvent : GameEvent()
+
 interface GameEventListener {
   fun onEvent(event: GameEvent)
 }

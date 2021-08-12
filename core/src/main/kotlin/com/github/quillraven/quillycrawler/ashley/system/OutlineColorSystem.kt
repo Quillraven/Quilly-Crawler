@@ -33,7 +33,7 @@ class OutlineColorSystem : IteratingSystem(allOf(InteractComponent::class, Playe
     private val CHEST_CLOSEST_OUTLINE_COLOR = Color(0.109f, 1f, 0f, 1f)
     private val ENEMY_OUTLINE_COLOR = Color(0.776f, 0.117f, 0f, 0.75f)
     private val ENEMY_CLOSEST_OUTLINE_COLOR = Color(1f, 0.153f, 0f, 1f)
-    private val EXIT_OUTLINE_COLOR = Color(1f, 0.7f, 0f, 0.75f)
+    private val EXIT_OUTLINE_COLOR = Color(1f, 0.3f, 0f, 0.5f)
     private val EXIT_CLOSEST_OUTLINE_COLOR = Color(1f, 0.5f, 0f, 1f)
   }
 }

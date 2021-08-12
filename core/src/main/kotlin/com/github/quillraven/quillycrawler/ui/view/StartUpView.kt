@@ -158,6 +158,7 @@ class StartUpView(
     crawlerSplash = Image(skin.getDrawable(SkinImages.CRAWLER.regionKey))
 
     top()
+    alpha = 0f
 
     // debugAll()
   }
