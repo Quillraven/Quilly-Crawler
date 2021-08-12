@@ -1,102 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="30">
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="32">
  <properties>
   <property name="musicFilePath" value="audio/music/Try and Solve This.ogg"/>
  </properties>
  <tileset firstgid="1" source="tileset1.tsx"/>
  <layer id="1" name="ground" width="20" height="20">
   <data encoding="base64" compression="zlib">
-   eJy9lEEOwCAIBDn7CLmYfqP//1XLwYQQtCuQkuxJGBckEv0b/KopVYRwehFr8qq9VTEb1c3PMrJM6XMY3p3gef44wfkSGteivlOMt2OIBshD+0T7Rmo9vwhn7sqpT9SD/Wes9BuOgBfvzkiOzl3N0stndb6bc2QfT+IBjmQJMg==
+   eJxjYBgFo2BggRoQcyFhSgGyWXJIbB4qmIcN2zOQ5nZ0d4GwChb92MyD2YfPfYTsJVUfPvPQMcgfqhSaRy334bJDnkpmjQIGBgDs4ANt
   </data>
  </layer>
  <layer id="4" name="background" width="20" height="20">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFtATKSGy9AXMFfYEIFFMLgMLNgkL9+MIeJMdOgfmDBZDqD5B6Syq7gR+HPZSEL3L8WVNgDjpQJqxkFBAAAICkAws=
+   eJxjYBgFo4A0IA7EnkBsCaWpBfihNMhMEyqbDQMgM6WhNC3Mx2UfJfoJsUkFsPgbBaOAUgAA9osETQ==
   </data>
  </layer>
- <layer id="2" name="foreground" width="20" height="20">
+ <layer id="9" name="foreground" width="20" height="20">
   <properties>
    <property name="z" type="int" value="1"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJxjYKAvMEdia1LBPHYcbHIBspvMcaoi3SxqmAkzT4QK5iG7jZ0BNezIMRPdr5SEowgW85CBOQNqGOADpKQxYtxJTfMI+RObebj8TY28BAOkugsdILuT2Hgi1lxK8yQy0BwC5hEq05SB2IsIdQxIatiR9KBjdPXsUDv0oDSyXhAAAId3CFY=
+   eJxjYBgFo2AUDHegOcjNc6ayeaOAPgAALNcAlg==
   </data>
  </layer>
- <layer id="3" name="foreground2" width="20" height="20">
+ <layer id="2" name="foreground2" width="20" height="20">
   <properties>
    <property name="z" type="int" value="1"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJxjYMAPpNAwpYAVB5tcoInENqfQLHcGVD+C2DoUmkktgOw2kJtgYUcNN4LCTZOgKtLMIxe4Q2l8aQ05HIYqIMaf6IBW/kaOL3LchQ6Q3UnNdEWN8ofWAJQvccWPO1SelYA6ZLUg4ICmD4Zt0fTgUodNLbUAACu+B4g=
+   eJxjYBgFwx2IADEblAZhHQrNM0fjOwCxBwVmo5uHbjapbsdnHj617lC7PNDsQVcjgqROBAnD3KsDVWeLpM8BjS0C1Q9S44mELYBYHYhN0dQjmwUCmkhskD4vJDPIAZqElaAAWFiJoGFsficWgPxgDcTSDJAwAGEHBkQYUQOYQs0dBdQBAFvsDVM=
+  </data>
+ </layer>
+ <layer id="3" name="foreground3" width="20" height="20">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUUArcqWyeJpXNGwWjgBYAAEX/AHE=
   </data>
  </layer>
  <objectgroup id="5" name="collision">
   <properties>
    <property name="collisionLayer" type="bool" value="true"/>
   </properties>
-  <object id="1" x="143.909" y="143.545">
-   <polygon points="0,0 32.4545,-0.0909091 31.0909,-48.5455 0.818182,-47.8182"/>
-  </object>
-  <object id="2" x="128.091" y="16">
-   <polygon points="0,0 -0.0909091,30.3636 14.5455,30.4545 15.2727,62.7273 -0.909091,63.1818 -0.818182,80.3636 -17.3636,80.0909 -17.3636,143.182 -48.5455,143.182 -48.8182,191.273 -80.8182,191.545 -80.2727,223.909 -112.455,223.727 -112.636,238.909 -123.273,239.455 -123.455,283.909 -109.545,283.818 -109.636,301.182 -3.18182,300.727 -3.09091,284.364 50.7273,284.455 50.4545,301.182 173.091,301.182 173.182,285.182 187.636,285.727 187.364,239.455 175.636,239.273 175.364,222.909 143.727,222.909 143.636,195.182 141.273,198.909 129.091,198.636 128,196.364 127.455,191.636 111.818,191.545 111.727,144.273 79.8182,143.091 80.2727,79.8182 63.9091,79.4545 63.6364,63.3636 48.5455,63.1818 48.8182,29 61.9091,29.1818 61.1818,-1.54545 0.727273,-1.72727"/>
+  <object id="31" x="16" y="128">
+   <polyline points="4.25,-0.5625 64,0 64,16 112,16 112,32 176,32 176,64 192,64 192,80 224,80 224,64 240,64 240,48 272,48 272,64 283.545,64 283.818,112 272,112 272,128 240,128 240,112 224,112 192,112 160,112 160,80 160,64 112,64 64,64 64,80 4.5,79.375 4.5,-0.625"/>
   </object>
  </objectgroup>
  <objectgroup id="6" name="entities">
-  <object id="6" name="PLAYER" x="152.25" y="240.25">
+  <object id="6" name="PLAYER" x="38.9167" y="172.917">
    <point/>
   </object>
-  <object id="7" name="EXIT" x="144" y="16" width="16.0678" height="16.0153"/>
-  <object id="8" name="CHEST_COMMON" x="222.75" y="176.25">
+  <object id="7" name="EXIT" x="272" y="208" width="16.0678" height="16.0153"/>
+  <object id="8" name="CHEST_COMMON" x="199.917" y="207.292">
    <point/>
   </object>
-  <object id="9" name="CHEST_RARE" x="224.75" y="204.5">
-   <point/>
-  </object>
-  <object id="10" name="CHEST_COMMON" x="207" y="177.5">
-   <point/>
-  </object>
-  <object id="11" name="CHEST_RARE" x="61.75" y="224.5">
-   <point/>
-  </object>
-  <object id="12" name="CHEST_EPIC" x="179" y="285.75">
-   <point/>
-  </object>
-  <object id="13" name="CHEST_EPIC" x="133.75" y="284.75">
-   <point/>
-  </object>
-  <object id="14" name="CHEST_EPIC" x="156.25" y="284.5">
-   <point/>
-  </object>
-  <object id="26" name="SHOP" x="144.75" y="199">
-   <point/>
-  </object>
-  <object id="27" name="REAPER" x="170.75" y="201.75">
+  <object id="26" name="SHOP" x="102.75" y="154.667">
    <point/>
   </object>
  </objectgroup>
  <objectgroup color="#ff0000" id="7" name="enemies">
-  <object id="19" name="BIG_DEMON" type="BOSS" x="95.75" y="188.75">
+  <object id="20" name="GOBLIN" type="EASY" x="182.625" y="192.25">
    <point/>
   </object>
-  <object id="20" name="GOBLIN" type="EASY" x="28.25" y="265.5">
-   <point/>
-  </object>
-  <object id="21" name="SKELET" type="MEDIUM" x="45" y="291.75">
-   <point/>
-  </object>
-  <object id="22" name="IMP" type="HARD" x="218.75" y="277.75">
-   <point/>
-  </object>
-  <object id="23" name="CHORT" type="HARD" x="252.75" y="279.5">
-   <point/>
-  </object>
-  <object id="24" name="BIG_DEMON" type="EASY" x="86.75" y="290.5">
-   <point/>
-  </object>
-  <object id="25" name="DUMMY" type="HARD" x="164.5" y="166.25">
-   <point/>
-  </object>
-  <object id="29" name="IMP" type="HARD" x="167.333" y="35.3333">
+  <object id="30" name="GOBLIN" type="EASY" x="232" y="222">
    <point/>
   </object>
  </objectgroup>

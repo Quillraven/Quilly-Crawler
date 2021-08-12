@@ -41,6 +41,7 @@ private fun EngineEntity.withBox2DComponents(
   z: Int = Z_DEFAULT,
   width: Float = 1f,
   height: Float = 1f,
+  boundingBoxWidthPercentage: Float = 1f,
   boundingBoxHeightPercentage: Float = 1f,
   onlySensor: Boolean = false,
   optionalInit: BodyDefinition.() -> Unit = {}
@@ -57,9 +58,10 @@ private fun EngineEntity.withBox2DComponents(
       )
       fixedRotation = true
       allowSleep = false
+      val boundingBoxWidth = transformCmp.size.x * boundingBoxWidthPercentage
       val boundingBoxHeight = transformCmp.size.y * boundingBoxHeightPercentage
       box(
-        transformCmp.size.x,
+        boundingBoxWidth,
         boundingBoxHeight,
         TMP_VECTOR2.set(0f, -transformCmp.size.y * 0.5f + boundingBoxHeight * 0.5f)
       ) {
@@ -140,13 +142,31 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
     }
     name == "SHOP" -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "WITCH", "idle", 0.35f)
-      withBox2DComponents(world, BodyType.StaticBody, x, y, Z_DEFAULT, 1.25f, 1.875f, 0.35f)
+      withBox2DComponents(
+        world,
+        BodyType.StaticBody,
+        x,
+        y,
+        Z_DEFAULT,
+        1.25f,
+        1.875f,
+        boundingBoxHeightPercentage = 0.35f
+      )
       with<ActionableComponent> { type = ActionType.SHOP }
       with<BagComponent>()
     }
     name == "REAPER" -> {
       withAnimationComponents(TextureAtlasAssets.ENTITIES, "REAPER", "idle", 0.4f)
-      withBox2DComponents(world, BodyType.StaticBody, x, y, Z_DEFAULT, 1.25f, 1.40625f, 0.35f)
+      withBox2DComponents(
+        world,
+        BodyType.StaticBody,
+        x,
+        y,
+        Z_DEFAULT,
+        1.25f,
+        1.40625f,
+        boundingBoxHeightPercentage = 0.35f
+      )
       with<ActionableComponent> { type = ActionType.REAPER }
     }
     name == "EXIT" -> {
@@ -161,7 +181,16 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
         "CHORT" -> TMP_VECTOR2.set(1f, 1.5f)
         else -> TMP_VECTOR2.set(1f, 1f)
       }
-      withBox2DComponents(world, BodyType.StaticBody, x - 0.5f, y, Z_DEFAULT, TMP_VECTOR2.x, TMP_VECTOR2.y, 0.25f)
+      withBox2DComponents(
+        world,
+        BodyType.StaticBody,
+        x - 0.5f,
+        y,
+        Z_DEFAULT,
+        TMP_VECTOR2.x,
+        TMP_VECTOR2.y,
+        boundingBoxHeightPercentage = 0.25f
+      )
       with<StateComponent> {
         state = when (name) {
           "DUMMY" -> EnemyState.IDLE
@@ -182,7 +211,7 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
 fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
   return this.entity {
     withAnimationComponents(TextureAtlasAssets.ENTITIES, "wizard-m")
-    withBox2DComponents(world, BodyType.DynamicBody, x, y, Z_DEFAULT, 1f, 1.75f, 0.2f) {
+    withBox2DComponents(world, BodyType.DynamicBody, x, y, Z_DEFAULT, 1f, 1.75f, 0.75f, 0.2f) {
       circle(1f) {
         isSensor = true
       }
