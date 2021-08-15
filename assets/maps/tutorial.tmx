@@ -51,7 +51,7 @@
    <point/>
   </object>
   <object id="7" name="EXIT" x="272" y="208" width="16.0678" height="16.0153"/>
-  <object id="8" name="CHEST_COMMON" x="199.917" y="207.292">
+  <object id="8" name="CHEST_COMMON" x="193.19" y="207.383">
    <point/>
   </object>
   <object id="26" name="SHOP" x="102.75" y="154.667">
