@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="20" height="22" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="49">
+ <properties>
+  <property name="musicFilePath" value="audio/music/Try and Solve This.ogg"/>
+ </properties>
+ <tileset firstgid="1" source="../tileset1.tsx"/>
+ <layer id="1" name="ground" width="20" height="22">
+  <data encoding="base64" compression="zlib">
+   eJzVlFEKwCAIhn2O7tDL1hF67f63GkGCE3XT2sOECJb/17+0AP4Tac51E+9k3JUok4PjIOwxqnOfNP1RJvfq5UnMztbfMvEfNR3dy+PP4nn8UV1kTcrtgiZDzJuWi9+LkWPptH6RznfUJxs8KX/MDe71l3xYPjWdVvdIPJ3vKg/v866+5G+Hl4f9wu931B+PL3jW+7ErLrigB1U=
+  </data>
+ </layer>
+ <layer id="4" name="background" width="20" height="22">
+  <data encoding="base64" compression="zlib">
+   eJxjYKAdYEGjBxPQQ6PZkfjIeDABUyS2OpQWHwiHDAEAik8TLOLqUOxJX+fgBKA0ZsqAO62BxKUZEOmRHYc6EEBPC7A0okuJA4cJgIUjjD0Y8jYofgaLW4YrAACDOQU5
+  </data>
+ </layer>
+ <layer id="9" name="foreground" width="20" height="22">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJylU0EOhCAMnItv2DeYbDxtwrU3N/L//6xEJ5SmuhUmaYpAx4EOwIF1j+8eb5VHMJucBvkmJ69n1hHV7emZnbmobm9fRquxQAb4CorGj/nu4aOubNZ7+Urdsserk0/Q9tbenZxr2RYGQF2eliXIkZQWjsk3qX2CmCeTo4dn+6fJ80bUp/bNXNUKWu22jvPsO+OKj+vkzah9WVDvVPed98EaD6V+Q/UdkdQ/vb5Hfan5eHbPgz18d3jKJ7j33FM+3Rv2Z4TPQtDq7XnXGlrvhurFH+vSFjA=
+  </data>
+ </layer>
+ <layer id="2" name="foreground2" width="20" height="22">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYEAF7gzUBeZUMkcTjQaZq0Mls2GAWm7FZx61wpfabh1MAF+8Ehvn5jjY+NQRAjC7WUl0Cy7gQIA/1IAmYSV4wVDMz6NgcAMAX78EvQ==
+  </data>
+ </layer>
+ <layer id="3" name="foreground3" width="20" height="22">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgaQAdKmw+oK0bBKKAecCfAHwWjYBRQBgBKFADy
+  </data>
+ </layer>
+ <objectgroup id="5" name="collision">
+  <properties>
+   <property name="collisionLayer" type="bool" value="true"/>
+  </properties>
+  <object id="45" x="36.375" y="63.875">
+   <polygon points="0,0 11.625,0.125 11.625,-31.875 27.625,-31.875 27.625,0.125 43.625,0.125 43.625,-31.875 59.625,-31.875 59.7163,-0.0835644 75.625,0.125 75.625,32.125 88.75,31.875 89.25,-0.375 155.625,0.125 155.625,32.125 168.875,32.125 168.75,95.5 155.625,96.125 155.625,128.125 235.625,128.125 235.625,192.125 263.25,192.375 263.375,286.5 191.25,287.75 191.625,255.25 126.193,255.375 126.205,175.818 71.625,176.375 71.75,191.625 32,190.875 31.25,174.875 -2,175.25 -2,95.625 26.75,95.375 27.5,76.875 -0.125,76.875"/>
+  </object>
+  <object id="46" x="176.375" y="256.125">
+   <polygon points="0,0 -0.375,31.875 47.625,31.875 47.625,-0.125 79.625,-0.125 79.625,-32.125 29.125,-32.3523 28.5,-0.431818"/>
+  </object>
+  <object id="47" x="160" y="208">
+   <polyline points="0,0 0,-16 -16,-16 -16,0 0,0"/>
+  </object>
+  <object id="48" x="80.5" y="159.5">
+   <polygon points="1.5,0.375 0.5,14.125 -30.75,14 -30.75,48.75 -16.5,48.5 -16.5,32.5 31.5,32.5 31.5,48.5 47.5,48.5 47.5,0.5 95.5,0.5 95.5,-15.5 82,-15.875 82,-64 95.5,-63.5 95.5,-79.5 60.875,-78.9375 60.875,-32.6875 27.625,-32.5 27.625,-0.625"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="entities">
+  <object id="6" name="PLAYER" x="280.046" y="318.796">
+   <point/>
+  </object>
+  <object id="7" name="EXIT" x="48" y="32" width="16.0678" height="16.0153"/>
+  <object id="8" name="CHEST_COMMON" x="81.489" y="222.794">
+   <point/>
+  </object>
+  <object id="26" name="SHOP" x="232.909" y="271.056">
+   <point/>
+  </object>
+  <object id="32" name="REAPER" x="276.758" y="271.27">
+   <point/>
+  </object>
+  <object id="33" name="CHEST_COMMON" x="176.955" y="224.279">
+   <point/>
+  </object>
+  <object id="37" name="CHEST_RARE" x="81.2083" y="47.75">
+   <point/>
+  </object>
+  <object id="44" name="CHEST_COMMON" x="176.417" y="127">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ff0000" id="7" name="enemies">
+  <object id="20" name="GOBLIN" type="MEDIUM" x="260.479" y="221.602">
+   <point/>
+  </object>
+  <object id="30" name="GOBLIN" type="EASY" x="186.656" y="159.35">
+   <point/>
+  </object>
+  <object id="34" name="CHORT" type="EASY" x="103.888" y="238.691">
+   <point/>
+  </object>
+  <object id="35" name="IMP" type="EASY" x="114.238" y="221.466">
+   <point/>
+  </object>
+  <object id="36" name="SKELET" type="EASY" x="54.5716" y="76.6443">
+   <point/>
+  </object>
+  <object id="38" name="GOBLIN" type="MEDIUM" x="168.962" y="297.545">
+   <point/>
+  </object>
+  <object id="39" name="CHORT" type="MEDIUM" x="83.6364" y="77.0375">
+   <point/>
+  </object>
+ </objectgroup>
+</map>
