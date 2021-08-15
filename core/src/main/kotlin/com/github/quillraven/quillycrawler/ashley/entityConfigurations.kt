@@ -150,6 +150,7 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
         Z_DEFAULT,
         1.25f,
         1.875f,
+        boundingBoxWidthPercentage = 0.75f,
         boundingBoxHeightPercentage = 0.35f
       )
       with<ActionableComponent> { type = ActionType.SHOP }
@@ -165,6 +166,7 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
         Z_DEFAULT,
         1.25f,
         1.40625f,
+        boundingBoxWidthPercentage = 0.75f,
         boundingBoxHeightPercentage = 0.35f
       )
       with<ActionableComponent> { type = ActionType.REAPER }
@@ -188,8 +190,7 @@ fun EngineEntity.configureTiledMapEntity(layer: MapLayer, mapObject: MapObject, 
         y,
         Z_DEFAULT,
         TMP_VECTOR2.x,
-        TMP_VECTOR2.y,
-        boundingBoxHeightPercentage = 0.25f
+        TMP_VECTOR2.y
       )
       with<StateComponent> {
         state = when (name) {

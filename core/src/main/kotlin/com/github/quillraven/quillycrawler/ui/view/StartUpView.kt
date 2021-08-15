@@ -222,9 +222,9 @@ class StartUpView(
     crawlerSplash.clearActions()
     crawlerSplash += sequence(Actions.moveBy(0f, 100f), delay(0.25f), moveBy(0f, -100f, 1.5f, Interpolation.bounce))
     this.clearActions()
-    this += sequence(alpha(0f), delay(4.5f), alpha(1f, 1.25f))
+    this += sequence(alpha(0f), delay(4f), alpha(1f, 1.25f))
     controlTable.clearActions()
-    controlTable += sequence(alpha(0f), delay(4.5f), alpha(1f, 1.25f))
+    controlTable += sequence(alpha(0f), delay(4f), alpha(1f, 1.25f))
   }
 
   override fun onHide() {

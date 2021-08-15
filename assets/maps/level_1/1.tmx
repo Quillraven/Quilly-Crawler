@@ -1,23 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-up" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="6">
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="20" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="45">
  <properties>
   <property name="musicFilePath" value="audio/music/Try and Solve This.ogg"/>
  </properties>
  <tileset firstgid="1" source="../tileset1.tsx"/>
- <layer id="1" name="Kachelebene 1" width="8" height="8">
+ <layer id="1" name="ground" width="20" height="21">
   <data encoding="base64" compression="zlib">
-   eJzjYmBg4CISyxOQwydPSD+6PCG1hLASkeoAlz8DFw==
+   eJytVMsKwzAMy2GHUQb7g+yy5Bu2U8/5/x9qBwlomuRmUIEorR1HftQpnY8GjGyOjKXzFtiQhd4ZeefT2PD8auJHGpxNYek6GK3bGn1rXfvHdt35pnM1uKsEmgfvwicH+l7kO2qKxL66WlTIi31dT/EbQ+WGzCaO06fymj07C6Vr1ONCz9l4qE3l4Oqn8Ei/9VuFn5qXI52Rhn9rehRvVh/PodpN6j+NdJX03WPeZzXNzxH2A/vMd7o9p/SpGWEftxPOwgYmTxMT
   </data>
  </layer>
- <objectgroup id="2" name="Objektebene 1">
-  <object id="1" name="PLAYER" x="26.8607" y="43.3237">
+ <layer id="4" name="background" width="20" height="21">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMAoGHgAABpAAAQ==
+  </data>
+ </layer>
+ <layer id="9" name="foreground" width="20" height="21">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJzVk0EKAzEIRT3EQBc9QWHIrnSbXaG5/32KjILz+SaWLko/iJPw+GNiFBHZQqC2QqAelm+wj2smxvzCLzsn8+uWh+Wn8SMwLcTdcubne1mdUcgw1uvQOveFnzKx9tn9OT8Ik2nl96m+9cMe61l2YDrhkHFd5OivZu831tMClzEzVVjG+LvEN13x63Kedb+rBlH1izxbq3AOZsJ5w3pFznOwEvsnvrXKfP6LXxc+C4ypzLv28mX5Gr6j2P4bWA8YLg==
+  </data>
+ </layer>
+ <layer id="2" name="foreground2" width="20" height="21">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYEAAdwZUgM7HBohRMxwAMf7UIUKNOZTWpMAtpAJi3DUKRgGlgNQ0jazeHKcq8gF6nh3NB4MfAABi+ALR
+  </data>
+ </layer>
+ <layer id="3" name="foreground3" width="20" height="21">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjETgTmP1o2AUkAoAZ2cAjw==
+  </data>
+ </layer>
+ <objectgroup id="5" name="collision">
+  <properties>
+   <property name="collisionLayer" type="bool" value="true"/>
+  </properties>
+  <object id="41" x="20.8182" y="31.4545">
+   <polyline points="0,0 38.6364,0.545455 38.7273,44.7273 27.3636,44.9091 27.3636,96.1818 43.1818,96.5455 43.1818,112.545 75.1818,112.545 75.1818,64.5455 107.182,64.5455 107.182,0.545455 245.909,0.545455 247,144.364 171.818,144.455"/>
+  </object>
+  <object id="42" x="160.25" y="79.125">
+   <polyline points="0,0 79.75,0.875 79.75,48.875 31.75,48.875 31.75,16.875 -0.25,16.875 -0.25,0.875"/>
+  </object>
+  <object id="43" x="20.875" y="32.125">
+   <polyline points="0,0 -0.125,44.25 11.75,44.5 11.125,95.875 0,95.75 -0.375,159.75 79.5,160 79.5,206.875 107.125,207.875 107.125,239.875 79.75,239.875 79.5,303.375 166.375,302.875 166.5,239.25 139.125,239.875 139.125,207.875 171.125,207.875 171.125,191.875 235.125,191.875 235.125,239.875 223.5,240 223.875,303.625 262,303.5 262.375,239.25 251.125,239.875 251.125,159.875 171.125,159.875 171.125,143.875"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="entities">
+  <object id="6" name="PLAYER" x="39.713" y="56.4629">
    <point/>
   </object>
-  <object id="3" name="EXIT" x="97.695" y="98.2366" width="13.4304" height="11.6974"/>
-  <object id="4" name="SHOP" x="89.4545" y="32.1591">
+  <object id="7" name="EXIT" x="256" y="288" width="16.0678" height="16.0153"/>
+  <object id="8" name="CHEST_COMMON" x="119.489" y="316.461">
    <point/>
   </object>
-  <object id="5" name="REAPER" x="115.455" y="34.9091">
+  <object id="26" name="SHOP" x="21.9087" y="172.723">
+   <point/>
+  </object>
+  <object id="32" name="REAPER" x="46.5076" y="143.603">
+   <point/>
+  </object>
+  <object id="33" name="CHEST_COMMON" x="168.288" y="315.946">
+   <point/>
+  </object>
+  <object id="37" name="CHEST_RARE" x="248.5" y="47.3333">
+   <point/>
+  </object>
+  <object id="44" name="CHEST_COMMON" x="135.75" y="160">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ff0000" id="7" name="enemies">
+  <object id="20" name="GOBLIN" type="MEDIUM" x="96.6382" y="165.113">
+   <point/>
+  </object>
+  <object id="30" name="GOBLIN" type="EASY" x="97.1107" y="186.714">
+   <point/>
+  </object>
+  <object id="34" name="CHORT" type="EASY" x="134.843" y="255.691">
+   <point/>
+  </object>
+  <object id="35" name="IMP" type="EASY" x="150.238" y="243.216">
+   <point/>
+  </object>
+  <object id="36" name="SKELET" type="EASY" x="264.333" y="272.667">
+   <point/>
+  </object>
+  <object id="38" name="GOBLIN" type="MEDIUM" x="146.917" y="76.5">
+   <point/>
+  </object>
+  <object id="39" name="CHORT" type="MEDIUM" x="254" y="102.333">
    <point/>
   </object>
  </objectgroup>
