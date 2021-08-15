@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.ScreenUtils
+import com.github.quillraven.commons.ashley.component.Box2DComponent
 import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.commons.ashley.component.tiledCmp
@@ -124,6 +125,7 @@ class CombatScreen(
       // remove enemy entity from original game screen
       enemyEntity.removeFromEngine(gameEngine, 1.5f)
       enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
+      enemyEntity.remove(Box2DComponent::class.java)
       playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
     }
 
