@@ -3,6 +3,7 @@ package com.github.quillraven.quillycrawler.combat.command
 import com.github.quillraven.commons.ashley.component.fadeTo
 import com.github.quillraven.commons.ashley.component.renderCmp
 import com.github.quillraven.commons.ashley.component.resizeTo
+import com.github.quillraven.commons.ashley.component.transformCmp
 import com.github.quillraven.quillycrawler.ashley.component.StatsType
 import com.github.quillraven.quillycrawler.ashley.component.statsCmp
 import com.github.quillraven.quillycrawler.assets.SoundAssets
@@ -31,7 +32,9 @@ class CommandTransform(context: CombatContext) : Command(context) {
       renderCmp.sprite.color.a,
       4f
     )
-    entity.resizeTo(engine, 1.5f, 1.5f, 4f)
+
+    val size = entity.transformCmp.size
+    entity.resizeTo(engine, size.x * 1.25f, size.y * 1.25f, 4f)
 
     // play transform sound
     audioService.play(SoundAssets.TRANSFORM_DEMON)
