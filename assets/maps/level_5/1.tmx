@@ -1,23 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-up" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="6">
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="20" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="46">
  <properties>
   <property name="musicFilePath" value="audio/music/Take Cover.ogg"/>
  </properties>
  <tileset firstgid="1" source="../tileset1.tsx"/>
- <layer id="1" name="Kachelebene 1" width="8" height="8">
+ <layer id="1" name="ground" width="20" height="21">
   <data encoding="base64" compression="zlib">
-   eJzjYmBg4CISyxMhh08NsWbgkpMnwR4lIv0EAKijA1Y=
+   eJxjYBgFo2DggR4WTIxaXIALDdvjMUsNqoYHj5kgeVU0GpubudDUcBHhPhUs7oWJyWGRw2ceMfYiq8EVLtjsxgWIUTMKRgExAAA8gAYc
   </data>
  </layer>
- <objectgroup id="2" name="Objektebene 1">
-  <object id="1" name="PLAYER" x="26.8607" y="43.3237">
+ <layer id="4" name="background" width="20" height="21">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2DwAGUS1FrTzBXEA5AbLBlIczchwE9Fs0bBKBhKAACTkQEF
+  </data>
+ </layer>
+ <layer id="9" name="foreground" width="20" height="21">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo4B0IIUF62BR506EGhAwJ0IMZJYtmpgDCeY5oLkF3SwQ0CTBPGIAseahhxOu8CLWPJA6ZSA2BWI9IGaH0g5IZmILTxhwYCAcVgxIZsLU6OFRJw3EFkjuwQX0kNw9CkYWAABb5AqS
+  </data>
+ </layer>
+ <layer id="2" name="foreground2" width="20" height="21">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo4B0oDPQDoAC94F2wCgYBaOAagAA1G8AdA==
+  </data>
+ </layer>
+ <layer id="3" name="foreground3" width="20" height="21">
+  <properties>
+   <property name="z" type="int" value="1"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2AUjIJRMAoGHgAABpAAAQ==
+  </data>
+ </layer>
+ <objectgroup id="5" name="collision">
+  <properties>
+   <property name="collisionLayer" type="bool" value="true"/>
+  </properties>
+  <object id="45" x="36.5455" y="144">
+   <polygon points="0,0 75.4545,0 75.4545,32 155.455,32 155.455,16 171.455,16 171.455,0 219.455,0 219.455,16 231.273,16 231.364,77.9091 215.182,77.5455 215.182,95.4545 175.636,95.9091 175.182,77.2727 156.182,78.6364 155.455,64 72.5455,63.7273 73.0909,94.4545 -0.454545,94.8182"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="entities">
+  <object id="6" name="PLAYER" x="46.713" y="211.13">
    <point/>
   </object>
-  <object id="3" name="EXIT" x="97.695" y="98.2366" width="13.4304" height="11.6974"/>
-  <object id="4" name="SHOP" x="89.2722" y="30.3409">
+  <object id="7" name="EXIT" x="256" y="176" width="16.0678" height="16.0153"/>
+  <object id="26" name="SHOP" x="49.5754" y="160.056">
    <point/>
   </object>
-  <object id="5" name="REAPER" x="115.273" y="33.0909">
+  <object id="32" name="REAPER" x="96.5076" y="159.603">
+   <point/>
+  </object>
+  <object id="37" name="CHEST_EPIC" x="226.833" y="192">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ff0000" id="7" name="enemies">
+  <object id="30" name="BIG_DEMON" type="BOSS" x="202.02" y="204.229">
    <point/>
   </object>
  </objectgroup>
