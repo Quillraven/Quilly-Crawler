@@ -8,9 +8,12 @@ import com.github.quillraven.commons.ashley.component.RemoveComponent
 import com.github.quillraven.commons.ashley.component.removeFromEngine
 import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.ashley.createItemEntity
+import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.event.GameLootEvent
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.ashley.get
+import ktx.collections.GdxArray
 import ktx.collections.contains
 import ktx.collections.set
 import ktx.log.debug
@@ -18,7 +21,9 @@ import ktx.log.error
 import ktx.log.logger
 import kotlin.random.Random
 
-class LootSystem : EntityListener, IteratingSystem(
+class LootSystem(
+  private val gameEventDispatcher: GameEventDispatcher
+) : EntityListener, IteratingSystem(
   allOf(PlayerComponent::class, LootComponent::class, BagComponent::class).exclude(RemoveComponent::class).get()
 ) {
   private val bagFamily = allOf(BagComponent::class).get()
@@ -51,7 +56,7 @@ class LootSystem : EntityListener, IteratingSystem(
 
     when (lootCmp.lootType) {
       LootType.COMMON -> {
-        addPlayerLoot(entity, Random.nextInt(0, 11), 25)
+        addPlayerLoot(entity, Random.nextInt(5, 11), 25)
       }
       LootType.RARE -> {
         addPlayerLoot(entity, Random.nextInt(25, 51), 50)
@@ -72,16 +77,23 @@ class LootSystem : EntityListener, IteratingSystem(
       gold += goldCoins
       LOG.debug { "Added '$goldCoins' gold. Total is '$gold'" }
 
+      TMP_ARRAY.clear()
       if (itemChance >= 100 || Random.nextInt(1, 101) <= itemChance) {
         for (i in 0 until numItems) {
           createItemForBag(this)
         }
+      }
+
+      gameEventDispatcher.dispatchEvent<GameLootEvent> {
+        this.gold = goldCoins
+        this.items.addAll(TMP_ARRAY)
       }
     }
   }
 
   private fun createItemForBag(bagCmp: BagComponent) {
     val type = ItemType.randomGearItem()
+    TMP_ARRAY.add(type)
 
     if (type in bagCmp.items) {
       bagCmp.items[type].itemCmp.amount++
@@ -98,5 +110,6 @@ class LootSystem : EntityListener, IteratingSystem(
 
   companion object {
     private val LOG = logger<LootSystem>()
+    private val TMP_ARRAY = GdxArray<ItemType>()
   }
 }

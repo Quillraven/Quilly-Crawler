@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.ReflectionPool
 import com.github.quillraven.quillycrawler.ashley.component.DamageEmitterComponent
 import com.github.quillraven.quillycrawler.ashley.component.HealEmitterComponent
+import com.github.quillraven.quillycrawler.ashley.component.ItemType
 import com.github.quillraven.quillycrawler.ashley.component.StatsComponent
 import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.combat.command.Command
@@ -94,6 +95,15 @@ class GameInteractReaperEvent : GameEvent() {
 }
 
 object GameExitEvent : GameEvent()
+
+class GameLootEvent : GameEvent() {
+  var gold = 0
+  val items = GdxArray<ItemType>()
+
+  override fun reset() {
+    items.clear()
+  }
+}
 
 interface GameEventListener {
   fun onEvent(event: GameEvent)

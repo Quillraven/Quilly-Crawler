@@ -296,6 +296,7 @@ class StartUpView(
           deleteSaveTable.isVisible = true
           deleteYesBtn.label.removeSelectionEffect()
           deleteNoBtn.label.addSelectionEffect()
+          viewModel.changeOption()
         } else {
           viewModel.newGame()
         }

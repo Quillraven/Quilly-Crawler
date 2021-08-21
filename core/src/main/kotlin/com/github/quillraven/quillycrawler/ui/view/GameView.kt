@@ -81,6 +81,17 @@ class GameView(private val viewModel: GameViewModel, private val bundle: I18NBun
     }
   }
 
+  override fun onPlayerLoot(lootDescr: StringBuilder) {
+    setInputControl()
+
+    popupTable.isVisible = true
+    popupTable.userObject = POPUP_PLAYER_LOOT
+    popupLabel.setText(lootDescr)
+    btnNo.label.addSelectionEffect()
+    btnNo.setText(bundle["OK"])
+    btnYes.isVisible = false
+  }
+
   override fun onDungeonReset(goldLoss: Int, newLevel: Int) {
     setInputControl()
 
@@ -100,6 +111,10 @@ class GameView(private val viewModel: GameViewModel, private val bundle: I18NBun
   }
 
   private fun changeYesNo() {
+    if (!btnYes.isVisible) {
+      return
+    }
+
     if (btnYes.label.actions.isNotEmpty()) {
       // yes button currently selected -> switch to no
       btnYes.label.removeSelectionEffect()
@@ -115,12 +130,15 @@ class GameView(private val viewModel: GameViewModel, private val bundle: I18NBun
   private fun confirmPopupDialog(isYes: Boolean) {
     removeInputControl()
     btnNo.label.removeSelectionEffect()
+    btnNo.setText(bundle["NO"])
     btnYes.label.removeSelectionEffect()
+    btnYes.isVisible = true
     popupTable.isVisible = false
 
     when (popupTable.userObject) {
       POPUP_DUNGEON_RESET -> viewModel.resetDungeon(isYes)
       POPUP_EXIT_GAME -> viewModel.exitGame(isYes)
+      POPUP_PLAYER_LOOT -> viewModel.backToGame()
     }
   }
 
@@ -149,5 +167,6 @@ class GameView(private val viewModel: GameViewModel, private val bundle: I18NBun
   companion object {
     private const val POPUP_DUNGEON_RESET = 1
     private const val POPUP_EXIT_GAME = 2
+    private const val POPUP_PLAYER_LOOT = 3
   }
 }

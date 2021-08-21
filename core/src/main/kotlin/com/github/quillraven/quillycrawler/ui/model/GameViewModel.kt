@@ -17,6 +17,7 @@ import ktx.ashley.configureEntity
 import ktx.ashley.getSystem
 import ktx.ashley.with
 import ktx.collections.GdxSet
+import ktx.collections.isNotEmpty
 
 interface GameUiListener {
   fun onMapChange(mapName: StringBuilder) = Unit
@@ -24,12 +25,14 @@ interface GameUiListener {
   fun onDungeonReset(goldLoss: Int, newLevel: Int) = Unit
 
   fun onGameExit() = Unit
+
+  fun onPlayerLoot(lootDescr: StringBuilder) = Unit
 }
 
 data class GameViewModel(val bundle: I18NBundle, val engine: Engine, private val audioService: AudioService) :
   GameEventListener {
   private val uiListeners = GdxSet<GameUiListener>()
-  private val mapNameBuilder = StringBuilder()
+  private val strBuilder = StringBuilder()
   private lateinit var playerEntity: Entity
 
   fun addGameListener(listener: GameUiListener) = uiListeners.add(listener)
@@ -44,6 +47,11 @@ data class GameViewModel(val bundle: I18NBundle, val engine: Engine, private val
     } else {
       audioService.play(SoundAssets.MENU_BACK)
     }
+  }
+
+  fun backToGame() {
+    audioService.play(SoundAssets.MENU_SELECT)
+    engine.getSystem<PlayerControlSystem>().setProcessing(true)
   }
 
   fun resetDungeon(reset: Boolean) {
@@ -72,9 +80,9 @@ data class GameViewModel(val bundle: I18NBundle, val engine: Engine, private val
   override fun onEvent(event: GameEvent) {
     when (event) {
       is MapChangeEvent -> {
-        mapNameBuilder.clear()
-        mapNameBuilder.append(bundle["GameView.dungeonLevel"]).append(" ").append(event.level)
-        uiListeners.forEach { it.onMapChange(mapNameBuilder) }
+        strBuilder.clear()
+        strBuilder.append(bundle["GameView.dungeonLevel"]).append(" ").append(event.level)
+        uiListeners.forEach { it.onMapChange(strBuilder) }
       }
       is GameInteractReaperEvent -> {
         playerEntity = event.entity
@@ -87,6 +95,18 @@ data class GameViewModel(val bundle: I18NBundle, val engine: Engine, private val
       is GameExitEvent -> {
         engine.getSystem<PlayerControlSystem>().setProcessing(false)
         uiListeners.forEach { it.onGameExit() }
+      }
+      is GameLootEvent -> {
+        strBuilder.clear()
+        if (event.items.isNotEmpty()) {
+          strBuilder.append(bundle.format("GameView.loot-with-items", event.gold))
+          strBuilder.append("\n")
+          event.items.forEach { strBuilder.append("\n").append(bundle["Item.${it.name}.name"]) }
+        } else {
+          strBuilder.append(bundle.format("GameView.loot-no-items", event.gold))
+        }
+        engine.getSystem<PlayerControlSystem>().setProcessing(false)
+        uiListeners.forEach { it.onPlayerLoot(strBuilder) }
       }
       else -> Unit
     }

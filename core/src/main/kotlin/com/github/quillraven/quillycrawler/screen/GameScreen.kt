@@ -14,10 +14,7 @@ import com.github.quillraven.quillycrawler.ai.MessageType
 import com.github.quillraven.quillycrawler.ashley.configureTiledMapEntity
 import com.github.quillraven.quillycrawler.ashley.system.*
 import com.github.quillraven.quillycrawler.assets.I18NAssets
-import com.github.quillraven.quillycrawler.event.GameEventDispatcher
-import com.github.quillraven.quillycrawler.event.GameExitEvent
-import com.github.quillraven.quillycrawler.event.GameInteractReaperEvent
-import com.github.quillraven.quillycrawler.event.MapChangeEvent
+import com.github.quillraven.quillycrawler.event.*
 import com.github.quillraven.quillycrawler.preferences.loadGameState
 import com.github.quillraven.quillycrawler.preferences.saveGameState
 import com.github.quillraven.quillycrawler.shader.DefaultShaderService
@@ -58,7 +55,7 @@ class GameScreen(
       addSystem(PlayerControlSystem(gameEventDispatcher))
       addSystem(InteractSystem(messageManager, audioService, gameEventDispatcher))
       addSystem(StateSystem(messageManager, MessageType.values().map { it.ordinal }.toSet()))
-      addSystem(LootSystem())
+      addSystem(LootSystem(gameEventDispatcher))
       addSystem(GearSystem())
       addSystem(ConsumeSystem(gameEventDispatcher))
       addSystem(MoveSystem())
@@ -98,6 +95,7 @@ class GameScreen(
     gameEventDispatcher.addListener<MapChangeEvent>(viewModel)
     gameEventDispatcher.addListener<GameInteractReaperEvent>(viewModel)
     gameEventDispatcher.addListener<GameExitEvent>(viewModel)
+    gameEventDispatcher.addListener<GameLootEvent>(viewModel)
     stage.addActor(view)
     engine.getSystem<AmbientSoundSystem>().setProcessing(true)
     engine.getSystem<PlayerControlSystem>().setProcessing(true)
