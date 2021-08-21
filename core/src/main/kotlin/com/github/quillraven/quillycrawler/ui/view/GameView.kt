@@ -92,6 +92,17 @@ class GameView(private val viewModel: GameViewModel, private val bundle: I18NBun
     btnYes.isVisible = false
   }
 
+  override fun onCombatLoot(description: String) {
+    setInputControl()
+
+    popupTable.isVisible = true
+    popupTable.userObject = POPUP_COMBAT_LOOT
+    popupLabel.setText(description)
+    btnNo.label.addSelectionEffect()
+    btnNo.setText(bundle["OK"])
+    btnYes.isVisible = false
+  }
+
   override fun onDungeonReset(goldLoss: Int, newLevel: Int) {
     setInputControl()
 
@@ -138,7 +149,7 @@ class GameView(private val viewModel: GameViewModel, private val bundle: I18NBun
     when (popupTable.userObject) {
       POPUP_DUNGEON_RESET -> viewModel.resetDungeon(isYes)
       POPUP_EXIT_GAME -> viewModel.exitGame(isYes)
-      POPUP_PLAYER_LOOT -> viewModel.backToGame()
+      POPUP_PLAYER_LOOT, POPUP_COMBAT_LOOT -> viewModel.backToGame()
     }
   }
 
@@ -168,5 +179,6 @@ class GameView(private val viewModel: GameViewModel, private val bundle: I18NBun
     private const val POPUP_DUNGEON_RESET = 1
     private const val POPUP_EXIT_GAME = 2
     private const val POPUP_PLAYER_LOOT = 3
+    private const val POPUP_COMBAT_LOOT = 4
   }
 }

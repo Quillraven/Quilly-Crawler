@@ -19,9 +19,7 @@ import com.github.quillraven.commons.ashley.component.tiledCmp
 import com.github.quillraven.commons.ashley.system.*
 import com.github.quillraven.commons.game.AbstractScreen
 import com.github.quillraven.quillycrawler.QuillyCrawler
-import com.github.quillraven.quillycrawler.ashley.component.bagCmp
-import com.github.quillraven.quillycrawler.ashley.component.interactCmp
-import com.github.quillraven.quillycrawler.ashley.component.playerCmp
+import com.github.quillraven.quillycrawler.ashley.component.*
 import com.github.quillraven.quillycrawler.ashley.system.*
 import com.github.quillraven.quillycrawler.assets.I18NAssets
 import com.github.quillraven.quillycrawler.assets.MusicAssets
@@ -33,8 +31,10 @@ import com.github.quillraven.quillycrawler.event.*
 import com.github.quillraven.quillycrawler.ui.model.CombatState
 import com.github.quillraven.quillycrawler.ui.model.CombatViewModel
 import com.github.quillraven.quillycrawler.ui.view.CombatView
+import ktx.ashley.configureEntity
 import ktx.ashley.entity
 import ktx.ashley.getSystem
+import ktx.ashley.with
 import ktx.collections.GdxArray
 import ktx.collections.gdxArrayOf
 import ktx.collections.set
@@ -127,6 +127,20 @@ class CombatScreen(
       enemyEntity.fadeTo(gameEngine, 1f, 0f, 0f, 0f, 1.5f)
       enemyEntity.remove(Box2DComponent::class.java)
       playerEntity.interactCmp.entitiesInRange.remove(enemyEntity)
+      gameEngine.configureEntity(playerEntity) {
+        with<CombatLootComponent> {
+          victory = true
+          gold = 10 + playerEntity.playerCmp.dungeonLevel * MathUtils.random(1, 3)
+        }
+      }
+    } else {
+      // defeat -> reduce gold
+      gameEngine.configureEntity(playerEntity) {
+        with<CombatLootComponent> {
+          victory = false
+          gold = -(playerEntity.bagCmp.gold * 0.15f).toInt()
+        }
+      }
     }
 
     gameEventDispatcher.removeListener(viewModel)
@@ -190,13 +204,38 @@ class CombatScreen(
     }
   }
 
-  private fun updatePlayerItemsAfterCombat(reduceGold: Boolean = false) {
+  private fun updatePlayerAfterCombat() {
+    // update items
     with(playerEntity.bagCmp) {
       items.clear()
       playerCombatEntity.bagCmp.items.forEach { entry -> items[entry.key] = entry.value }
+    }
 
-      if (reduceGold) {
-        gold = (gold * 0.8f).toInt()
+    // update commands if any command was learned during combat
+    with(playerEntity.combatCmp) {
+      playerCombatEntity.combatCmp.availableCommands.forEach {
+        if (!this.commandsToLearn.contains(it.key)) {
+          this.learn(it.key)
+        }
+      }
+    }
+
+    // update stats
+    if (viewModel.combatState == CombatState.VICTORY) {
+      // victory -> set stats to combat stats
+      with(playerEntity.statsCmp) {
+        StatsType.VALUES.forEach { this[it] = playerCombatEntity.statsCmp[it] }
+      }
+    } else {
+      // defeat -> restore life and mana to maximum
+      with(playerEntity.statsCmp) {
+        StatsType.VALUES.forEach {
+          when (it) {
+            StatsType.LIFE -> this[StatsType.LIFE] = this.totalStatValue(playerEntity, StatsType.MAX_LIFE)
+            StatsType.MANA -> this[StatsType.MANA] = this.totalStatValue(playerEntity, StatsType.MAX_MANA)
+            else -> this[it] = playerCombatEntity.statsCmp[it]
+          }
+        }
       }
     }
   }
@@ -217,6 +256,7 @@ class CombatScreen(
     FrameBuffer.unbind()
   }
 
+  // gets called by ViewModel when combat is over (=victory or defeat)
   private fun onReturnToGame() {
     returnToGame = true
     gameTransitionAlpha = 0f
@@ -226,7 +266,7 @@ class CombatScreen(
     audioService.playMusic(gameMusic)
 
     // update player entity after combat
-    updatePlayerItemsAfterCombat()
+    updatePlayerAfterCombat()
 
     // cleanup combat engine
     engine.removeAllEntities()

@@ -8,10 +8,7 @@ import com.github.quillraven.quillycrawler.ashley.component.buffCmp
 import com.github.quillraven.quillycrawler.combat.CombatContext
 import com.github.quillraven.quillycrawler.combat.buff.Buff
 import com.github.quillraven.quillycrawler.combat.buff.BuffPools
-import com.github.quillraven.quillycrawler.event.CombatBuffAdded
-import com.github.quillraven.quillycrawler.event.CombatBuffRemoved
-import com.github.quillraven.quillycrawler.event.CombatPreDamageEvent
-import com.github.quillraven.quillycrawler.event.GameEventDispatcher
+import com.github.quillraven.quillycrawler.event.*
 import ktx.ashley.allOf
 import ktx.ashley.exclude
 import ktx.collections.iterate
@@ -46,6 +43,9 @@ class BuffSystem(
       this.entity = entity
     }
     gameEventDispatcher.addListener<CombatPreDamageEvent>(newBuff)
+    gameEventDispatcher.addListener<CombatPostDamageEvent>(newBuff)
+    gameEventDispatcher.addListener<CombatPreHealEvent>(newBuff)
+    gameEventDispatcher.addListener<CombatPostHealEvent>(newBuff)
     newBuff.onAdd()
     // add new buff to entity buff map to avoid adding the same buff multiple times
     buffCmp.buffs[buffType] = newBuff

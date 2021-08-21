@@ -27,6 +27,8 @@ interface GameUiListener {
   fun onGameExit() = Unit
 
   fun onPlayerLoot(lootDescr: StringBuilder) = Unit
+
+  fun onCombatLoot(description: String) = Unit
 }
 
 data class GameViewModel(val bundle: I18NBundle, val engine: Engine, private val audioService: AudioService) :
@@ -107,6 +109,14 @@ data class GameViewModel(val bundle: I18NBundle, val engine: Engine, private val
         }
         engine.getSystem<PlayerControlSystem>().setProcessing(false)
         uiListeners.forEach { it.onPlayerLoot(strBuilder) }
+      }
+      is GameCombatLoot -> {
+        engine.getSystem<PlayerControlSystem>().setProcessing(false)
+        if (event.victory) {
+          uiListeners.forEach { it.onCombatLoot(bundle.format("GameView.combat-victory", event.gold)) }
+        } else {
+          uiListeners.forEach { it.onCombatLoot(bundle.format("GameView.combat-defeat", -event.gold)) }
+        }
       }
       else -> Unit
     }

@@ -105,6 +105,11 @@ class GameLootEvent : GameEvent() {
   }
 }
 
+class GameCombatLoot : GameEvent() {
+  var gold = 0
+  var victory = false
+}
+
 interface GameEventListener {
   fun onEvent(event: GameEvent)
 }
