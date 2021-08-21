@@ -19,6 +19,7 @@ class CommandTransform(context: CombatContext) : Command(context) {
     // set unit alive
     with(entity.statsCmp) {
       this[StatsType.LIFE] = this[StatsType.MAX_LIFE] * 0.75f
+      this[StatsType.MANA] = this[StatsType.MAX_MANA]
     }
 
     val renderCmp = entity.renderCmp

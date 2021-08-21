@@ -229,8 +229,8 @@ fun Engine.createPlayerEntity(world: World, x: Float, y: Float): Entity {
     with<CameraLockComponent>()
     with<GearComponent>()
     with<StatsComponent> {
-      stats[StatsType.LIFE] = 30f
-      stats[StatsType.MAX_LIFE] = 30f
+      stats[StatsType.LIFE] = 50f
+      stats[StatsType.MAX_LIFE] = 50f
       stats[StatsType.MANA] = 10f
       stats[StatsType.MAX_MANA] = 10f
       stats[StatsType.STRENGTH] = StatsComponent.BASE_STRENGTH

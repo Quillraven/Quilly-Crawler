@@ -151,12 +151,18 @@ class CombatScreen(
     val tiledCmp = enemyEntity.tiledCmp
     when (val enemyType = tiledCmp.type) {
       "BOSS" -> {
-        audioService.play(MusicAssets.LASER_QUEST)
-
         // spawn exact boss setup
         when (tiledCmp.name) {
           "BIG_DEMON" -> {
+            audioService.play(MusicAssets.LASER_QUEST)
             val bossEnemies = gdxArrayOf("CHORT", "BIG_DEMON", "IMP")
+            bossEnemies.forEachIndexed { index, name ->
+              engine.entity { configureEnemyCombatEntity(name, dungeonLevel, gameViewport, index, bossEnemies.size) }
+            }
+          }
+          "GOBLIN" -> {
+            audioService.play(MusicAssets.QUANTUM_LOOP)
+            val bossEnemies = gdxArrayOf("GOBLIN")
             bossEnemies.forEachIndexed { index, name ->
               engine.entity { configureEnemyCombatEntity(name, dungeonLevel, gameViewport, index, bossEnemies.size) }
             }

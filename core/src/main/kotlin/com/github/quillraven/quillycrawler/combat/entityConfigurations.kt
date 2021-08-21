@@ -91,10 +91,29 @@ fun EngineEntity.configureEnemyCombatEntity(
       with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
       with {
         stats[StatsType.LIFE] = 7f
-        stats[StatsType.AGILITY] = 5f
+        stats[StatsType.AGILITY] = 7f
         stats[StatsType.PHYSICAL_DAMAGE] = 3f
         stats[StatsType.PHYSICAL_ARMOR] = 1f
         stats[StatsType.MAGIC_ARMOR] = 1f
+      }
+    }
+    "CHORT" -> {
+      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
+      with {
+        stats[StatsType.LIFE] = 11f
+        stats[StatsType.AGILITY] = 8f
+        stats[StatsType.PHYSICAL_DAMAGE] = 5f
+        stats[StatsType.PHYSICAL_ARMOR] = 4f
+      }
+    }
+    "IMP" -> {
+      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
+      with {
+        stats[StatsType.LIFE] = 9f
+        stats[StatsType.AGILITY] = 10f
+        stats[StatsType.PHYSICAL_DAMAGE] = 4f
+        stats[StatsType.PHYSICAL_ARMOR] = 3f
+        stats[StatsType.MAGIC_ARMOR] = 5f
       }
     }
     "SKELET" -> {
@@ -102,26 +121,7 @@ fun EngineEntity.configureEnemyCombatEntity(
       with {
         stats[StatsType.LIFE] = 15f
         stats[StatsType.AGILITY] = 3f
-        stats[StatsType.PHYSICAL_DAMAGE] = 5f
-      }
-    }
-    "IMP" -> {
-      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
-      with {
-        stats[StatsType.LIFE] = 5f
-        stats[StatsType.AGILITY] = 15f
-        stats[StatsType.PHYSICAL_DAMAGE] = 4f
-        stats[StatsType.PHYSICAL_ARMOR] = 3f
-        stats[StatsType.MAGIC_ARMOR] = 5f
-      }
-    }
-    "CHORT" -> {
-      with<CombatAIComponent> { treeFilePath = "ai/genericCombat.tree" }
-      with {
-        stats[StatsType.LIFE] = 22f
-        stats[StatsType.AGILITY] = 8f
         stats[StatsType.PHYSICAL_DAMAGE] = 6f
-        stats[StatsType.PHYSICAL_ARMOR] = 7f
       }
     }
     "BIG_DEMON" -> {
@@ -130,13 +130,13 @@ fun EngineEntity.configureEnemyCombatEntity(
       combatCmp.learn<CommandFirebolt>()
       with<CombatAIComponent> { treeFilePath = "ai/big_demon.tree" }
       with {
-        stats[StatsType.LIFE] = 50f
-        stats[StatsType.MANA] = 10f
-        stats[StatsType.AGILITY] = 11f
+        stats[StatsType.LIFE] = 32f
+        stats[StatsType.MANA] = 15f
+        stats[StatsType.AGILITY] = 3f
         stats[StatsType.PHYSICAL_DAMAGE] = 7f
-        stats[StatsType.MAGIC_DAMAGE] = 6f
-        stats[StatsType.PHYSICAL_ARMOR] = 4f
-        stats[StatsType.MAGIC_ARMOR] = 4f
+        stats[StatsType.MAGIC_DAMAGE] = 7f
+        stats[StatsType.PHYSICAL_ARMOR] = 6f
+        stats[StatsType.MAGIC_ARMOR] = 6f
       }
     }
     "DUMMY" -> {
