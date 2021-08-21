@@ -59,7 +59,7 @@
   </object>
  </objectgroup>
  <objectgroup color="#ff0000" id="7" name="enemies">
-  <object id="20" name="GOBLIN" type="EASY" x="182.625" y="192.25">
+  <object id="20" name="GOBLIN" type="BOSS" x="182.625" y="192.25">
    <point/>
   </object>
   <object id="30" name="GOBLIN" type="EASY" x="232" y="222">
