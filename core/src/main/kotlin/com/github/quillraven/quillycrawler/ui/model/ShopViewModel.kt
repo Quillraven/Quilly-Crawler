@@ -38,7 +38,24 @@ data class ShopItemViewModel(
   var cost: Int,
   val equipped: Boolean,
   var canBuy: Boolean,
-) {
+  var consumable: Boolean,
+  var type: ItemType
+) : Comparable<ShopItemViewModel> {
+  override fun compareTo(other: ShopItemViewModel): Int {
+    return if (consumable && !other.consumable) {
+      -1
+    } else if (!consumable && other.consumable) {
+      1
+    } else {
+      val costDiff = cost.compareTo(other.cost)
+      if (costDiff != 0) {
+        costDiff
+      } else {
+        name.compareTo(other.name)
+      }
+    }
+  }
+
   override fun toString(): String {
     var result = if (amount > 0) {
       // string in SELL mode
@@ -82,7 +99,6 @@ data class ShopViewModel(
   private val statsInfo = EnumMap<StatsType, StringBuilder>(StatsType::class.java)
   private var mode = ShopMode.SELL
   private val uiItems = GdxArray<ShopItemViewModel>()
-  private val itemEntities = GdxArray<Entity>()
 
   fun addShopListener(listener: ShopListener) = listeners.add(listener)
 
@@ -96,11 +112,9 @@ data class ShopViewModel(
     }
 
     uiItems.clear()
-    itemEntities.clear()
     val gold = playerEntity.bagCmp.gold
 
     entity.bagCmp.items.values().forEach { item ->
-      itemEntities.add(item)
       item.itemCmp.also { itemCmp ->
         uiItems.add(
           ShopItemViewModel(
@@ -111,10 +125,14 @@ data class ShopViewModel(
             if (mode == ShopMode.BUY) itemCmp.baseCost else (itemCmp.baseCost * SELL_RATIO).toInt(),
             entity[GearComponent.MAPPER]?.gear?.containsKey(itemCmp.gearType) ?: false,
             if (mode == ShopMode.BUY) itemCmp.baseCost <= gold else true,
+            item[ConsumableComponent.MAPPER] != null,
+            itemCmp.itemType
           )
         )
       }
     }
+
+    uiItems.sort()
   }
 
   fun setSellMode(playSnd: Boolean = true): GdxArray<ShopItemViewModel> {
@@ -162,9 +180,9 @@ data class ShopViewModel(
     audioService.play(SoundAssets.MENU_SELECT_2)
 
     // enough gold -> buy item
-    val item = itemEntities[idx]
+    val selItemType = uiItem.type
+    val item = shopEntity.bagCmp.items[selItemType]
     val itemCmp = item.itemCmp
-    val selItemType = itemCmp.itemType
     val playerBagCmp = playerEntity.bagCmp
     if (selItemType in playerBagCmp.items) {
       playerBagCmp.items[selItemType].itemCmp.amount++
@@ -193,7 +211,8 @@ data class ShopViewModel(
   private fun sellItem(idx: Int) {
     audioService.play(SoundAssets.MENU_SELECT_2)
 
-    val item = itemEntities[idx]
+    val uiItem = uiItems[idx]
+    val item = playerEntity.bagCmp.items[uiItem.type]
     val itemCmp = item.itemCmp
     val playerBag = playerEntity.bagCmp
     playerBag.gold += (itemCmp.baseCost * SELL_RATIO).toInt()
@@ -201,7 +220,7 @@ data class ShopViewModel(
 
     if (itemCmp.amount > 1) {
       itemCmp.amount--
-      uiItems[idx].amount--
+      uiItem.amount--
     } else {
       // no more items left -> remove it from bag
       playerBag.items.remove(itemCmp.itemType)
@@ -209,7 +228,6 @@ data class ShopViewModel(
       // this also triggers entityRemoved of the GearSystem
       engine.update(0f)
       uiItems.removeIndex(idx)
-      itemEntities.removeIndex(idx)
     }
 
     listeners.forEach { it.onItemsUpdated(uiItems) }
@@ -265,8 +283,13 @@ data class ShopViewModel(
 
       // stats comparison with current selected item in shop
       if (selectedItemIdx >= 0) {
-        val selStats = itemEntities[selectedItemIdx][StatsComponent.MAPPER]
-        val selItemCmp = itemEntities[selectedItemIdx].itemCmp
+        val selItem = if (mode == ShopMode.BUY) {
+          shopEntity.bagCmp.items[uiItems[selectedItemIdx].type]
+        } else {
+          playerEntity.bagCmp.items[uiItems[selectedItemIdx].type]
+        }
+        val selStats = selItem[StatsComponent.MAPPER]
+        val selItemCmp = selItem.itemCmp
         val selGearType = selItemCmp.gearType
         if (selStats != null && selGearType != GearType.UNDEFINED) {
           // if it is a gear item then show the stats differences
