@@ -17,7 +17,24 @@ If you are interested, please feel free to subscribe :)
 
 ### About the game
 
-TBD
+![image](https://user-images.githubusercontent.com/93260/130333721-7305bdb3-dcec-4513-ae94-4cbb58c0348b.png)
+
+Quilly Crawler is a dungeon crawler game where you play an old man and go deeper and deeper into an endless cave.
+Every level contains enemies that you can fight, chests that you can loot, a shop to buy and sell items and a reaper
+who can set you back in the dungeon if it gets too hard.
+
+![image](https://user-images.githubusercontent.com/93260/130333775-e3c2c387-004d-404e-b06d-fcb4b0fa67bc.png)
+
+The combat is a round based system where every entity is executing a single order per turn. The order is defined
+by the agility of an entity. As a player you can either attack, use an ability or use an item. There are offensive
+abilities like a Firebolt but also defensive abilities like a Heal or Protection ability. In addition some abilities
+will add a buff like the Protes ability which reduces physical damage by 50% for three turns.
+
+![image](https://user-images.githubusercontent.com/93260/130333803-87f3139b-d600-4664-95a0-625b42be88d2.png)
+
+I have only added a few levels, enemies and items to the game. Feel free to fork this project and add your own content.
+If you have any questions, don't hesitate to ask and use the [Discussions](https://github.com/Quillraven/Quilly-Crawler/discussions/14)
+for it.
 
 ### Credits
 - Twitch chat for supporting with some questions during development
