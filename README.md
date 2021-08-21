@@ -15,6 +15,23 @@ Until it is finished, I will stream every weekend on [twitch](https://www.twitch
 Also, a VLog will be uploaded every sunday on my [YouTube](https://www.youtube.com/Quillraven) channel.
 If you are interested, please feel free to subscribe :)
 
+### Controls
+
+Quilly Crawler supports keyboard and XBox Controller input.
+
+**Keyboard**:
+- Arrow keys for navigation / movement
+- Space for any selection
+- Escape for cancel a selection / menu
+- I to open the inventory
+
+**XBox**
+- Left joystick for movement
+- Analog pad for navigation
+- A for any selection
+- B for cancel a selection / menu
+- Y to open the inventory
+
 ### About the game
 
 ![image](https://user-images.githubusercontent.com/93260/130333721-7305bdb3-dcec-4513-ae94-4cbb58c0348b.png)
