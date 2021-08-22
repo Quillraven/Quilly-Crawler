@@ -12,6 +12,7 @@ import com.github.quillraven.quillycrawler.QuillyCrawler.Companion.PREF_KEY_SOUN
 import com.github.quillraven.quillycrawler.assets.SoundAssets
 import com.github.quillraven.quillycrawler.assets.play
 import com.github.quillraven.quillycrawler.screen.GameScreen
+import com.github.quillraven.quillycrawler.screen.TutorialScreen
 import ktx.preferences.set
 
 class StartUpViewModel(
@@ -53,10 +54,10 @@ class StartUpViewModel(
     // flush is not necessary because it happens in StartUpScreen.hide
     preferences.remove(PREF_KEY_SAVE_STATE)
     audioService.play(SoundAssets.MENU_SELECT)
-    if (!game.containsScreen<GameScreen>()) {
-      game.addScreen(GameScreen(game))
+    if (!game.containsScreen<TutorialScreen>()) {
+      game.addScreen(TutorialScreen(game))
     }
-    game.setScreen<GameScreen>()
+    game.setScreen<TutorialScreen>()
   }
 
   fun continueGame() {
