@@ -55,6 +55,7 @@ for it.
 
 ### Credits
 - Twitch chat for supporting with some questions during development
+  - Special thanks to Lamazitten and Schlauhibi for assisting and helping throughout the entire development!
 - czyzby for his quick support and adjustments in [LibKTX](https://github.com/libktx/ktx)
 - 0x72: [16x16 Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii)
 - greatdocbrown: [Gamepad Icons](https://greatdocbrown.itch.io/gamepad-ui)
