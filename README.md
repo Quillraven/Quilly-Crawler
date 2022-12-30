@@ -1,6 +1,6 @@
 # Quilly Crawler
 
-[![Build Master](https://img.shields.io/github/workflow/status/quillraven/quilly-crawler/Build/master?event=push&label=Build%20master)](https://github.com/Quillraven/Quilly-Crawler/actions)
+[![Build Master](https://img.shields.io/github/actions/workflow/status/quillraven/quilly-crawler/build.yml?branch=master)](https://github.com/Quillraven/Quilly-Crawler/actions)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.5.0-red.svg)](http://kotlinlang.org/)
 [![LibGDX](https://img.shields.io/badge/LibGDX-1.10.0-green.svg)](https://github.com/libgdx/libgdx)
 [![LibKTX](https://img.shields.io/badge/LibKTX-1.10.0--b1-blue.svg)](https://github.com/libktx/ktx)
